@@ -7,7 +7,7 @@
 -- 						CORE TABLES 
 -- =====================================================
 
--- Vehicle (Gonzales)
+-- Vehicle (Ren)
 CREATE TABLE Vehicle (
     vehicle_id INT AUTO_INCREMENT PRIMARY KEY,
     plate_number VARCHAR(20) NOT NULL UNIQUE,
@@ -16,3 +16,10 @@ CREATE TABLE Vehicle (
     status ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
     mileage INT DEFAULT 0
 );
+
+
+-- Client (Ken)
+
+-- Parts (Duncan)
+
+-- Driver (Leelancze)
