@@ -17,8 +17,19 @@ CREATE TABLE Vehicle (
     mileage INT DEFAULT 0
 );
 
-
 -- Client (Ken)
+CREATE TABLE IF NOT EXISTS client (
+	client_id		INT AUTO_INCREMENT NOT NULL,
+    client_type		VARCHAR(20),
+    name			VARCHAR(30) NOT NULL,
+	contact_person	VARCHAR(30),
+    phone			VARCHAR(20),
+    email			VARCHAR(30),
+    priority_flag	BOOLEAN,
+    status			ENUM('active','inactive','suspended') DEFAULT 'active',
+    completed_orders 	INT DEFAULT 0,
+    CONSTRAINT Client_PK PRIMARY KEY (client_id)
+);
 
 -- Parts (Duncan)
 
