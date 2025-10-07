@@ -34,3 +34,14 @@ CREATE TABLE IF NOT EXISTS client (
 -- Parts (Duncan)
 
 -- Driver (Leelancze)
+CREATE TABLE Driver (
+	driver_id		INT AUTO_INCREMENT NOT NULL,
+	first_name 		VARCHAR(20),
+	last_name 		VARCHAR(20),
+	license_num 	VARCHAR(20),
+	contact_num		VARCHAR(20),
+	email			VARCHAR(30),
+	status			ENUM('active','inactive','suspended') DEFAULT 'active',
+	completed_trips INT DEFAULT 0,
+	CONSTRAINT Driver_PK PRIMARY KEY (driver_id)
+);
