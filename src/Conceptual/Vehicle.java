@@ -1,3 +1,5 @@
+package Conceptual;
+
 public class Vehicle {
     private int vehicleId;
     private String plateNumber;
