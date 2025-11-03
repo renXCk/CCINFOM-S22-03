@@ -9,12 +9,13 @@
 
 -- Vehicle (Ren)
 CREATE TABLE Vehicle (
-    vehicle_id 		INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id 		INT AUTO_INCREMENT NOT NULL,
     plate_number 	VARCHAR(20) NOT NULL UNIQUE,
     vehicle_type 	VARCHAR(50) NOT NULL,
     model 			VARCHAR(50) NOT NULL,
     status 			ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
-    mileage 		INT DEFAULT 0
+    mileage 		INT DEFAULT 0,
+    CONSTRAINT Vehcile_PK PRIMARY KEY (vehicle_id)
 );
 
 -- Client (Ken)
