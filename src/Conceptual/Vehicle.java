@@ -8,6 +8,9 @@ public class Vehicle {
     private String status;
     private int mileage;
 
+    public Vehicle(){}
+
+
     public Vehicle(String plateNumber, String vehicleType, String model, String status, int mileage) {
         this.plateNumber = plateNumber;
         this.vehicleType = vehicleType;
