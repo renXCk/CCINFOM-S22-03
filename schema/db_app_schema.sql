@@ -15,7 +15,7 @@ CREATE TABLE Vehicle (
     model 			VARCHAR(50) NOT NULL,
     status 			ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
     mileage 		INT DEFAULT 0,
-    CONSTRAINT Vehcile_PK PRIMARY KEY (vehicle_id)
+    CONSTRAINT Vehicle_PK PRIMARY KEY (vehicle_id)
 );
 
 -- Client (Ken)
@@ -33,6 +33,15 @@ CREATE TABLE IF NOT EXISTS client (
 );
 
 -- Parts (Duncan)
+CREATE TABLE IF NOT EXISTS Parts (
+    part_id         INT AUTO_INCREMENT NOT NULL,
+    part_name       VARCHAR(30) NOT NULL UNIQUE,
+    description     VARCHAR(50),
+    stock_qty       INT NOT NULL DEFAULT 0,
+    cost            DECIMAL(10,2) NOT NULL DEFAULT 0,
+    supplier        VARCHAR(50),
+    CONSTRAINT PARTS_PK PRIMARY KEY (part_id)
+);
 
 -- Driver (Leelancze)
 CREATE TABLE Driver (
