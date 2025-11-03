@@ -30,6 +30,47 @@ public class DBView extends JFrame {
         setVisible(true);
     }
 
+    // Getters for buttons
+    public JButton getVehicleBtn() { 
+        return vehicleBtn; 
+    }
+    public JButton getClientBtn() { 
+        return clientBtn; 
+    }
+    public JButton getPartsBtn() { 
+        return partsBtn; 
+    }
+    public JButton getDriverBtn() { 
+        return driverBtn; 
+    }
+    public JButton getCrudAdd() { 
+        return crudAdd; 
+    }
+    public JButton getInsertBtn() { 
+        return insertBtn; 
+    }
+
+    // Getters for text fields
+    public JTextField getFNameTF() {
+        return fNameTF;
+    }
+
+    public JTextField getLNameTF() {
+        return lNameTF;
+    }
+
+    public JTextField getLicNumTF() {
+        return licNumTF;
+    }
+
+    public JTextField getPNumTF() {
+        return pNumTF;
+    }
+
+    public JTextField getEmailTF() {
+        return emailTF;
+    }
+
     public void mainScreen(){
         JPanel panel = new JPanel();
         panel.setBackground(Color.DARK_GRAY);

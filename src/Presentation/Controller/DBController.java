@@ -18,12 +18,12 @@ public class DBController implements ActionListener {
     }
 
     public void init(){
-        view.vehicleBtn.addActionListener(this);
-        view.clientBtn.addActionListener(this);
-        view.partsBtn.addActionListener(this);
-        view.driverBtn.addActionListener(this);
-        view.crudAdd.addActionListener(this);
-        view.insertBtn.addActionListener(this);
+        view.getVehicleBtn().addActionListener(this);
+        view.getClientBtn().addActionListener(this);
+        view.getPartsBtn().addActionListener(this);
+        view.getDriverBtn().addActionListener(this);
+        view.getCrudAdd().addActionListener(this);
+        view.getInsertBtn().addActionListener(this);
     }
 
     public void refreshTable(){
@@ -89,28 +89,28 @@ public class DBController implements ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e){
-        if(e.getSource() == view.vehicleBtn){
+        if(e.getSource() == view.getVehicleBtn()){
             currentTable = "Vehicle";
             refreshTable();
         }
-        else if(e.getSource() == view.clientBtn){
+        else if(e.getSource() == view.getClientBtn()){
             currentTable = "Client";
             refreshTable();
         }
-        else if(e.getSource() == view.partsBtn){
+        else if(e.getSource() == view.getPartsBtn()){
             System.out.println("Parts button pressed");
         }
-        else if(e.getSource() == view.driverBtn){
+        else if(e.getSource() == view.getDriverBtn()){
             currentTable = "Driver";
             refreshTable();
         }
-        else if(e.getSource() == view.crudAdd){
+        else if(e.getSource() == view.getCrudAdd()){
             view.addPanel();
         }
-        else if(e.getSource() == view.insertBtn){
+        else if(e.getSource() == view.getInsertBtn()){
             try {
                 PreparedStatement ps = DBConnection.conn.prepareCall("INSERT INTO " + currentTable + " (first_name, last_name, license_num, contact_num, email) " +
-                        "VALUES ('"+view.fNameTF.getText()+"','"+view.lNameTF.getText()+"','"+view.licNumTF.getText()+"','"+view.pNumTF.getText()+"','"+view.emailTF.getText()+"')");
+                        "VALUES ('"+view.getFNameTF().getText()+"','"+view.getLNameTF().getText()+"','"+view.getLicNumTF().getText()+"','"+view.getPNumTF().getText()+"','"+view.getEmailTF().getText()+"')");
                 ps.executeUpdate();
                 ps.close();
                 refreshTable();
