@@ -1,4 +1,4 @@
-package Conceptual;
+package Business.model;
 
 public class Vehicle {
     private int vehicleId;

@@ -1,7 +1,7 @@
-package Internal.dao;
+package Data.dao;
 
-import Conceptual.Vehicle;
-import Internal.util.DBConnection;
+import Business.model.Vehicle;
+import Data.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

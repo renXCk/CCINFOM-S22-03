@@ -1,4 +1,7 @@
-import util.DBConnection;
+package Presentation.Controller;
+
+import Data.util.DBConnection;
+import Presentation.View.DBView;
 
 import java.awt.event.*;
 import java.sql.*;
