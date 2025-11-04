@@ -35,11 +35,12 @@ CREATE TABLE IF NOT EXISTS client (
 -- Parts (Duncan)
 CREATE TABLE IF NOT EXISTS Parts (
     part_id         INT AUTO_INCREMENT NOT NULL,
-    part_name       VARCHAR(30) NOT NULL UNIQUE,
+    part_name       VARCHAR(30) NOT NULL,
     description     VARCHAR(50),
     stock_qty       INT NOT NULL DEFAULT 0,
     cost            DECIMAL(10,2) NOT NULL DEFAULT 0,
-    supplier        VARCHAR(50),
+    supplier        VARCHAR(50) NTO NULL,
+    pending_delivery    BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT PARTS_PK PRIMARY KEY (part_id)
 );
 
