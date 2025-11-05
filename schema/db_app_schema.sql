@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS Parts (
     description     VARCHAR(50),
     stock_qty       INT NOT NULL DEFAULT 0,
     cost            DECIMAL(10,2) NOT NULL DEFAULT 0,
-    supplier        VARCHAR(50) NTO NULL,
+    supplier        VARCHAR(50) NOT NULL,
     pending_delivery    BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT PARTS_PK PRIMARY KEY (part_id)
 );
