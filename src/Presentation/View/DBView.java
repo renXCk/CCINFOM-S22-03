@@ -25,8 +25,8 @@ public class DBView extends JFrame {
         super("Sample DB App");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         mainScreen();
-        setSize(500,200);
-        //setResizable(false);
+        setSize(5000,2000);
+        setResizable(true);
         setVisible(true);
     }
 
@@ -42,33 +42,6 @@ public class DBView extends JFrame {
     }
     public JButton getDriverBtn() { 
         return driverBtn; 
-    }
-    public JButton getCrudAdd() { 
-        return crudAdd; 
-    }
-    public JButton getInsertBtn() { 
-        return insertBtn; 
-    }
-
-    // Getters for text fields
-    public JTextField getFNameTF() {
-        return fNameTF;
-    }
-
-    public JTextField getLNameTF() {
-        return lNameTF;
-    }
-
-    public JTextField getLicNumTF() {
-        return licNumTF;
-    }
-
-    public JTextField getPNumTF() {
-        return pNumTF;
-    }
-
-    public JTextField getEmailTF() {
-        return emailTF;
     }
 
     public void mainScreen(){
@@ -188,6 +161,13 @@ public class DBView extends JFrame {
         add(crudAddPanel);
         setSize(500,500);
         setResizable(false);
+        revalidate();
+        repaint();
+    }
+
+    public void setMainPanel(JPanel panel) {
+        getContentPane().removeAll();
+        getContentPane().add(panel, BorderLayout.CENTER);
         revalidate();
         repaint();
     }

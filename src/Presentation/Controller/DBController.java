@@ -3,9 +3,13 @@ package Presentation.Controller;
 import Data.util.DBConnection;
 import Presentation.View.DBView;
 
-import java.awt.event.*;
-import java.sql.*;
-import java.util.*;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class DBController implements ActionListener {
     private final DBView view;
@@ -22,8 +26,6 @@ public class DBController implements ActionListener {
         view.getClientBtn().addActionListener(this);
         view.getPartsBtn().addActionListener(this);
         view.getDriverBtn().addActionListener(this);
-        view.getCrudAdd().addActionListener(this);
-        view.getInsertBtn().addActionListener(this);
     }
 
     public void refreshTable(){
@@ -88,35 +90,20 @@ public class DBController implements ActionListener {
         }
     }
     @Override
-    public void actionPerformed(ActionEvent e){
-        if(e.getSource() == view.getVehicleBtn()){
-            currentTable = "Vehicle";
-            refreshTable();
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+
+        if (src == view.getVehicleBtn()) {
+            JOptionPane.showMessageDialog(view, "Vehicle Module");
         }
-        else if(e.getSource() == view.getClientBtn()){
-            currentTable = "Client";
-            refreshTable();
+        else if (src == view.getClientBtn()) {
+            JOptionPane.showMessageDialog(view, "Client module");
         }
-        else if(e.getSource() == view.getPartsBtn()){
-            System.out.println("Parts button pressed");
+        else if (src == view.getPartsBtn()) {
+            JOptionPane.showMessageDialog(view, "Parts module");
         }
-        else if(e.getSource() == view.getDriverBtn()){
-            currentTable = "Driver";
-            refreshTable();
-        }
-        else if(e.getSource() == view.getCrudAdd()){
-            view.addPanel();
-        }
-        else if(e.getSource() == view.getInsertBtn()){
-            try {
-                PreparedStatement ps = DBConnection.conn.prepareCall("INSERT INTO " + currentTable + " (first_name, last_name, license_num, contact_num, email) " +
-                        "VALUES ('"+view.getFNameTF().getText()+"','"+view.getLNameTF().getText()+"','"+view.getLicNumTF().getText()+"','"+view.getPNumTF().getText()+"','"+view.getEmailTF().getText()+"')");
-                ps.executeUpdate();
-                ps.close();
-                refreshTable();
-            } catch(SQLException ex){
-                System.out.println(ex.getMessage());
-            }
+        else if (src == view.getDriverBtn()) {
+            JOptionPane.showMessageDialog(view, "Driver module");
         }
     }
 }

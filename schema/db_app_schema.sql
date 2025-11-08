@@ -7,6 +7,9 @@
 -- 						CORE TABLES 
 -- =====================================================
 
+CREATE DATABASE deliveryshipment;
+USE deliveryshipment;
+
 -- Vehicle (Ren)
 CREATE TABLE Vehicle (
     vehicle_id 		INT AUTO_INCREMENT NOT NULL,
@@ -14,6 +17,7 @@ CREATE TABLE Vehicle (
     vehicle_type 	VARCHAR(50) NOT NULL,
     model 			VARCHAR(50) NOT NULL,
     status 			ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
+    fuel_type 		ENUM('diesel', 'gasoline') NOT NULL DEFAULT 'diesel',
     mileage 		INT DEFAULT 0,
     CONSTRAINT Vehicle_PK PRIMARY KEY (vehicle_id)
 );
@@ -55,4 +59,20 @@ CREATE TABLE Driver (
 	status			ENUM('active','inactive','suspended') DEFAULT 'active',
 	completed_trips INT DEFAULT 0,
 	CONSTRAINT Driver_PK PRIMARY KEY (driver_id)
+);
+
+-- Fuel Log (Ren)
+CREATE TABLE FuelLog (
+    fuel_id          INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id       INT NOT NULL,
+    driver_id        INT NOT NULL,
+    fuel_date        DATETIME NOT NULL,
+    fuel_type        ENUM('diesel', 'gasoline') NOT NULL,
+    liters_filled    DECIMAL(8,2) NOT NULL CHECK (liters_filled > 0),
+    price_per_liter  DECIMAL(8,2) NOT NULL CHECK (price_per_liter > 0),
+    total_cost       DECIMAL(10,2) DEFAULT 0,
+    reimbursed       BOOLEAN DEFAULT FALSE, -- TRUE when paid back
+
+    CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
+    CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
