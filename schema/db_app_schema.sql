@@ -22,14 +22,15 @@ CREATE TABLE Vehicle (
     CONSTRAINT Vehicle_PK PRIMARY KEY (vehicle_id)
 );
 
--- Client (Ken)
-CREATE TABLE IF NOT EXISTS client (
+-- Client (Kenn)
+CREATE TABLE IF NOT EXISTS Client (
 	client_id		INT AUTO_INCREMENT NOT NULL,
     client_type		VARCHAR(20),
     name			VARCHAR(30) NOT NULL,
 	contact_person	VARCHAR(30),
     phone			VARCHAR(20),
     email			VARCHAR(30),
+    address         VARCHAR(255),
     priority_flag	BOOLEAN,
     status			ENUM('active','inactive','suspended') DEFAULT 'active',
     completed_orders 	INT DEFAULT 0,
@@ -61,6 +62,10 @@ CREATE TABLE Driver (
 	CONSTRAINT Driver_PK PRIMARY KEY (driver_id)
 );
 
+-- =====================================================
+--                  TRANSACTION TABLES
+-- =====================================================
+
 -- Fuel Log (Ren)
 CREATE TABLE FuelLog (
     fuel_id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,4 +80,20 @@ CREATE TABLE FuelLog (
 
     CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
     CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
+);
+
+-- Trip Log (Kenn)
+CREATE TABLE IF NOT EXISTS TripLog (
+    trip_id         INT AUTO_INCREMENT PRIMARY KEY,
+    client_id       INT NOT NULL,
+    driver_id       INT NOT NULL,
+    pick_up_loc     VARCHAR(255),
+    drop_off_loc    VARCHAR(255),
+    date_time_start DATETIME,
+    date_time_completed     DATETIME,
+    trip_cost       INT,
+    status          ENUM('Pending','Ongoing','Completed','Cancelled'),
+    CONSTRAINT Trip_Log_PK PRIMARY KEY (trip_id),
+    CONSTRAINT FK_Trip_Client FOREIGN KEY (client_id) REFERENCES Client(client_id),
+    CONSTRAINT FK_Trip_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
