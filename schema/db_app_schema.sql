@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS FuelLog (
 CREATE TABLE IF NOT EXISTS TripLog (
     trip_id         INT AUTO_INCREMENT,
     client_id       INT NOT NULL,
+    vehicle_id		INT NOT NULL,
     driver_id       INT NOT NULL,
     pick_up_loc     VARCHAR(255),
     drop_off_loc    VARCHAR(255),
@@ -94,6 +95,7 @@ CREATE TABLE IF NOT EXISTS TripLog (
     status          ENUM('Pending','Ongoing','Completed','Cancelled'),
     CONSTRAINT Trip_Log_PK PRIMARY KEY (trip_id),
     CONSTRAINT FK_Trip_Client FOREIGN KEY (client_id) REFERENCES Client(client_id),
+    CONSTRAINT FK_Trip_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Client(vehicle_id),
     CONSTRAINT FK_Trip_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 
@@ -123,8 +125,8 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
 	driver_status		ENUM('active','inactive','suspended'),
 	vehicle_status		ENUM('available','on_trip','maintenance','inactive'),
     CONSTRAINT Incident_Log_PK PRIMARY KEY (incident_id),
-	CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
-    CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
+	CONSTRAINT FK_Incident_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
+    CONSTRAINT FK_Incident_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 	
 	
