@@ -7,7 +7,6 @@
 -- 						CORE TABLES 
 -- =====================================================
 
-CREATE DATABASE deliveryshipment;
 USE deliveryshipment;
 
 -- Vehicle (Ren)
@@ -68,7 +67,7 @@ CREATE TABLE IF NOT EXISTS Driver (
 
 -- Fuel Log (Ren)
 CREATE TABLE IF NOT EXISTS FuelLog (
-    fuel_id          INT AUTO_INCREMENT PRIMARY KEY,
+    fuel_id          INT AUTO_INCREMENT,
     vehicle_id       INT NOT NULL,
     driver_id        INT NOT NULL,
     fuel_date        DATETIME NOT NULL,
@@ -77,14 +76,14 @@ CREATE TABLE IF NOT EXISTS FuelLog (
     price_per_liter  DECIMAL(8,2) NOT NULL CHECK (price_per_liter > 0),
     total_cost       DECIMAL(10,2) DEFAULT 0,
     reimbursed       BOOLEAN DEFAULT FALSE, -- TRUE when paid back
-
+	CONSTRAINT Fuel_Log_PK PRIMARY KEY (fuel_id),
     CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
     CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 
 -- Trip Log (Kenn)
 CREATE TABLE IF NOT EXISTS TripLog (
-    trip_id         INT AUTO_INCREMENT PRIMARY KEY,
+    trip_id         INT AUTO_INCREMENT,
     client_id       INT NOT NULL,
     driver_id       INT NOT NULL,
     pick_up_loc     VARCHAR(255),
@@ -106,13 +105,13 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     date_time_completed DATETIME,
     total_cost          INT,
     status              ENUM('Pending','Ongoing','Completed','Cancelled'),
-    CONSTRAINT PK_Maintenance PRIMARY KEY (maintenance_id),
+    CONSTRAINT Maintenance_Log_PK PRIMARY KEY (maintenance_id),
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
 
 -- Incident Log (Leelancze)
 CREATE TABLE IF NOT EXISTS IncidentLog (
-	incident_id		INT AUTO_INCREMENT PRIMARY KEY,
+	incident_id		INT AUTO_INCREMENT,
 	driver_id		INT NOT NULL,
 	driver_name		VARCHAR(50) NOT NULL,
 	vehicle_id		INT NOT NULL,
@@ -123,6 +122,7 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
 	incident_severity	ENUM('Minor', 'Moderate', 'Major'),
 	driver_status		ENUM('active','inactive','suspended'),
 	vehicle_status		ENUM('available','on_trip','maintenance','inactive'),
+    CONSTRAINT Incident_Log_PK PRIMARY KEY (incident_id),
 	CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
     CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
