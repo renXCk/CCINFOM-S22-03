@@ -11,7 +11,7 @@ CREATE DATABASE deliveryshipment;
 USE deliveryshipment;
 
 -- Vehicle (Ren)
-CREATE TABLE Vehicle (
+CREATE TABLE IF NOT EXISTS Vehicle (
     vehicle_id 		INT AUTO_INCREMENT NOT NULL,
     plate_number 	VARCHAR(20) NOT NULL UNIQUE,
     vehicle_type 	VARCHAR(50) NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS Parts (
 );
 
 -- Driver (Leelancze)
-CREATE TABLE Driver (
+CREATE TABLE IF NOT EXISTS Driver (
 	driver_id		INT AUTO_INCREMENT NOT NULL,
 	first_name 		VARCHAR(20),
 	last_name 		VARCHAR(20),
@@ -67,7 +67,7 @@ CREATE TABLE Driver (
 -- =====================================================
 
 -- Fuel Log (Ren)
-CREATE TABLE FuelLog (
+CREATE TABLE IF NOT EXISTS FuelLog (
     fuel_id          INT AUTO_INCREMENT PRIMARY KEY,
     vehicle_id       INT NOT NULL,
     driver_id        INT NOT NULL,
@@ -96,4 +96,16 @@ CREATE TABLE IF NOT EXISTS TripLog (
     CONSTRAINT Trip_Log_PK PRIMARY KEY (trip_id),
     CONSTRAINT FK_Trip_Client FOREIGN KEY (client_id) REFERENCES Client(client_id),
     CONSTRAINT FK_Trip_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
+);
+
+-- Maintenance Log (Duncan)
+CREATE TABLE IF NOT EXISTS MaintenanceLog (
+    maintenance_id      INT AUTO_INCREMENT,
+    vehicle_id          INT NOT NULL,
+    date_time_start     DATETIME,
+    date_time_completed DATETIME,
+    total_cost          INT,
+    status              ENUM('Pending','Ongoing','Completed','Cancelled'),
+    CONSTRAINT PK_Maintenance PRIMARY KEY (maintenance_id),
+    CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
