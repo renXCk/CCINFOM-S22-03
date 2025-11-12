@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
 	driver_status		ENUM('active','inactive','suspended'),
 	vehicle_status		ENUM('available','on_trip','maintenance','inactive'),
     CONSTRAINT Incident_Log_PK PRIMARY KEY (incident_id),
-	CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
-    CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
+	CONSTRAINT FK_Incident_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
+    CONSTRAINT FK_Incident_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 	
 	
