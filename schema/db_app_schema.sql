@@ -52,11 +52,11 @@ CREATE TABLE IF NOT EXISTS Parts (
 -- Driver (Leelancze)
 CREATE TABLE IF NOT EXISTS Driver (
 	driver_id		INT AUTO_INCREMENT NOT NULL,
-	first_name 		VARCHAR(20),
-	last_name 		VARCHAR(20),
-	license_num 	VARCHAR(20),
-	contact_num		VARCHAR(20),
-	email			VARCHAR(30),
+	first_name 		VARCHAR(20) NOT NULL,
+	last_name 		VARCHAR(20) NOT NULL,
+	license_num 	VARCHAR(20) NOT NULL,
+	contact_num		VARCHAR(20) NOT NULL,
+	email			VARCHAR(30) NOT NULL,
 	status			ENUM('active','inactive','suspended') DEFAULT 'active',
 	completed_trips INT DEFAULT 0,
 	CONSTRAINT Driver_PK PRIMARY KEY (driver_id)
@@ -109,3 +109,22 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     CONSTRAINT PK_Maintenance PRIMARY KEY (maintenance_id),
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
+
+-- Incident Log (Leelancze)
+CREATE TABLE IF NOT EXISTS IncidentLog (
+	incident_id		INT AUTO_INCREMENT PRIMARY KEY,
+	driver_id		INT NOT NULL,
+	driver_name		VARCHAR(50) NOT NULL,
+	vehicle_id		INT NOT NULL,
+	plate_no		VARCHAR(20) NOT NULL,
+	incident_type	VARCHAR(50) NOT NULL,
+	incident_date_time	DATETIME NOT NULL,
+	incident_location	VARCHAR(50) NOT NULL,
+	incident_severity	ENUM('Minor', 'Moderate', 'Major'),
+	driver_status		ENUM('active','inactive','suspended'),
+	vehicle_status		ENUM('available','on_trip','maintenance','inactive'),
+	CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
+    CONSTRAINT FK_Fuel_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
+);
+	
+	
