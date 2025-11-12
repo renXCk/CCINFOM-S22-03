@@ -111,6 +111,17 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
 
+-- Junction Table for Maintenance Log & Parts
+CREATE TABLE MaintenancePart (
+    maintenance_id INT NOT NULL,
+    part_id INT NOT NULL,
+    quantity_used INT NOT NULL,
+    cost_per_part DECIMAL(10,2),
+    CONSTRAINT PK_MaintenancePart PRIMARY KEY (maintenance_id, part_id),
+    CONSTRAINT FK_MaintenancePart_Maintenance FOREIGN KEY (maintenance_id) REFERENCES MaintenanceLog(maintenance_id),
+    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Part(part_id)
+);
+
 -- Incident Log (Leelancze)
 CREATE TABLE IF NOT EXISTS IncidentLog (
 	incident_id		INT AUTO_INCREMENT,
