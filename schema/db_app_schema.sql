@@ -112,8 +112,8 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
 -- Junction Table for Maintenance Log & Parts
 CREATE TABLE MaintenancePart (
     maintenance_id INT NOT NULL,
-    part_id INT NOT NULL,
-    quantity_used INT NOT NULL,
+    part_id       INT, -- removed not null
+    quantity_used INT, -- removed not null
     cost_per_part DECIMAL(10,2),
     CONSTRAINT PK_MaintenancePart PRIMARY KEY (maintenance_id, part_id),
     CONSTRAINT FK_MaintenancePart_Maintenance FOREIGN KEY (maintenance_id) REFERENCES MaintenanceLog(maintenance_id),
