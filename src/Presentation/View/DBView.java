@@ -2,6 +2,8 @@ package Presentation.View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class DBView extends JFrame {
     JButton vehicleBtn = new JButton("Vehicle");
@@ -23,25 +25,29 @@ public class DBView extends JFrame {
 
     public DBView(){
         super("Sample DB App");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        mainScreen();
-        setSize(5000,2000);
-        setResizable(true);
-        setVisible(true);
+        initialize(); // for WindowBuilder
     }
 
+    private void initialize() {
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(800, 600);
+        getContentPane().setLayout(new BorderLayout());
+        mainScreen();
+    }
+
+
     // Getters for buttons
-    public JButton getVehicleBtn() { 
-        return vehicleBtn; 
+    public JButton getVehicleBtn() {
+        return vehicleBtn;
     }
-    public JButton getClientBtn() { 
-        return clientBtn; 
+    public JButton getClientBtn() {
+        return clientBtn;
     }
-    public JButton getPartsBtn() { 
-        return partsBtn; 
+    public JButton getPartsBtn() {
+        return partsBtn;
     }
-    public JButton getDriverBtn() { 
-        return driverBtn; 
+    public JButton getDriverBtn() {
+        return driverBtn;
     }
 
     public void mainScreen(){
@@ -50,10 +56,13 @@ public class DBView extends JFrame {
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(panel, BorderLayout.WEST);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        vehicleBtn.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        	}
+        });
         vehicleBtn.setForeground(Color.WHITE);
 
         vehicleBtn.setContentAreaFilled(false);
-        vehicleBtn.setBorderPainted(false);
         panel.add(vehicleBtn);
         clientBtn.setForeground(Color.WHITE);
         clientBtn.setContentAreaFilled(false);
@@ -158,7 +167,7 @@ public class DBView extends JFrame {
 
         insertBtn.setBounds(320, 427, 89, 23);
         crudAddPanel.add(insertBtn);
-        add(crudAddPanel);
+        getContentPane().add(crudAddPanel);
         setSize(500,500);
         setResizable(false);
         revalidate();

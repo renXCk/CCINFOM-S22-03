@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS FuelLog (
     fuel_type        ENUM('diesel', 'gasoline') NOT NULL,
     liters_filled    DECIMAL(8,2) NOT NULL CHECK (liters_filled > 0),
     price_per_liter  DECIMAL(8,2) NOT NULL CHECK (price_per_liter > 0),
-    total_cost       DECIMAL(10,2) DEFAULT 0,
     reimbursed       BOOLEAN DEFAULT FALSE, -- TRUE when paid back
 	CONSTRAINT Fuel_Log_PK PRIMARY KEY (fuel_id),
     CONSTRAINT FK_Fuel_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
