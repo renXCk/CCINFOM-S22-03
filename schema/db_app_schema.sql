@@ -104,8 +104,7 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     vehicle_id          INT NOT NULL,
     date_time_start     DATETIME,
     date_time_completed DATETIME,
-    total_cost          INT,
-    status              ENUM('Pending','Ongoing','Completed','Cancelled'),
+    status              ENUM('Pending','Ongoing','Completed','Cancelled'),  
     CONSTRAINT Maintenance_Log_PK PRIMARY KEY (maintenance_id),
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
