@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS TripLog (
     status          ENUM('Pending','Ongoing','Completed','Cancelled'),
     CONSTRAINT Trip_Log_PK PRIMARY KEY (trip_id),
     CONSTRAINT FK_Trip_Client FOREIGN KEY (client_id) REFERENCES Client(client_id),
-    CONSTRAINT FK_Trip_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Client(vehicle_id),
+    CONSTRAINT FK_Trip_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
     CONSTRAINT FK_Trip_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE MaintenancePart (
     cost_per_part DECIMAL(10,2),
     CONSTRAINT PK_MaintenancePart PRIMARY KEY (maintenance_id, part_id),
     CONSTRAINT FK_MaintenancePart_Maintenance FOREIGN KEY (maintenance_id) REFERENCES MaintenanceLog(maintenance_id),
-    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Part(part_id)
+    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Parts(part_id)
 );
 
 -- Incident Log (Leelancze)
