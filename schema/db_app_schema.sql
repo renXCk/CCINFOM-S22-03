@@ -13,7 +13,7 @@ USE deliveryshipment;
 CREATE TABLE IF NOT EXISTS Vehicle (
     vehicle_id 		INT AUTO_INCREMENT NOT NULL,
     plate_number 	VARCHAR(20) NOT NULL UNIQUE,
-    vehicle_type 	VARCHAR(50) NOT NULL,
+    vehicle_type 	ENUM('motorcycle','sedan','van','truck'),
     model 			VARCHAR(50) NOT NULL,
     status 			ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
     fuel_type 		ENUM('diesel', 'gasoline') NOT NULL DEFAULT 'diesel',

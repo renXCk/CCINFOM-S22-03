@@ -6,6 +6,7 @@ public class Vehicle {
     private String vehicleType;
     private String model;
     private String status;
+    private String fuelType;
     private int mileage;
 
     public Vehicle(){}
@@ -16,6 +17,7 @@ public class Vehicle {
         this.vehicleType = vehicleType;
         this.model = model;
         this.status = status;
+        this.fuelType = fuelType;
         this.mileage = mileage;
     }
 
@@ -34,6 +36,9 @@ public class Vehicle {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getFuelType() { return fuelType; }
+    public void setFuelType(String fuelType) { this.fuelType = fuelType; }
 
     public int getMileage() { return mileage; }
     public void setMileage(int mileage) { this.mileage = mileage; }

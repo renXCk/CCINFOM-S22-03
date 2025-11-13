@@ -11,7 +11,7 @@ import java.util.List;
 public class VehicleDAO {
 
     public boolean createVehicle(Vehicle vehicle) {
-        String query = "INSERT INTO Vehicle (plate_number, vehicle_type, model, status, mileage) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, mileage) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -19,7 +19,8 @@ public class VehicleDAO {
             statement.setString(2, vehicle.getVehicleType());
             statement.setString(3, vehicle.getModel());
             statement.setString(4, vehicle.getStatus());
-            statement.setInt(5, vehicle.getMileage());
+            statement.setString(5, vehicle.getFuelType());
+            statement.setInt(6, vehicle.getMileage());
 
             int rowsInserted = statement.executeUpdate();
             //return true if we inserted a row
@@ -47,6 +48,7 @@ public class VehicleDAO {
                 vehicle.setVehicleType(resultSet.getString("vehicle_type"));
                 vehicle.setModel(resultSet.getString("model"));
                 vehicle.setStatus(resultSet.getString("status"));
+                vehicle.setFuelType(resultSet.getString("fuel_type"));
                 vehicle.setMileage(resultSet.getInt("mileage"));
                 vehicleList.add(vehicle);
             }
@@ -59,7 +61,7 @@ public class VehicleDAO {
     }
 
     public boolean updateVehicle(Vehicle vehicle) {
-        String query = "UPDATE Vehicle SET plate_number=?, vehicle_type=?, model=?, status=?, mileage=? WHERE vehicle_id=?";
+        String query = "UPDATE Vehicle SET plate_number=?, vehicle_type=?, model=?, status=?, fuel_type=?, mileage=? WHERE vehicle_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -68,8 +70,9 @@ public class VehicleDAO {
             statement.setString(2, vehicle.getVehicleType());
             statement.setString(3, vehicle.getModel());
             statement.setString(4, vehicle.getStatus());
-            statement.setInt(5, vehicle.getMileage());
-            statement.setInt(6, vehicle.getVehicleId());
+            statement.setString(5, vehicle.getFuelType());
+            statement.setInt(6, vehicle.getMileage());
+            statement.setInt(7, vehicle.getVehicleId());
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;
