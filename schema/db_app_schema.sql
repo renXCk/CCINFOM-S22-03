@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS Driver (
 	driver_id		INT AUTO_INCREMENT NOT NULL,
 	first_name 		VARCHAR(20) NOT NULL,
 	last_name 		VARCHAR(20) NOT NULL,
-	license_num 	VARCHAR(20) NOT NULL,
+	license_num 	VARCHAR(20) NOT NULL UNIQUE,
 	contact_num		VARCHAR(20) NOT NULL,
 	email			VARCHAR(30) NOT NULL,
 	status			ENUM('active','inactive','suspended') DEFAULT 'active',
