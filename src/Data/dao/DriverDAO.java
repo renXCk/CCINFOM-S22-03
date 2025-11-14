@@ -61,7 +61,7 @@ public class DriverDAO {
         return driverList;
     }
 
-    public boolean updateVehicle(Driver driver) {
+    public boolean updateDriver(Driver driver) {
         String query = "UPDATE Driver SET first_name=?, last_name=?, license_num=?, contact_num=?, email=?, status=?, completed_trips=? WHERE driver_id=?";
 
         try (Connection connection = DBConnection.getConnection();
@@ -85,7 +85,7 @@ public class DriverDAO {
         }
     }
 
-    public boolean deleteVehicle(int driverId) {
+    public boolean deleteDriver(int driverId) {
         String query = "DELETE FROM Driver WHERE driver_id=?";
 
         try (Connection connection = DBConnection.getConnection();
