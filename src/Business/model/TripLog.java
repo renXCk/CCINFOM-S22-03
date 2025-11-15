@@ -14,10 +14,10 @@ public class TripLog {
 
     public TripLog() {}
 
-    public TripLog(int clientId, int driverId, int vehicleId, String pickUpLocation, String dropOffLocation, float tripCost, String status) {
+    public TripLog(int clientId, int vehicleId, int driverId, String pickUpLocation, String dropOffLocation, float tripCost, String status) {
         this.clientId = clientId;
-        this.driverId = driverId;
         this.vehicleId = vehicleId;
+        this.driverId = driverId;
         this.pickUpLocation = pickUpLocation;
         this.dropOffLocation = dropOffLocation;
         this.tripCost = tripCost;
@@ -31,11 +31,11 @@ public class TripLog {
     public int getClientId() { return clientId; }
     public void setClientId(int clientId) { this.clientId = clientId; }
 
-    public int getDriverId() { return driverId; }
-    public void setDriverId(int driverId) { this.driverId = driverId; }
-
     public int getVehicleId() { return vehicleId; }
     public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
+
+    public int getDriverId() { return driverId; }
+    public void setDriverId(int driverId) { this.driverId = driverId; }
 
     public String getPickUpLocation() { return pickUpLocation; }
     public void setPickUpLocation(String pickUpLocation) { this.pickUpLocation = pickUpLocation; }
