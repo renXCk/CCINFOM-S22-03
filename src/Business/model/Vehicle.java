@@ -12,7 +12,7 @@ public class Vehicle {
     public Vehicle(){}
 
 
-    public Vehicle(String plateNumber, String vehicleType, String model, String status, int mileage) {
+    public Vehicle(String plateNumber, String vehicleType, String model, String status, String fuelType, int mileage) {
         this.plateNumber = plateNumber;
         this.vehicleType = vehicleType;
         this.model = model;

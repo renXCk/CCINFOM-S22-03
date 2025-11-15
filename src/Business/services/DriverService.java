@@ -49,7 +49,7 @@ public class DriverService {
             return false;
         }
 
-        return dao.updateDriver(v);
+        return dao.updateDriver(d);
 
     }
 
