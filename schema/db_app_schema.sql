@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS FuelLog (
 
 -- Trip Log (Kenn)
 CREATE TABLE IF NOT EXISTS TripLog (
-    trip_id         INT AUTO_INCREMENT,
+    trip_id         INT AUTO_INCREMENT NOT NULL,
     client_id       INT NOT NULL,
     vehicle_id		INT NOT NULL,
     driver_id       INT NOT NULL,
