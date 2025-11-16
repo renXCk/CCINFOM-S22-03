@@ -23,13 +23,15 @@ public class ClientService {
         return dao.readClients();
     }
 
+    public Client getClientById(int id) { return dao.readClientById(id); }
+
     public boolean updateClient(Client c) {
         return dao.updateClient(c);
     }
 
     public boolean deleteClient(int id) {
         return dao.deleteClient(id);
-    }
+    } // will change to softblock later
 
 }
 
