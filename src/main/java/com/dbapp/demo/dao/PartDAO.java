@@ -97,4 +97,32 @@ public class PartDAO {
             return false;
         }
     }
+
+    public Part getPartById(int partId) {
+        String query = "SELECT * FROM Part WHERE part_id = ?";
+        
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            statement.setInt(1, partId);
+            ResultSet resultSet = statement.executeQuery();
+            
+            if (resultSet.next()) {
+                Part part = new Part();
+                part.setPartId(resultSet.getInt("part_id"));
+                part.setPartName(resultSet.getString("part_name"));
+                part.setDescription(resultSet.getString("description"));
+                part.setStockQty(resultSet.getInt("stock_qty"));
+                part.setCost(resultSet.getDouble("cost"));
+                part.setSupplier(resultSet.getString("supplier"));
+                part.setPendingDelivery(resultSet.getBoolean("pending_delivery"));
+                return part;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting part by ID: " + e.getMessage());
+        }
+        
+        return null;
+    }
 }

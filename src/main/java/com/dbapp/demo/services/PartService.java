@@ -59,11 +59,7 @@ public class PartService {
     }
 
     public Part getPartById(int partId) {
-        List<Part> allParts = dao.readPart();
-        return allParts.stream()
-                .filter(part -> part.getPartId() == partId)
-                .findFirst()
-                .orElse(null);
+        return dao.getPartById(partId);
     }
 
     public boolean updatePart(Part part) {
