@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/api/vehicle")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -18,7 +18,7 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @GetMapping("/vehicle")
+    @GetMapping("/vehicles")
     public List<Vehicle> getAllVehicles() {
         return vehicleService.getAllVehicles();
     }
