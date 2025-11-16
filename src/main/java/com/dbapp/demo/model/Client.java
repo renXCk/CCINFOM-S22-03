@@ -1,15 +1,22 @@
 package com.dbapp.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Client {
+    @JsonProperty("client_id")
     private int clientId;
+    @JsonProperty("client_type")
     private String clientType;
     private String name;
+    @JsonProperty("contact_person")
     private String contactPerson;
     private String phone;
     private String email;
     private String address;
+    @JsonProperty("priority_flag")
     private char priorityFlag;
     private String status;
+    @JsonProperty("completed_orders")
     private int completedOrders;
 
     public Client(){}
