@@ -13,7 +13,7 @@ public class ClientDAO {
 
     public boolean createClient(Client client){
 
-        String query = "INSERT INTO Client (clientType, name, contactPerson, phone, email, address, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO client (client_type, name, contact_person, phone, email, address, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -35,6 +35,38 @@ public class ClientDAO {
             return false;
         }
     }
+
+    public Client readClientById(int clientId){
+        String query = "SELECT * FROM Client WHERE client_id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
+
+            statement.setInt(1, clientId);
+            ResultSet rs = statement.executeQuery();
+
+            if (rs.next()) {
+                Client client = new Client();
+                client.setClientId(rs.getInt("client_id"));
+                client.setClientType(rs.getString("client_type"));
+                client.setName(rs.getString("name"));
+                client.setContactPerson(rs.getString("contact_person"));
+                client.setPhone(rs.getString("phone"));
+                client.setEmail(rs.getString("email"));
+                client.setAddress(rs.getString("address"));
+                client.setPriorityFlag(rs.getString("priority_flag").charAt(0));
+                client.setStatus(rs.getString("status"));
+                client.setCompletedOrders(rs.getInt("completed_orders"));
+                return client;
+            }
+
+        }catch (SQLException e){
+            System.err.println("Error getting client by id: " + e.getMessage());
+        }
+
+        return null;
+    }
+
 
     //for display
     public List<Client> readClients() {
