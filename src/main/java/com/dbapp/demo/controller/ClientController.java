@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
+@CrossOrigin("http://localhost:3000")
 public class ClientController {
 
     public ClientService clientService;
