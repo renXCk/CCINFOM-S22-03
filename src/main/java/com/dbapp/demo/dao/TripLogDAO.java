@@ -2,11 +2,13 @@ package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.TripLog;
 import Data.util.DBConnection;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class TripLogDAO {
 
     public boolean createTripLog(TripLog tripLog) {
@@ -67,6 +69,38 @@ public class TripLogDAO {
         return tripLogList;
     }
 
+    public TripLog readTripLogById(int id) {
+
+        String query = "SELECT * FROM TripLog WHERE trip_id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)){
+
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                TripLog tripLog = new TripLog();
+                tripLog.setTripId(resultSet.getInt("trip_id"));
+                tripLog.setClientId(resultSet.getInt("client_id"));
+                tripLog.setVehicleId(resultSet.getInt("vehicle_id"));
+                tripLog.setDriverId(resultSet.getInt("driver_id"));
+                tripLog.setPickUpLocation(resultSet.getString("pick_up_loc"));
+                tripLog.setDropOffLocation(resultSet.getString("drop_off_loc"));
+                tripLog.setStartTime(resultSet.getString("date_time_start"));
+                tripLog.setCompleteTime(resultSet.getString("date_time_completed"));
+                tripLog.setTripCost(resultSet.getFloat("trip_cost"));
+                tripLog.setStatus(resultSet.getString("status"));
+
+            }
+
+        }catch (SQLException e){
+            System.err.println("Error reading tripLog: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     public boolean updateTripLog(TripLog tripLog) {
         String query = "UPDATE TripLog SET client_id=?, vehicle_id=?, driver_id=?, pick_up_loc=?, drop_off_loc=?, date_time_start=?, date_time_completed=?, trip_cost=?, status=? WHERE trip_id=?";
 
@@ -93,18 +127,19 @@ public class TripLogDAO {
         }
     }
 
+    // soft delete trip log
     public boolean deleteTripLog(int tripId) {
-        String query = "DELETE FROM TripLog WHERE trip_id=?";
+        String query = "UPDATE TripLog SET status='Archive' WHERE trip_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, tripId);
-            int rowsDeleted = statement.executeUpdate();
-            return rowsDeleted > 0;
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error deleting Trip log: " + e.getMessage());
+            System.err.println("Error archiving Trip Log: " + e.getMessage());
             return false;
         }
     }
