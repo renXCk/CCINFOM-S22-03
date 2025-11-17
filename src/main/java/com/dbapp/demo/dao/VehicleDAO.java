@@ -99,4 +99,35 @@ public class VehicleDAO {
             return false;
         }
     }
+
+    public Vehicle getVehicleById(int id) {
+        String query = "SELECT * FROM Vehicle WHERE vehicle_id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, id);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Vehicle vehicle = new Vehicle();
+                    vehicle.setVehicleId(resultSet.getInt("vehicle_id"));
+                    vehicle.setPlateNumber(resultSet.getString("plate_number"));
+                    vehicle.setVehicleType(resultSet.getString("vehicle_type"));
+                    vehicle.setModel(resultSet.getString("model"));
+                    vehicle.setStatus(resultSet.getString("status"));
+                    vehicle.setFuelType(resultSet.getString("fuel_type"));
+                    vehicle.setMileage(resultSet.getInt("mileage"));
+
+                    return vehicle;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching vehicle: " + e.getMessage());
+        }
+
+        // return null if vehicle not found or error occurred
+        return null;
+    }
 }
