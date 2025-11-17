@@ -113,6 +113,42 @@ public class DriverDAO {
         }
     }
 
+    public boolean updateDriverStatus(int driverId, String status) {
+        String query = "UPDATE Driver SET status=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, status);
+            statement.setInt(2, driverId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating driver: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateDriverTripCtr(int driverId, int ctr) {
+        String query = "UPDATE Driver SET completed_trips=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, ctr);
+            statement.setInt(2, driverId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating driver: " + e.getMessage());
+            return false;
+        }
+    }
+
     public boolean deleteDriver(int driverId) {
         String query = "DELETE FROM Driver WHERE driver_id=?";
 

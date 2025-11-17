@@ -1,7 +1,6 @@
 package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.Driver;
-import com.dbapp.demo.model.FuelLog;
 import com.dbapp.demo.model.Vehicle;
 import com.dbapp.demo.model.IncidentLog;
 import Data.util.DBConnection;
