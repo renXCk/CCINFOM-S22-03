@@ -61,6 +61,34 @@ public class DriverDAO {
         return driverList;
     }
 
+    public Driver getDriverById(int driverId){
+        String query = "SELECT * FROM Driver WHERE driver_id="+driverId;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                Driver driver = new Driver();
+                driver.setDriverId(resultSet.getInt("driver_id"));
+                driver.setFirstName(resultSet.getString("first_name"));
+                driver.setLastName(resultSet.getString("last_name"));
+                driver.setLicenseNum(resultSet.getString("license_num"));
+                driver.setContactNum(resultSet.getString("contact_num"));
+                driver.setEmail(resultSet.getString("email"));
+                driver.setStatus(resultSet.getString("status"));
+                driver.setCompletedTrips(resultSet.getInt("completed_trips"));
+                return driver;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading drivers: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     public boolean updateDriver(Driver driver) {
         String query = "UPDATE Driver SET first_name=?, last_name=?, license_num=?, contact_num=?, email=?, status=?, completed_trips=? WHERE driver_id=?";
 
@@ -75,6 +103,42 @@ public class DriverDAO {
             statement.setString(6, driver.getStatus());
             statement.setInt(7, driver.getCompletedTrips());
             statement.setInt(8, driver.getDriverId());
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating driver: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateDriverStatus(int driverId, String status) {
+        String query = "UPDATE Driver SET status=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, status);
+            statement.setInt(2, driverId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating driver: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateDriverTripCtr(int driverId, int ctr) {
+        String query = "UPDATE Driver SET completed_trips=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, ctr);
+            statement.setInt(2, driverId);
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;
