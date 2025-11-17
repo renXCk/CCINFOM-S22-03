@@ -1,13 +1,15 @@
-package Data.dao;
+package com.dbapp.demo.dao;
 
-import Business.model.MaintenanceLog;
-import Business.model.MaintenancePart;
+import com.dbapp.demo.model.MaintenanceLog;
+import com.dbapp.demo.model.MaintenancePart;
 import Data.util.DBConnection;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class MaintenanceLogDAO {
 
     private final MaintenancePartDAO maintenancePartDAO = new MaintenancePartDAO();

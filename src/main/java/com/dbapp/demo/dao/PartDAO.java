@@ -2,11 +2,13 @@ package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.Part;
 import Data.util.DBConnection;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class PartDAO {
 
     public boolean createPart(Part part) {

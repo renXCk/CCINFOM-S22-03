@@ -1,13 +1,13 @@
-package Business.services;
+package com.dbapp.demo.report;
 
-import Business.model.MaintenanceLog;
-import Business.model.MaintenancePart;
-import Business.model.Vehicle;
-import Business.model.Part;
-import Data.dao.MaintenanceLogDAO;
-import Data.dao.MaintenancePartDAO;
-import Data.dao.VehicleDAO;
-import Data.dao.PartDAO;
+import com.dbapp.demo.model.MaintenanceLog;
+import com.dbapp.demo.model.MaintenancePart;
+import com.dbapp.demo.model.Vehicle;
+import com.dbapp.demo.model.Part;
+import com.dbapp.demo.dao.MaintenanceLogDAO;
+import com.dbapp.demo.dao.MaintenancePartDAO;
+import com.dbapp.demo.dao.VehicleDAO;
+import com.dbapp.demo.dao.PartDAO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

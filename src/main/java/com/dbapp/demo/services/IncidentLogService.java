@@ -6,10 +6,12 @@ import com.dbapp.demo.dao.DriverDAO;
 import com.dbapp.demo.dao.VehicleDAO;
 import com.dbapp.demo.model.IncidentLog;
 import com.dbapp.demo.dao.IncidentLogDAO;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.sql.Timestamp;
 
+@Repository
 public class IncidentLogService {
     private final IncidentLogDAO incidentLogDAO = new IncidentLogDAO();
     private final VehicleDAO vehicleDAO = new VehicleDAO();

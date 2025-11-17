@@ -1,12 +1,14 @@
-package Data.dao;
+package com.dbapp.demo.dao;
 
-import Business.model.MaintenancePart;
+import com.dbapp.demo.model.MaintenancePart;
 import Data.util.DBConnection;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class MaintenancePartDAO {
 
     public boolean createMaintenancePart(MaintenancePart mp) {
