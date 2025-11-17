@@ -36,13 +36,13 @@ public class ClientDAO {
         }
     }
 
-    public Client readClientById(int clientId){
+    public Client readClientById(int id){
         String query = "SELECT * FROM Client WHERE client_id = ?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)){
 
-            statement.setInt(1, clientId);
+            statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
 
             if (rs.next()) {
