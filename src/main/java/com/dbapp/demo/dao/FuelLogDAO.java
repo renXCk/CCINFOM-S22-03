@@ -10,7 +10,7 @@ import java.util.List;
 public class FuelLogDAO {
 
     public boolean createFuelLog(FuelLog fuelLog) {
-        String query = "INSERT INTO fuellog (vehicle_id, driver_id, fuel_date, fuel_type, liters_filled, price_per_liter, reimbursed) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO FuelLog (vehicle_id, driver_id, fuel_date, fuel_type, liters_filled, price_per_liter, reimbursed) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -128,17 +128,19 @@ public class FuelLogDAO {
 
     // Update fuel log (mainly for reimbursement status)
     public boolean updateFuelLog(FuelLog fuelLog) {
-        String query = "UPDATE FuelLog SET fuel_date=?, fuel_type=?, liters_filled=?, price_per_liter=?, reimbursed=? WHERE fuel_id=?";
+        String query = "UPDATE FuelLog SET vehicle_id=?, driver_id=?, fuel_date=?, fuel_type=?, liters_filled=?, price_per_liter=?, reimbursed=? WHERE fuel_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setTimestamp(1, fuelLog.getFuelDate());
-            statement.setString(2, fuelLog.getFuelType());
-            statement.setDouble(3, fuelLog.getLitersFilled());
-            statement.setDouble(4, fuelLog.getPricePerLiter());
-            statement.setBoolean(5, fuelLog.isReimbursed());
-            statement.setInt(6, fuelLog.getFuelId());
+            statement.setInt(1, fuelLog.getVehicleId());
+            statement.setInt(2, fuelLog.getDriverId());
+            statement.setTimestamp(3, fuelLog.getFuelDate());
+            statement.setString(4, fuelLog.getFuelType());
+            statement.setDouble(5, fuelLog.getLitersFilled());
+            statement.setDouble(6, fuelLog.getPricePerLiter());
+            statement.setBoolean(7, fuelLog.isReimbursed());
+            statement.setInt(8, fuelLog.getFuelId());
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;
