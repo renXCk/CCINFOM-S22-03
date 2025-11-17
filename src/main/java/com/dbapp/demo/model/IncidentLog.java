@@ -1,4 +1,4 @@
-package Business.model;
+package com.dbapp.demo.model;
 
 import java.sql.Timestamp;
 

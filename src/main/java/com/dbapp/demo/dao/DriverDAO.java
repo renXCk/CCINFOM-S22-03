@@ -61,6 +61,34 @@ public class DriverDAO {
         return driverList;
     }
 
+    public Driver getDriverById(int driverId){
+        String query = "SELECT * FROM Driver WHERE driver_id="+driverId;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                Driver driver = new Driver();
+                driver.setDriverId(resultSet.getInt("driver_id"));
+                driver.setFirstName(resultSet.getString("first_name"));
+                driver.setLastName(resultSet.getString("last_name"));
+                driver.setLicenseNum(resultSet.getString("license_num"));
+                driver.setContactNum(resultSet.getString("contact_num"));
+                driver.setEmail(resultSet.getString("email"));
+                driver.setStatus(resultSet.getString("status"));
+                driver.setCompletedTrips(resultSet.getInt("completed_trips"));
+                return driver;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading drivers: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     public boolean updateDriver(Driver driver) {
         String query = "UPDATE Driver SET first_name=?, last_name=?, license_num=?, contact_num=?, email=?, status=?, completed_trips=? WHERE driver_id=?";
 

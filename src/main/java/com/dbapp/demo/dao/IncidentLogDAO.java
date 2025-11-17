@@ -1,8 +1,9 @@
-package Data.dao;
+package com.dbapp.demo.dao;
 
-import Business.model.Driver;
-import Business.model.Vehicle;
-import Business.model.IncidentLog;
+import com.dbapp.demo.model.Driver;
+import com.dbapp.demo.model.FuelLog;
+import com.dbapp.demo.model.Vehicle;
+import com.dbapp.demo.model.IncidentLog;
 import Data.util.DBConnection;
 
 import java.sql.*;
@@ -36,7 +37,7 @@ public class IncidentLogDAO {
 
     public List<IncidentLog> readIncidentLogs() {
         List<IncidentLog> incidentLogList = new ArrayList<>();
-        String query = "SELECT * FROM IncidentLog ORDER BY incident_id";
+        String query = "SELECT * FROM IncidentLog ORDER BY incident_date_time DESC";
 
         try (Connection connection = DBConnection.getConnection();
              Statement statement = connection.createStatement();
@@ -56,7 +57,63 @@ public class IncidentLogDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error reading incidentLogs: " + e.getMessage());
+            System.err.println("Error reading incident logs: " + e.getMessage());
+        }
+
+        return incidentLogList;
+    }
+
+    public List<IncidentLog> getIncidentLogsByVehicle(int vehicleId) {
+        List<IncidentLog> incidentLogList = new ArrayList<>();
+        String query = "SELECT * FROM IncidentLog WHERE vehicle_id = "+vehicleId+" ORDER BY incident_date_time DESC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                IncidentLog incidentLog = new IncidentLog();
+                incidentLog.setIncidentId(resultSet.getInt("incident_id"));
+                incidentLog.setDriverId(resultSet.getInt("driver_id"));
+                incidentLog.setVehicleId(resultSet.getInt("vehicle_id"));
+                incidentLog.setIncidentType(resultSet.getString("incident_type"));
+                incidentLog.setIncidentDateTime(resultSet.getTimestamp("incident_date_time"));
+                incidentLog.setIncidentLocation(resultSet.getString("incident_location"));
+                incidentLog.setIncidentSeverity(resultSet.getString("incident_severity"));
+
+                incidentLogList.add(incidentLog);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading incident logs by vehicle: " + e.getMessage());
+        }
+
+        return incidentLogList;
+    }
+
+    public List<IncidentLog> getIncidentLogsByDriver(int driverId) {
+        List<IncidentLog> incidentLogList = new ArrayList<>();
+        String query = "SELECT * FROM IncidentLog WHERE vehicle_id = "+driverId+" ORDER BY incident_date_time DESC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                IncidentLog incidentLog = new IncidentLog();
+                incidentLog.setIncidentId(resultSet.getInt("incident_id"));
+                incidentLog.setDriverId(resultSet.getInt("driver_id"));
+                incidentLog.setVehicleId(resultSet.getInt("vehicle_id"));
+                incidentLog.setIncidentType(resultSet.getString("incident_type"));
+                incidentLog.setIncidentDateTime(resultSet.getTimestamp("incident_date_time"));
+                incidentLog.setIncidentLocation(resultSet.getString("incident_location"));
+                incidentLog.setIncidentSeverity(resultSet.getString("incident_severity"));
+
+                incidentLogList.add(incidentLog);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading incident logs by vehicle: " + e.getMessage());
         }
 
         return incidentLogList;
@@ -71,7 +128,7 @@ public class IncidentLogDAO {
             statement.setInt(1, incidentLog.getDriverId());
             statement.setInt(2, incidentLog.getVehicleId());
             statement.setString(3, incidentLog.getIncidentType());
-            statement.setString(3, incidentLog.getIncidentDateTime());
+            statement.setTimestamp(3, incidentLog.getIncidentDateTime());
             statement.setString(5, incidentLog.getIncidentLocation());
             statement.setString(6, incidentLog.getIncidentSeverity());
             statement.setInt(7, incidentLog.getIncidentId());
