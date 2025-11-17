@@ -1,10 +1,10 @@
 package com.dbapp.demo.services;
 
-import com.dbapp.demo.model.IncidentLog;
 import com.dbapp.demo.model.Driver;
 import com.dbapp.demo.model.Vehicle;
 import com.dbapp.demo.dao.DriverDAO;
 import com.dbapp.demo.dao.VehicleDAO;
+import com.dbapp.demo.model.IncidentLog;
 import com.dbapp.demo.dao.IncidentLogDAO;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class IncidentLogService {
         }
 
         Driver driver = driverDAO.getDriverById(i.getDriverId());
-        if (vehicle == null) {
+        if (driver == null) {
             System.err.println("Vehicle does not exist");
             return false;
         }
@@ -43,6 +43,13 @@ public class IncidentLogService {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         if (i.getIncidentDateTime().after(now)) {
             System.err.println("Incident date cannot be in the future");
+            return false;
+        }
+
+        if(!i.getIncidentSeverity().equals("Minor") &&
+                !i.getIncidentSeverity().equals("Moderate") &&
+                !i.getIncidentSeverity().equals("Major")){
+            System.err.println("Invalid status entered.");
             return false;
         }
 
@@ -85,6 +92,19 @@ public class IncidentLogService {
         }
 
         return incidentLogDAO.updateIncidentLog(i);
+    }
+
+    public boolean updateIncidentType(int incidentId, String type){ return incidentLogDAO.updateIncidentType(incidentId, type); }
+
+    public boolean updateIncidentSeverity(int incidentId, String severity){
+        if(!severity.equals("Minor") &&
+                !severity.equals("Moderate") &&
+                !severity.equals("Major")){
+            System.err.println("Invalid severity entered.");
+            return false;
+        }
+
+        return incidentLogDAO.updateIncidentType(incidentId, severity);
     }
 
     public boolean deleteIncidentLog(int id) {

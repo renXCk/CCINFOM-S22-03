@@ -141,6 +141,42 @@ public class IncidentLogDAO {
         }
     }
 
+    public boolean updateIncidentType(int incidentId, String type) {
+        String query = "UPDATE IncidentLog SET incident_type=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, type);
+            statement.setInt(2, incidentId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating incident: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateIncidentSeverity(int incidentId, String severity) {
+        String query = "UPDATE IncidentLog SET incident_severity=? WHERE driver_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, severity);
+            statement.setInt(2, incidentId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating incident: " + e.getMessage());
+            return false;
+        }
+    }
+
     public boolean deleteIncidentLog(int incidentId) {
         String query = "DELETE FROM IncidentLog WHERE incident_id=?";
 
