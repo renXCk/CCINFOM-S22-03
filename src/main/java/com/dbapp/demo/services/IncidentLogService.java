@@ -56,9 +56,11 @@ public class IncidentLogService {
         return incidentLogDAO.createIncidentLog(i);
     }
 
-    public List<IncidentLog> getAllIncidents() {
+    public List<IncidentLog> getAllIncidentLogs() {
         return incidentLogDAO.readIncidentLogs();
     }
+
+    public IncidentLog getIncidentLogsById(int incidentId){ return incidentLogDAO.getIncidentLogsById(incidentId); }
 
     public boolean updateIncidentLog(IncidentLog i) {
         Vehicle vehicle = vehicleDAO.getVehicleById(i.getVehicleId());

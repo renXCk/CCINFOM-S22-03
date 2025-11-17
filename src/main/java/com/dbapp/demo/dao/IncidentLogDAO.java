@@ -62,6 +62,33 @@ public class IncidentLogDAO {
         return incidentLogList;
     }
 
+    public IncidentLog getIncidentLogsById(int incidentId){
+        String query = "SELECT * FROM IncidentLog WHERE incident_id="+incidentId;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                IncidentLog incidentLog = new IncidentLog();
+                incidentLog.setIncidentId(resultSet.getInt("incident_id"));
+                incidentLog.setDriverId(resultSet.getInt("driver_id"));
+                incidentLog.setVehicleId(resultSet.getInt("vehicle_id"));
+                incidentLog.setIncidentType(resultSet.getString("incident_type"));
+                incidentLog.setIncidentDateTime(resultSet.getTimestamp("incident_date_time"));
+                incidentLog.setIncidentLocation(resultSet.getString("incident_location"));
+                incidentLog.setIncidentSeverity(resultSet.getString("incident_severity"));
+                return incidentLog;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading incident logs: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     public List<IncidentLog> getIncidentLogsByVehicle(int vehicleId) {
         List<IncidentLog> incidentLogList = new ArrayList<>();
         String query = "SELECT * FROM IncidentLog WHERE vehicle_id = "+vehicleId+" ORDER BY incident_date_time DESC";
