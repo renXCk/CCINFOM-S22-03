@@ -7,6 +7,8 @@
 -- 						CORE TABLES 
 -- =====================================================
 
+DROP DATABASE IF EXISTS deliveryshipment;
+CREATE DATABASE deliveryshipment;
 USE deliveryshipment;
 
 -- Vehicle (Ren)
@@ -134,5 +136,16 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
     CONSTRAINT FK_Incident_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 
-	
+INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, mileage) 
+VALUES 
+('ABC-123', 'sedan', 'Toyota Vios 1.3', 'available', 'gasoline', 15400),
+('XYZ-987', 'van', 'Toyota Hiace Commuter', 'on_trip', 'diesel', 45000),
+('MC-8821', 'motorcycle', 'Honda Click 125i', 'available', 'gasoline', 8500),
+('TRK-555', 'truck', 'Isuzu Elf N-Series', 'maintenance', 'diesel', 120000),
+('NBI-404', 'sedan', 'Mitsubishi Mirage G4', 'inactive', 'gasoline', 32000),
+('VAN-202', 'van', 'Nissan Urvan NV350', 'available', 'diesel', 28000),
+('HUL-001', 'truck', 'Mitsubishi Fuso Canter', 'available', 'diesel', 95000),
+('MC-1199', 'motorcycle', 'Yamaha NMAX 155', 'on_trip', 'gasoline', 12000),
+('DEF-456', 'sedan', 'Honda City 1.5', 'maintenance', 'gasoline', 18500),
+('LOG-777', 'truck', 'Hino 300 Series', 'available', 'diesel', 67000);
 	
