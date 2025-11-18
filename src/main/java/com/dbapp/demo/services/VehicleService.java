@@ -1,7 +1,9 @@
 package com.dbapp.demo.services;
 
+import com.dbapp.demo.dao.VehicleViewDAO;
 import com.dbapp.demo.model.Vehicle;
 import com.dbapp.demo.dao.VehicleDAO;
+import com.dbapp.demo.model.VehicleView;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 @Service
 public class VehicleService {
     private final VehicleDAO dao = new VehicleDAO();
+    private final VehicleViewDAO viewDAO = new VehicleViewDAO();
 
     public boolean addVehicle(Vehicle v) {
         if (v.getPlateNumber() == null || v.getPlateNumber().trim().isEmpty()) {
@@ -66,6 +69,10 @@ public class VehicleService {
         }
 
         return dao.createVehicle(v);
+    }
+
+    public List<VehicleView> getVehicleHistory() {
+        return viewDAO.getAllVehicleViews();
     }
 
     public List<Vehicle> getAllVehicles() {
