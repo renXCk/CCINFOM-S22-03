@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/parts")
+@CrossOrigin("http://localhost:3000")
 public class PartController {
 
     private final PartService partService;
@@ -95,4 +96,9 @@ public class PartController {
     public boolean reactivatePart(@PathVariable int id) {
         return partService.reactivatePart(id);
     }
+
+//    @GetMapping("/{id}/vehicles")
+//    public List<Vehicle> getVehiclesByPart(@PathVariable int id) {
+//        return partService.getVehiclesByPartId(id);
+//    }
 }

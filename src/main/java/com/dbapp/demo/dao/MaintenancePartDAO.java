@@ -130,4 +130,26 @@ public class MaintenancePartDAO {
 
         return mp;
     }
+
+//    public List<Integer> getVehicleIdsByPartId(int partId) {
+//        List<Integer> vehicleIds = new ArrayList<>();
+//        String query = "SELECT DISTINCT ml.vehicle_id FROM MaintenanceLog ml " +
+//                "JOIN MaintenancePart mp ON ml.maintenance_id = mp.maintenance_id " +
+//                "WHERE mp.part_id = ?";
+//
+//        try (Connection conn = DBConnection.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(query)) {
+//
+//            stmt.setInt(1, partId);
+//            try (ResultSet rs = stmt.executeQuery()) {
+//                while (rs.next()) {
+//                    vehicleIds.add(rs.getInt("vehicle_id"));
+//                }
+//            }
+//        } catch (SQLException e) {
+//            System.err.println("Error getting vehicles by part: " + e.getMessage());
+//        }
+//
+//        return vehicleIds;
+//    }
 }

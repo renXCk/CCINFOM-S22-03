@@ -153,14 +153,14 @@ const IncidentLogs = () => {
 
   // --- HELPER: Get Driver Name by ID ---
   const getDriverName = (id) => {
-    const drv = drivers.find(d => d.driver_id === id)
-    return drv ? `${drv.first_name} ${drv.last_name}` : `ID: ${id}`
+    const drv = drivers.find(d => d.driverId === id)
+    return drv ? `${drv.firstName} ${drv.lastName}` : `ID: ${id}`
   }
 
   // --- HELPER: Get Vehicle Plate by ID ---
   const getVehiclePlate = (id) => {
-    const veh = vehicles.find(v => v.vehicle_id === id)
-    return veh ? veh.plate_number : `ID: ${id}`
+    const veh = vehicles.find(v => v.vehicleId === id)
+    return veh ? veh.plateNumber : `ID: ${id}`
   }
 
   const getSeverityBadge = (severity) => {
@@ -188,10 +188,11 @@ const IncidentLogs = () => {
             <CTable hover bordered responsive>
               <CTableHead>
                 <CTableRow>
+                    <CTableHeaderCell>ID</CTableHeaderCell>
                   <CTableHeaderCell>Date/Time</CTableHeaderCell>
                   <CTableHeaderCell>Type</CTableHeaderCell>
-                  <CTableHeaderCell>Driver</CTableHeaderCell>
-                  <CTableHeaderCell>Vehicle</CTableHeaderCell>
+                  <CTableHeaderCell>Driver ID</CTableHeaderCell>
+                  <CTableHeaderCell>Vehicle ID</CTableHeaderCell>
                   <CTableHeaderCell>Location</CTableHeaderCell>
                   <CTableHeaderCell>Severity</CTableHeaderCell>
                   <CTableHeaderCell>Actions</CTableHeaderCell>
@@ -199,24 +200,25 @@ const IncidentLogs = () => {
               </CTableHead>
               <CTableBody>
                 {incidents.map((item) => (
-                  <CTableRow key={item.incident_id}>
+                  <CTableRow key={item.incidentId}>
+                    <CTableDataCell>{item.incidentId}</CTableDataCell>
                     <CTableDataCell>
-                        {new Date(item.incident_date_time).toLocaleString()}
+                        {new Date(item.incidentDateTime).toLocaleString()}
                     </CTableDataCell>
-                    <CTableDataCell>{item.incident_type}</CTableDataCell>
-                    <CTableDataCell>{getDriverName(item.driver_id)}</CTableDataCell>
-                    <CTableDataCell>{getVehiclePlate(item.vehicle_id)}</CTableDataCell>
-                    <CTableDataCell>{item.incident_location}</CTableDataCell>
+                    <CTableDataCell>{item.incidentType}</CTableDataCell>
+                    <CTableDataCell>{item.driverId}</CTableDataCell>
+                    <CTableDataCell>{item.vehicleId}</CTableDataCell>
+                    <CTableDataCell>{item.incidentLocation}</CTableDataCell>
                     <CTableDataCell>
-                      <CBadge color={getSeverityBadge(item.incident_severity)}>
-                        {item.incident_severity}
+                      <CBadge color={getSeverityBadge(item.incidentSeverity)}>
+                        {item.incidentSeverity}
                       </CBadge>
                     </CTableDataCell>
                     <CTableDataCell>
                       <CButton color="info" size="sm" variant="ghost" className="me-2" onClick={() => openEditModal(item)}>
                         <CIcon icon={cilPencil} />
                       </CButton>
-                      <CButton color="danger" size="sm" variant="ghost" onClick={() => handleDelete(item.incident_id)}>
+                      <CButton color="danger" size="sm" variant="ghost" onClick={() => handleDelete(item.incidentId)}>
                         <CIcon icon={cilTrash} />
                       </CButton>
                     </CTableDataCell>

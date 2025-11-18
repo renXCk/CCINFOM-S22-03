@@ -8,6 +8,7 @@ import com.dbapp.demo.model.Vehicle;
 import com.dbapp.demo.model.Part;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -140,6 +141,13 @@ public class MaintenanceLogService {
             return false;
         }
 
+        if ("Completed".equals(log.getStatus())) {
+            if (log.getDateTimeCompleted() == null || log.getDateTimeCompleted().trim().isEmpty()) {
+                System.err.println("Completion date is required when status is 'Completed'");
+                return false;
+            }
+        }
+
         if ("Cancelled".equals(log.getStatus())) {
             if ("Completed".equals(existing.getStatus())) {
                 System.err.println("Cannot cancel a completed maintenance");
@@ -247,4 +255,36 @@ public class MaintenanceLogService {
             return false;
         }
     }
+//
+//    @Transactional
+//    public boolean addPartToMaintenance(int maintenanceId, MaintenancePart part) {
+//        MaintenanceLog log = dao.getMaintenanceLogById(maintenanceId);
+//
+//        if (log == null) {
+//            System.err.println("Maintenance log not found");
+//            return false;
+//        }
+//
+//        if (!"Ongoing".equals(log.getStatus())) {
+//            System.err.println("Can only add parts to ongoing maintenance");
+//            return false;
+//        }
+//
+//        // Validate part availability
+//        Part p = partService.getPartById(part.getPartId());
+//        if (p == null || p.getStockQty() < part.getQuantityUsed()) {
+//            System.err.println("Insufficient stock");
+//            return false;
+//        }
+//
+//        part.setMaintenanceId(maintenanceId);
+//        part.setCostPerPart(p.getCost());
+//
+//        boolean added = maintenancePartDAO.createMaintenancePart(part);
+//        if (added) {
+//            partService.decreaseStock(part.getPartId(), part.getQuantityUsed());
+//        }
+//
+//        return added;
+//    }
 }
