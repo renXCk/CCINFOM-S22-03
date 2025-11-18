@@ -6,6 +6,7 @@ import com.dbapp.demo.model.Client;
 import com.dbapp.demo.model.TripLog;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -34,15 +35,15 @@ public class TripLogService {
             return false;
         }
 
-//        if (driverService.getDriverById(t.getDriverId()) == null) {
-//            System.err.println("Driver does not exist");
-//            return false;
-//        }
-//
-//        if (vehicleService.getVehicleById(t.getVehicleId()) == null) {
-//            System.err.println("Vehicle does not exist");
-//            return false;
-//        }
+        if (driverService.getDriverById(t.getDriverId()) == null) {
+            System.err.println("Driver does not exist");
+            return false;
+        }
+
+        if (vehicleService.getVehicleById(t.getVehicleId()) == null) {
+            System.err.println("Vehicle does not exist");
+            return false;
+        }
 
         // Trip information, such as pick-up location and drop-off location, must not be null.
         if (t.getPickUpLocation() == null || t.getPickUpLocation().trim().isEmpty()) {
@@ -54,14 +55,49 @@ public class TripLogService {
             return false;
         }
 
-        // The start date/time must occur before the completed date/time.
-//        if (t.getStartTime() != null && t.getCompleteTime() != null) {
-//            if (t.getStartTime().isAfter(t.getCompleteTime())) {
-//                System.err.println("Start time must be before end time");
-//                return false;
-//            }
-//        }
-        // will write parsing later
+        // Date/Time Validation and Parsing
+        String status = t.getStatus();
+
+        // CHECK: Complete Time (End Time) required for final states.
+        if ("Completed".equals(status) || "Cancelled".equals(status) || "Archive".equals(status)) {
+            // For completed, cancelled, or archived trips, there must be complete time.
+            if (t.getCompleteTime() == null) {
+                System.err.println("Validation Error: Complete time is mandatory for status '" + status + "'.");
+                return false;
+            }
+        }
+
+        // CHECK: Start Time required for ongoing or completed trips.
+        if (t.getStartTime() == null) {
+            if ("Ongoing".equals(status) || "Completed".equals(status)) {
+                System.err.println("Validation Error: Start time is mandatory for ongoing or completed trips.");
+                return false;
+            }
+        }
+
+        // CHECK: Start must be before Complete (only if both are present).
+        if (t.getStartTime() != null && t.getCompleteTime() != null) {
+
+            LocalDateTime startTime;
+            LocalDateTime completeTime;
+
+            try {
+                // Parse the start and complete time strings into LocalDateTime objects.
+                startTime = LocalDateTime.parse(t.getStartTime());
+                completeTime = LocalDateTime.parse(t.getCompleteTime());
+
+            } catch (DateTimeParseException e) {
+                // Return false if the date string is in an invalid format.
+                System.err.println("Validation Error: Invalid date/time format for start or complete time. Error: " + e.getMessage());
+                return false;
+            }
+
+            // The start date/time must occur before the completed date/time.
+            if (startTime.isAfter(completeTime)) {
+                System.err.println("Validation Error: Start time must be before end time");
+                return false;
+            }
+        }
 
         // The trip_cost must be greater than or equal to 0.
         if (t.getTripCost() < 0) {
