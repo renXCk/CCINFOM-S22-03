@@ -69,6 +69,13 @@ const _nav = [
   },
 
   {
+      component: CNavItem,
+      name: 'Fuel Logs',
+      to: '/fuel-logs', // Must match the path in routes.js
+      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+  },
+
+  {
     component: CNavTitle,
     name: 'Theme',
   },
