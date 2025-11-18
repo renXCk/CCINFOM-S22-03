@@ -16,9 +16,6 @@ public class PartService {
         this.dao = dao;
     }
 
-    /* ==========================================================
-     * VALIDATION
-     * ========================================================== */
     private boolean validatePart(Part part) {
         if (part.getPartName() == null || part.getPartName().trim().isEmpty()) {
             System.err.println("Part name cannot be empty");
@@ -38,10 +35,6 @@ public class PartService {
         }
         return true;
     }
-
-    /* ==========================================================
-     * CRUD + BUSINESS LOGIC
-     * ========================================================== */
 
     public boolean addPart(Part part) {
         if (!validatePart(part)) return false;
