@@ -3,6 +3,7 @@ import React from 'react'
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Clients = React.lazy(() => import('./views/clients/Clients'))
 const Vehicles = React.lazy(() => import('./views/vehicles/Vehicles'))
+const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -102,6 +103,7 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/clients', exact: true, name: 'Clients', element: Clients},
   { path: '/vehicles', name: 'Vehicles', element: Vehicles },
+  { path: '/drivers', name: 'Drivers', element: Drivers },
 ]
 
 export default routes

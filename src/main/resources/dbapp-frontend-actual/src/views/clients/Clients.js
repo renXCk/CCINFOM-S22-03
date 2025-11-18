@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
+    import React, { useEffect, useState } from "react";
+    import { IMaskMixin } from "react-imask";
+    import {
     CTable,
     CTableBody,
     CTableDataCell,
@@ -16,15 +17,130 @@ import {
     CFormTextarea,
     CFormLabel,
     CForm,
-    CFormSelect, 
-} from "@coreui/react";
+    CFormSelect,
+    CButton,
+    CModal,
+    CModalBody,
+    CModalFooter,
+    CModalHeader,
+    CModalTitle,
+    } from "@coreui/react";
 
+    import axios from "axios";
 
-import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
-import axios from "axios";
+const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
+  <CFormInput {...props} ref={inputRef} />
+));
 
+    /* ===========================
+    ADD CLIENT FORM (CHILD)
+    =========================== */
+    function AddClientModal({ newClient, setNewClient }) {
+    return (
+    <>
+        {/* CLIENT TYPE */}
+        <CFormLabel>Client Type</CFormLabel>
+        <CFormSelect
+        className="mb-3"
+        onChange={(e) =>
+            setNewClient({ ...newClient, client_type: e.target.value })
+        }
+        >
+        <option value="">Select type</option>
+        <option value="Individual">Individual</option>
+        <option value="Company">Company</option>
+        <option value="Government">Government</option>
+        </CFormSelect>
 
-function AddClientModal({ visible, setVisible, onClientAdded }) {
+        {/* CLIENT NAME */}
+        <CFormLabel>Client Name</CFormLabel>
+        <CInputGroup className="mb-3">
+        <CInputGroupText>🏷️</CInputGroupText>
+        <CFormInput
+            placeholder="Client Name"
+            onChange={(e) =>
+            setNewClient({ ...newClient, name: e.target.value })
+            }
+        />
+        </CInputGroup>
+
+        {/* CONTACT PERSON */}
+        <CFormLabel>Contact Person</CFormLabel>
+        <CInputGroup className="mb-3">
+        <CInputGroupText>👤</CInputGroupText>
+        <CFormInput
+            placeholder="Contact Person"
+            onChange={(e) =>
+            setNewClient({ ...newClient, contact_person: e.target.value })
+            }
+        />
+        </CInputGroup>
+
+        {/* PHONE */}
+        <CFormLabel>Phone</CFormLabel>
+        <CInputGroup className="mb-3">
+        <CInputGroupText>📞</CInputGroupText>
+        <PhoneInput
+            placeholder="09XX-XXX-XXXX"
+            mask="0000-000-0000"
+            overwite={true}
+            unmask={false}
+            onAccept={(value) =>
+                setNewClient({ ...newClient, phone: value })
+            }
+        />
+        </CInputGroup>
+
+        {/* EMAIL*/}
+        <CFormLabel>Email</CFormLabel>
+        <CInputGroup className="mb-3">
+        <CInputGroupText>📧</CInputGroupText>
+        <CFormInput
+            placeholder="Email"
+            onChange={(e) =>
+            setNewClient({ ...newClient, email: e.target.value })
+            }
+        />
+        </CInputGroup>
+
+        {/* ADDRESS */}
+        <CFormLabel>Address</CFormLabel>
+        <CInputGroup className="mb-3">
+        <CInputGroupText>🏠</CInputGroupText>
+        <CFormInput
+            placeholder="Address"
+            onChange={(e) =>
+            setNewClient({ ...newClient, address: e.target.value })
+            }
+        />
+        </CInputGroup>
+
+        {/* CLIENT STATUS */}
+        <CFormLabel>Status</CFormLabel>
+        <CFormSelect
+        className="mb-3"
+        onChange={(e) =>
+            setNewClient({ ...newClient, status: e.target.value })
+        }
+        >
+        <option value="">Select status</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Blacklisted">Blacklisted</option>
+        </CFormSelect>
+    </>
+    );
+    }
+
+    /* ===========================
+            MAIN PAGE
+    =========================== */
+    const Clients = () => {
+    const [clients, setClients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [visible, setVisible] = useState(false);
+
+    /* Form State (owned by parent) */
     const [newClient, setNewClient] = useState({
     name: "",
     client_type: "",
@@ -33,102 +149,51 @@ function AddClientModal({ visible, setVisible, onClientAdded }) {
     phone: "",
     status: "",
     priority_flag: "",
-  });
+    });
 
-  return(
-    <>
-        {/* CLIENT TYPE */}
-        <CFormLabel>Client Type</CFormLabel>
-        <CFormSelect className="mb-3" aria-label="Small select example">
-            <option>Open this select menu</option>
-            <option value="1">Individual</option>
-            <option value="2">Company</option>
-            <option value="3">Government</option>
-        </CFormSelect>
-
-        {/* CONTACT PERSON */}
-        <CFormLabel>Contact Person</CFormLabel>
-        <CInputGroup className="flex-nowrap">
-        <CInputGroupText id="addon-wrapping">👤</CInputGroupText>
-        <CFormInput placeholder="Contact Person" aria-label="Username" aria-describedby="addon-wrapping" />
-        </CInputGroup>
-
-        {/* PHONE */}
-        <CFormLabel>Phone</CFormLabel>
-        <CInputGroup className="mb-3">
-        <CInputGroupText id="basic-addon3">https://example.com/users/</CInputGroupText>
-        <CFormInput id="basic-url" aria-describedby="basic-addon3" />
-        </CInputGroup>
-
-        {/* EMAIL */}
-        <CFormLabel>Email</CFormLabel>
-        <CInputGroup className="mb-3">
-        <CInputGroupText id="basic-addon3">https://example.com/users/</CInputGroupText>
-        <CFormInput id="basic-url" aria-describedby="basic-addon3" />
-        </CInputGroup>
-
-        <CInputGroup className="mb-3">
-        <CInputGroupText>$</CInputGroupText>
-        <CFormInput aria-label="Amount (to the nearest dollar)" />
-        <CInputGroupText>.00</CInputGroupText>
-        </CInputGroup>
-
-        <CInputGroup className="mb-3">
-        <CFormInput placeholder="Username" aria-label="Username" />
-        <CInputGroupText>@</CInputGroupText>
-        <CFormInput placeholder="Server" aria-label="Server" />
-        </CInputGroup>
-
-        <CInputGroup>
-        <CInputGroupText>With textarea</CInputGroupText>
-        <CFormTextarea aria-label="With textarea"></CFormTextarea>
-        </CInputGroup>
-    
-    </>
-  )
-
-}
-
-const Clients = () => {
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    loadClients();
-  }, []);
-
-const loadClients = async () => {
+    /* Load Clients */
+    const loadClients = async () => {
     try {
-      const result = await axios.get("http://localhost:8080/api/clients/all");
-      console.log("Fetched clients:", result.data);
-      setClients(result.data); // update state with fetched data
-      setLoading(false);
-
+        const result = await axios.get("http://localhost:8080/api/clients/all");
+        setClients(result.data);
     } catch (error) {
-      console.error("Error fetching clients:", error);
+        console.error("Error fetching clients:", error);
     } finally {
-      setLoading(false); // stop loading spinner
+        setLoading(false);
     }
-  };
+    };
 
-  return (
-    // CLIENT TABLE
+    useEffect(() => {
+    loadClients();
+    }, []);
+
+    /* SAVE CLIENT */
+    const handleSave = async () => {
+    try {
+        await axios.post("http://localhost:8080/api/clients/add", newClient);
+        loadClients();
+        setVisible(false);
+    } catch (err) {
+        console.error("Error creating client:", err);
+    }
+    };
+
+    return (
     <CCard className="mb-4">
-      <CCardHeader>
+        <CCardHeader>
         <strong>Client List</strong>
-      </CCardHeader>
+        </CCardHeader>
 
-      <CCardBody>
+        <CCardBody>
         {loading ? (
-          <div className="text-center">
-            <CSpinner color="primary" />
+            <div className="text-center">
+            <CSpinner />
             <p>Loading clients...</p>
-          </div>
+            </div>
         ) : (
-          <CTable striped hover responsive>
+            <CTable striped hover responsive>
             <CTableHead>
-              <CTableRow>
+                <CTableRow>
                 <CTableHeaderCell>Client ID</CTableHeaderCell>
                 <CTableHeaderCell>Name</CTableHeaderCell>
                 <CTableHeaderCell>Type</CTableHeaderCell>
@@ -138,70 +203,66 @@ const loadClients = async () => {
                 <CTableHeaderCell>Status</CTableHeaderCell>
                 <CTableHeaderCell>Completed Orders</CTableHeaderCell>
                 <CTableHeaderCell>Priority</CTableHeaderCell>
-              </CTableRow>
+                </CTableRow>
             </CTableHead>
 
             <CTableBody>
-              {clients.map((c) => (
+                {clients.map((c) => (
                 <CTableRow key={c.client_id}>
-                  <CTableDataCell>{c.client_id}</CTableDataCell>
-                  <CTableDataCell>{c.name}</CTableDataCell>
-                  <CTableDataCell>{c.client_type}</CTableDataCell>
-                  <CTableDataCell>{c.contact_person}</CTableDataCell>
-                  <CTableDataCell>{c.email}</CTableDataCell>
-                  <CTableDataCell>{c.phone}</CTableDataCell>
-                  <CTableDataCell>{c.status}</CTableDataCell>
-                  <CTableDataCell>{c.completed_orders}</CTableDataCell>
-                  <CTableDataCell>{c.priority_flag}</CTableDataCell>
+                    <CTableDataCell>{c.client_id}</CTableDataCell>
+                    <CTableDataCell>{c.name}</CTableDataCell>
+                    <CTableDataCell>{c.client_type}</CTableDataCell>
+                    <CTableDataCell>{c.contact_person}</CTableDataCell>
+                    <CTableDataCell>{c.email}</CTableDataCell>
+                    <CTableDataCell>{c.phone}</CTableDataCell>
+                    <CTableDataCell>{c.status}</CTableDataCell>
+                    <CTableDataCell>{c.completed_orders}</CTableDataCell>
+                    <CTableDataCell>{c.priority_flag}</CTableDataCell>
                 </CTableRow>
-              ))}
+                ))}
             </CTableBody>
-          </CTable>
-
+            </CTable>
         )}
+        </CCardBody>
 
-      </CCardBody>
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
-        <CButton color="primary" style={{ width: '80px', margin: 10 }} onClick={() => setVisible(!visible)}>
+        {/* BUTTONS */}
+        <div
+        style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "10px",
+            marginTop: "15px",
+            marginBottom: "15px",
+        }}
+        >
+        <CButton color="primary" onClick={() => setVisible(true)}>
             Add
         </CButton>
-
-        <CButton color="primary" style={{ width: '80px', margin: 10, marginLeft: 0 }} onClick={() => setVisible(!visible)}>
-            Delete
-        </CButton>
-
-        <CButton color="primary" style={{ width: '80px', margin: 10, marginLeft: 0 }} onClick={() => setVisible(!visible)}>
-            Edit
-        </CButton>
+        <CButton color="danger">Delete</CButton>
+        <CButton color="warning">Edit</CButton>
         </div>
 
-      <CModal
-        visible={visible}
-        onClose={() => setVisible(false)}
-        aria-labelledby="AddClientModalTitle"
-      >
+        {/* MODAL */}
+        <CModal visible={visible} onClose={() => setVisible(false)}>
         <CModalHeader>
-            
-          <CModalTitle id="AddClienModelTitle">Add Client</CModalTitle>
+            <CModalTitle>Add Client</CModalTitle>
         </CModalHeader>
 
-
         <CModalBody>
-            <AddClientModal visible={visible} setVisible={setVisible} onClientAdded={loadClients} />
+            <AddClientModal newClient={newClient} setNewClient={setNewClient} />
         </CModalBody>
-        
 
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setVisible(false)}>
+            <CButton color="secondary" onClick={() => setVisible(false)}>
             Close
-          </CButton>
-          <CButton color="primary">Save changes</CButton>
+            </CButton>
+            <CButton color="primary" onClick={handleSave}>
+            Save changes
+            </CButton>
         </CModalFooter>
-      </CModal>
-
+        </CModal>
     </CCard>
-  );
-};
+    );
+    };
 
-export default Clients;
+    export default Clients;
