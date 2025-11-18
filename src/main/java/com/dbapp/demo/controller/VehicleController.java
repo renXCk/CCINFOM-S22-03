@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicle")
+@RequestMapping("/api/vehicles")
 @CrossOrigin("http://localhost:3000")
 public class VehicleController {
 
@@ -17,7 +17,7 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @GetMapping("/vehicles")
+    @GetMapping("/all")
     public List<Vehicle> getAllVehicles() {
         return vehicleService.getAllVehicles();
     }
