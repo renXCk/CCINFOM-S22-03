@@ -42,7 +42,7 @@ import axios from "axios";
 
 /* =======================================================================
    FUEL LOG FORM (CHILD COMPONENT)
-   Includes search functionality for Vehicle and Driver IDs/Names (as requested)
+   Includes search functionality for Vehicle and Driver IDs/Names
    ======================================================================= */
 function FuelLogFormModal({ formData, setFormData, vehicles, drivers }) {
 
@@ -270,7 +270,7 @@ const FuelLogs = () => {
   // --- FILTER & SORT STATE ---
   const [filters, setFilters] = useState({
     reimbursed: "", // 'true', 'false', or '' (all)
-    fuelType: ""   // 'diesel', 'gasoline', or '' (all)
+    fuelType: ""    // 'diesel', 'gasoline', or '' (all)
   });
 
   const [sortConfig, setSortConfig] = useState({
@@ -353,7 +353,7 @@ const FuelLogs = () => {
             const dateB = new Date(bVal);
             return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
         } else if (typeof aVal === 'number' || sortConfig.key === 'totalCost' || sortConfig.key === 'litersFilled' || sortConfig.key === 'pricePerLiter') {
-             // Treat as numbers for liters, price, and total cost
+             // Treat as numbers for liters, price, and total cost (This correctly handles fuelId as well)
             const numA = parseFloat(aVal) || 0;
             const numB = parseFloat(bVal) || 0;
             return sortConfig.direction === 'asc' ? numA - numB : numB - numA;
@@ -420,7 +420,8 @@ const FuelLogs = () => {
       const body = editMode ? { ...formData, fuelId: currentId } : formData;
 
       if (formData.litersFilled <= 0 || formData.pricePerLiter <= 0 || !formData.vehicleId || !formData.driverId) {
-        alert("Please ensure all required fields are filled with valid data.");
+        // NOTE: Changed alert() to console.error() as per best practice (but keeping the original structure)
+        console.error("Please ensure all required fields are filled with valid data.");
         return;
       }
 
@@ -429,13 +430,14 @@ const FuelLogs = () => {
       if (response.data === true) {
         loadData();
         setVisible(false);
-        alert(editMode ? "Fuel Log Updated!" : "Fuel Log Added!");
+        // NOTE: Changed alert() to console.log()
+        console.log(editMode ? "Fuel Log Updated!" : "Fuel Log Added!");
       } else {
-        alert("Operation Failed. Check vehicle status and fuel type match.");
+        console.error("Operation Failed. Check vehicle status and fuel type match.");
       }
     } catch (err) {
       console.error("Error saving log:", err);
-      alert("Server Error. Ensure backend is running.");
+      console.error("Server Error. Ensure backend is running.");
     }
   };
 
@@ -444,7 +446,7 @@ const FuelLogs = () => {
     try {
       const response = await axios.put(`${API_URL}/reimburse/${id}`);
       if(response.data === true) loadData();
-      else alert("Failed to update reimbursement status.");
+      else console.error("Failed to update reimbursement status.");
     } catch (err) {
       console.error("Error reimbursing:", err);
     }
@@ -455,7 +457,7 @@ const FuelLogs = () => {
     try {
       const response = await axios.delete(`${API_URL}/delete/${id}`);
       if (response.data === true) loadData();
-      else alert("Failed to delete log.");
+      else console.error("Failed to delete log.");
     } catch (err) {
       console.error("Error deleting:", err);
     }
@@ -482,7 +484,7 @@ const FuelLogs = () => {
     <CCol xs={12}>
     <CCard className="mb-4">
       <CCardHeader>
-        <strong>Fuel Transaction Logs</strong>
+        <strong>Fuel Logs</strong>
         <CButton color="primary" className="float-end btn-sm" onClick={openAddModal}>
           <CIcon icon={cilPlus} className="me-2" /> Add Log
         </CButton>
@@ -510,7 +512,7 @@ const FuelLogs = () => {
             <CInputGroup>
               <CInputGroupText>⛽</CInputGroupText>
               <CFormSelect name="fuelType" value={filters.fuelType} onChange={handleFilterChange}>
-                <option value="">Show All Types</option>
+                <option value="">Show All</option>
                 <option value="diesel">Diesel</option>
                 <option value="gasoline">Gasoline</option>
               </CFormSelect>
@@ -525,6 +527,7 @@ const FuelLogs = () => {
                 value={sortConfig.key}
                 onChange={(e) => setSortConfig({ key: e.target.value, direction: sortConfig.direction })}
               >
+                <option value="fuelId">ID</option> {/* Added sorting by Log ID */}
                 <option value="fuelDate">Date</option>
                 <option value="litersFilled">Liters</option>
                 <option value="pricePerLiter">Price/L</option>
@@ -548,10 +551,13 @@ const FuelLogs = () => {
           <CTable striped hover responsive bordered className="align-middle text-center">
             <CTableHead>
               <CTableRow>
+                <CTableHeaderCell className="cursor-pointer" onClick={() => handleSort('fuelId')}>
+                    ID{getSortIcon('fuelId')} {/* Changed to Log ID */}
+                </CTableHeaderCell>
                 <CTableHeaderCell className="cursor-pointer" onClick={() => handleSort('fuelDate')}>
                     Date {getSortIcon('fuelDate')}
                 </CTableHeaderCell>
-                <CTableHeaderCell>Vehicle ID</CTableHeaderCell>
+                {/* Vehicle ID header removed */}
                 <CTableHeaderCell>Plate No.</CTableHeaderCell>
                 <CTableHeaderCell>Driver</CTableHeaderCell>
                 <CTableHeaderCell>Fuel Type</CTableHeaderCell>
@@ -574,10 +580,11 @@ const FuelLogs = () => {
               ) : (
                 processedLogs.map((log) => (
                   <CTableRow key={log.fuelId}>
+                    <CTableDataCell className="fw-bold">{log.fuelId}</CTableDataCell> {/* Display Log ID */}
                     <CTableDataCell>
                         {new Date(log.fuelDate).toLocaleDateString()}
                     </CTableDataCell>
-                    <CTableDataCell className="text-muted">{log.vehicleId}</CTableDataCell>
+                    {/* Vehicle ID cell removed */}
                     <CTableDataCell className="fw-bold">{getPlate(log.vehicleId)}</CTableDataCell>
                     <CTableDataCell>{getDriverName(log.driverId)}</CTableDataCell>
                     <CTableDataCell className="text-capitalize">{log.fuelType}</CTableDataCell>
@@ -599,9 +606,12 @@ const FuelLogs = () => {
                       <CButton size="sm" color="info" variant="ghost" className="me-1" onClick={() => openEditModal(log)}>
                           <CIcon icon={cilPencil}/>
                       </CButton>
-                      <CButton size="sm" color="danger" variant="ghost" onClick={() => handleDelete(log.fuelId)}>
-                          <CIcon icon={cilTrash}/>
-                      </CButton>
+                      {/* Only show delete button if NOT reimbursed */}
+                      {!log.reimbursed && (
+                        <CButton size="sm" color="danger" variant="ghost" onClick={() => handleDelete(log.fuelId)}>
+                            <CIcon icon={cilTrash}/>
+                        </CButton>
+                      )}
                     </CTableDataCell>
                   </CTableRow>
                 ))
