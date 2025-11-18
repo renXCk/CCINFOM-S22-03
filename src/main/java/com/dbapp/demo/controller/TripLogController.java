@@ -41,7 +41,4 @@ public class TripLogController {
     @DeleteMapping("/delete/{id}")
     public boolean deleteClient(@PathVariable int id) { return tripLogService.deleteTripLog(id); }
 
-
-
-
 }
