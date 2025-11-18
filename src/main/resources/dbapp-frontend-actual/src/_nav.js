@@ -15,7 +15,8 @@ import {
   cilStar,
   cilPeople,
   cilTruck,
-  cilMoodGood
+  cilMoodGood,
+  cilWarning,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -47,20 +48,25 @@ const _nav = [
   },
 
   {
-      component: CNavItem,
-      name: 'Fuel Logs',
-      to: '/fuel-logs', // Must match the path in routes.js
-      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
-    },
-
-  {
     component: CNavItem,
     name: 'Eto Sample Ng Page',
     to: '/clients',
     icon: <CIcon icon={cilMoodGood} customClassName="nav-icon" />,
   },
 
+  {
+  component: CNavItem,
+  name: 'Drivers',
+  to: '/drivers',
+  icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+  },
 
+  {
+  component: CNavItem,
+  name: 'IncidentLogs',
+  to: '/incidentLogs',
+  icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,
+  },
 
   {
     component: CNavTitle,

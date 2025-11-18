@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/incidentlogs")
+@CrossOrigin("http://localhost:3000")
 public class IncidentLogController {
 
     public IncidentLogService incidentLogService;

@@ -11,7 +11,7 @@ import java.util.List;
 public class DriverDAO {
 
     public boolean createDriver(Driver driver) {
-        String query = "INSERT INTO Driver (first_name, last_name, license_num, contact_num, email, status) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Driver (first_name, last_name, license_num, contact_num, email, status, completed_trips) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -21,6 +21,7 @@ public class DriverDAO {
             statement.setString(4, driver.getContactNum());
             statement.setString(5, driver.getEmail());
             statement.setString(6, driver.getStatus());
+            statement.setInt(7, driver.getCompletedTrips());
 
             int rowsInserted = statement.executeUpdate();
             //return true if we inserted a row
