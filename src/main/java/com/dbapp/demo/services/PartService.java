@@ -17,6 +17,10 @@ public class PartService {
     }
 
     private boolean validatePart(Part part) {
+        if (part == null) {
+            System.err.println("Part object cannot be null");
+            return false;
+        }
         if (part.getPartName() == null || part.getPartName().trim().isEmpty()) {
             System.err.println("Part name cannot be empty");
             return false;
@@ -25,10 +29,12 @@ public class PartService {
             System.err.println("Supplier cannot be empty");
             return false;
         }
+
         if (part.getStockQty() < 0) {
             System.err.println("Stock quantity cannot be negative");
             return false;
         }
+
         if (part.getCost() < 0) {
             System.err.println("Cost cannot be negative");
             return false;
@@ -221,5 +227,19 @@ public class PartService {
 
         return requestShipment(partId);
     }
+
+//    public List<Vehicle> getVehiclesByPartId(int partId) {
+//        List<Integer> vehicleIds = maintenancePartDAO.getVehicleIdsByPartId(partId);
+//        List<Vehicle> vehicles = new ArrayList<>();
+//
+//        for (Integer vehicleId : vehicleIds) {
+//            Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
+//            if (vehicle != null) {
+//                vehicles.add(vehicle);
+//            }
+//        }
+//
+//        return vehicles;
+//    }
 
 }

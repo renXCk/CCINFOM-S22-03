@@ -12,10 +12,14 @@ import java.util.List;
 @Repository
 public class MaintenanceLogDAO {
 
-    private final MaintenancePartDAO maintenancePartDAO = new MaintenancePartDAO();
+    private final MaintenancePartDAO maintenancePartDAO;
+
+    public MaintenanceLogDAO(MaintenancePartDAO maintenancePartDAO) {
+        this.maintenancePartDAO = maintenancePartDAO;
+    }
 
     public boolean createMaintenanceLog(MaintenanceLog log, List<MaintenancePart> parts) {
-        String query = "INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, status) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, description, status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -23,7 +27,8 @@ public class MaintenanceLogDAO {
             stmt.setInt(1, log.getVehicleId());
             stmt.setString(2, log.getDateTimeStart());
             stmt.setString(3, log.getDateTimeCompleted());
-            stmt.setString(4, log.getStatus());
+            stmt.setString(4, log.getDescription());
+            stmt.setString(5, log.getStatus());
 
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted == 0) return false;
@@ -47,6 +52,7 @@ public class MaintenanceLogDAO {
 
         } catch (SQLException e) {
             System.err.println("Error inserting Maintenance Log: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -65,6 +71,7 @@ public class MaintenanceLogDAO {
 
         } catch (SQLException e) {
             System.err.println("Error reading maintenance logs: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return list;
@@ -84,13 +91,14 @@ public class MaintenanceLogDAO {
 
         } catch (SQLException e) {
             System.err.println("Error reading maintenance log: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return null;
     }
 
     public boolean updateMaintenanceLog(MaintenanceLog log) {
-        String query = "UPDATE MaintenanceLog SET vehicle_id=?, date_time_start=?, date_time_completed=?, status=? WHERE maintenance_id=?";
+        String query = "UPDATE MaintenanceLog SET vehicle_id=?, date_time_start=?, date_time_completed=?, description=?, status=? WHERE maintenance_id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -98,14 +106,16 @@ public class MaintenanceLogDAO {
             stmt.setInt(1, log.getVehicleId());
             stmt.setString(2, log.getDateTimeStart());
             stmt.setString(3, log.getDateTimeCompleted());
-            stmt.setString(4, log.getStatus());
-            stmt.setInt(5, log.getMaintenanceId());
+            stmt.setString(4, log.getDescription()); // FIX: Add this
+            stmt.setString(5, log.getStatus());       // FIX: Changed from position 4 to 5
+            stmt.setInt(6, log.getMaintenanceId());   // FIX: Changed from position 5 to 6
 
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
 
         } catch (SQLException e) {
             System.err.println("Error updating Maintenance Log: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -125,6 +135,7 @@ public class MaintenanceLogDAO {
 
         } catch (SQLException e) {
             System.err.println("Error deleting Maintenance Log: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -141,6 +152,7 @@ public class MaintenanceLogDAO {
 
         } catch (SQLException e) {
             System.err.println("Error checking active maintenance: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return false;
@@ -152,6 +164,7 @@ public class MaintenanceLogDAO {
         log.setVehicleId(rs.getInt("vehicle_id"));
         log.setDateTimeStart(rs.getString("date_time_start"));
         log.setDateTimeCompleted(rs.getString("date_time_completed"));
+        log.setDescription(rs.getString("description")); // FIX: Add this
         log.setStatus(rs.getString("status"));
         return log;
     }
