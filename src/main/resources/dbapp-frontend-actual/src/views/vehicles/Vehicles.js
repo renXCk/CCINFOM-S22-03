@@ -118,7 +118,7 @@ function VehicleFormModal({ formData, setFormData, editMode }) {
         MAIN PAGE
    =========================== */
 const Vehicles = () => {
-  const API_URL = "http://localhost:8080/api/vehicle";
+  const API_URL = "http://localhost:8080/api";
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +153,7 @@ const Vehicles = () => {
   const loadVehicles = async () => {
     setLoading(true);
     try {
-      const result = await axios.get(`${API_URL}/vehicles`);
+      const result = await axios.get(`${API_URL}/vehicles/all`);
       setVehicles(result.data);
     } catch (error) {
       console.error("Error fetching vehicles:", error);

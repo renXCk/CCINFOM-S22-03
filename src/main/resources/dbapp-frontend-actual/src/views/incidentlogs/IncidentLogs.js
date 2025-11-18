@@ -108,8 +108,8 @@ const IncidentLogs = () => {
   // --- 5. SUBMIT FORM ---
   const handleSubmit = async () => {
     const url = editMode
-      ? 'http://localhost:8080/api/incidents/update'
-      : 'http://localhost:8080/api/incidents/add'
+      ? 'http://localhost:8080/api/incidentlogs/update'
+      : 'http://localhost:8080/api/incidentlogs/add'
 
     const method = editMode ? 'PUT' : 'POST'
 
@@ -140,7 +140,7 @@ const IncidentLogs = () => {
     if (!window.confirm('Are you sure you want to delete this incident log?')) return
 
     try {
-      const response = await fetch(`http://localhost:8080/api/incidents/delete/${id}`, {
+      const response = await fetch(`http://localhost:8080/api/incidentlogs/delete/${id}`, {
         method: 'DELETE'
       })
       if (response.ok) {
@@ -240,9 +240,12 @@ const IncidentLogs = () => {
                     <CFormLabel>Driver</CFormLabel>
                     <CFormSelect name="driverId" value={formData.driverId} onChange={handleInputChange} required>
                         <option value="">Select Driver</option>
-                        {drivers.map(d => (
-                            <option key={d.driver_id} value={d.driver_id}>
-                                {d.first_name} {d.last_name} ({d.license_num})
+                        {drivers.map((d, index) => (
+                            <option 
+                                key={d.driver_id || d.driverId || index} 
+                                value={d.driver_id || d.driverId}
+                            >
+                                {d.first_name || d.firstName} {d.last_name || d.lastName} ({d.license_num || d.licenseNum})
                             </option>
                         ))}
                     </CFormSelect>
@@ -251,9 +254,12 @@ const IncidentLogs = () => {
                     <CFormLabel>Vehicle</CFormLabel>
                     <CFormSelect name="vehicleId" value={formData.vehicleId} onChange={handleInputChange} required>
                         <option value="">Select Vehicle</option>
-                        {vehicles.map(v => (
-                            <option key={v.vehicle_id} value={v.vehicle_id}>
-                                {v.plate_number} - {v.model}
+                        {vehicles.map((v, index) => (
+                            <option 
+                                key={v.vehicle_id || v.vehicleId || index} 
+                                value={v.vehicle_id || v.vehicleId}
+                            >
+                                {v.plate_number || v.plateNumber} - {v.model}
                             </option>
                         ))}
                     </CFormSelect>
