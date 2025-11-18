@@ -130,4 +130,22 @@ public class VehicleDAO {
         // return null if vehicle not found or error occurred
         return null;
     }
+
+    public boolean updateVehicleStatus(int vehicleId, String status) {
+        String query = "UPDATE Vehicle SET status=? WHERE vehicle_id=?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, status);
+            statement.setInt(2, vehicleId);
+
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating vehicle status: " + e.getMessage());
+            return false;
+        }
+    }
 }
