@@ -14,10 +14,10 @@ public class Client {
     private String email;
     private String address;
     @JsonProperty("priority_flag")
-    private char priorityFlag;
+    private char priorityFlag = '0';
     private String status;
     @JsonProperty("completed_orders")
-    private int completedOrders;
+    private int completedOrders = 0;
 
     public Client(){}
 
@@ -29,6 +29,8 @@ public class Client {
         this.email = email;
         this.address = address;
         this.status = status;
+        this.priorityFlag = '0';
+        this.clientId = -1;
     }
 
     // Getters and Setters
