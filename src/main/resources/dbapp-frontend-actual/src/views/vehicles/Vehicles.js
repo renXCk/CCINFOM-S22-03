@@ -118,7 +118,7 @@ function VehicleFormModal({ formData, setFormData, editMode }) {
         MAIN PAGE
    =========================== */
 const Vehicles = () => {
-  const API_URL = "http://localhost:8080/api";
+  const API_URL = "http://localhost:8080/api/vehicles";
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +153,7 @@ const Vehicles = () => {
   const loadVehicles = async () => {
     setLoading(true);
     try {
-      const result = await axios.get(`${API_URL}/vehicles/all`);
+      const result = await axios.get(`${API_URL}/all`);
       setVehicles(result.data);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
@@ -275,6 +275,21 @@ const Vehicles = () => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
+  // Handler for sorting column headers
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+        direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Helper to get the sort icon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return '↕'; // Neutral icon for unsorted columns
+    return sortConfig.direction === 'asc' ? '⬆' : '⬇'; // Up/Down arrow for sorted columns
+  };
+
   return (
     <CCard className="mb-4">
       <CCardHeader>
@@ -359,12 +374,18 @@ const Vehicles = () => {
           <CTable striped hover responsive bordered className="align-middle">
             <CTableHead>
               <CTableRow>
-                <CTableHeaderCell>ID</CTableHeaderCell>
-                <CTableHeaderCell>Plate No.</CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('vehicleId')} style={{ cursor: 'pointer' }}>
+                    ID {getSortIcon('vehicleId')}
+                </CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('plateNumber')} style={{ cursor: 'pointer' }}>
+                    Plate No. {getSortIcon('plateNumber')}
+                </CTableHeaderCell>
                 <CTableHeaderCell>Type</CTableHeaderCell>
                 <CTableHeaderCell>Model</CTableHeaderCell>
                 <CTableHeaderCell>Status</CTableHeaderCell>
-                <CTableHeaderCell>Mileage</CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('mileage')} style={{ cursor: 'pointer' }}>
+                    Mileage {getSortIcon('mileage')}
+                </CTableHeaderCell>
                 <CTableHeaderCell>Fuel</CTableHeaderCell>
                 <CTableHeaderCell>Actions</CTableHeaderCell>
               </CTableRow>
