@@ -1,13 +1,12 @@
 package com.dbapp.demo.dao;
 
-import com.dbapp.demo.model.Driver;
-import com.dbapp.demo.model.Vehicle;
+import com.dbapp.demo.util.DBConnection;
 import com.dbapp.demo.model.IncidentLog;
-import Data.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class IncidentLogDAO {
 

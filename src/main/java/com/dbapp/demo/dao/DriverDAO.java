@@ -1,7 +1,7 @@
 package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.Driver;
-import Data.util.DBConnection;
+import com.dbapp.demo.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
