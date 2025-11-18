@@ -49,7 +49,7 @@ const _nav = [
 
   {
     component: CNavItem,
-    name: 'Trip Logs',
+    name: 'TripLogs',
     to: '/triplogs',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
