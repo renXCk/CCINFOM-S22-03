@@ -126,6 +126,36 @@ public class FuelLogDAO {
         return fuelLogList;
     }
 
+    public FuelLog getFuelLogById(int fuelId) {
+        FuelLog fuelLog = null;
+        String query = "SELECT * FROM FuelLog WHERE fuel_id = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, fuelId);
+            ResultSet resultSet = statement.executeQuery();
+
+            // Use 'if' since we only expect one result
+            if (resultSet.next()) {
+                fuelLog = new FuelLog();
+                fuelLog.setFuelId(resultSet.getInt("fuel_id"));
+                fuelLog.setVehicleId(resultSet.getInt("vehicle_id"));
+                fuelLog.setDriverId(resultSet.getInt("driver_id"));
+                fuelLog.setFuelDate(resultSet.getTimestamp("fuel_date"));
+                fuelLog.setFuelType(resultSet.getString("fuel_type"));
+                fuelLog.setLitersFilled(resultSet.getDouble("liters_filled"));
+                fuelLog.setPricePerLiter(resultSet.getDouble("price_per_liter"));
+                fuelLog.setReimbursed(resultSet.getBoolean("reimbursed"));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading fuel log by ID: " + e.getMessage());
+        }
+
+        return fuelLog; // Returns the found fuel log or null
+    }
+
     // Update fuel log (mainly for reimbursement status)
     public boolean updateFuelLog(FuelLog fuelLog) {
         String query = "UPDATE FuelLog SET vehicle_id=?, driver_id=?, fuel_date=?, fuel_type=?, liters_filled=?, price_per_liter=?, reimbursed=? WHERE fuel_id=?";
