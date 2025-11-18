@@ -31,6 +31,7 @@
 
     const Trips = () => {
         const [tripLogs, setTripLogs] = useState([]);
+        
 
     };
     

@@ -243,10 +243,10 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
             <p>Loading clients...</p>
             </div>
         ) : (
-            <CTable striped hover responsive style={{ textAlign: 'center' }}>
+            <CTable striped hover responsive bordered style={{ textAlign: 'left' }}>
             <CTableHead>
                 <CTableRow>
-                <CTableHeaderCell>Client ID</CTableHeaderCell>
+                <CTableHeaderCell>ID</CTableHeaderCell>
                 <CTableHeaderCell>Name</CTableHeaderCell>
                 <CTableHeaderCell>Type</CTableHeaderCell>
                 <CTableHeaderCell>Contact Person</CTableHeaderCell>
@@ -255,7 +255,7 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
                 <CTableHeaderCell>Status</CTableHeaderCell>
                 <CTableHeaderCell>Completed Orders</CTableHeaderCell>
                 <CTableHeaderCell>Priority</CTableHeaderCell>
-                <CTableHeaderCell>Action</CTableHeaderCell>
+                <CTableHeaderCell>Actions</CTableHeaderCell>
                 </CTableRow>
             </CTableHead>
 
@@ -277,16 +277,20 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
                     <CTableDataCell>{c.priority_flag}</CTableDataCell>
                     <CTableDataCell>
                         <CButton
+                        color="info"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleEditClick(c)}
                         >
-                        <CIcon icon={cilPencil} style={{ color: "green" }} />
+                        <CIcon icon={cilPencil}/>
                         </CButton>
                         <CButton
-                        size="sm"
+                        color="danger"
+                          variant="ghost"
+                          size="sm"
                         onClick={() => handleDelete(c.client_id)}
                         >
-                        <CIcon icon={cilTrash} style={{ color: "red" }} />
+                        <CIcon icon={cilTrash}/>
                         </CButton>
                     </CTableDataCell>
                 </CTableRow>
