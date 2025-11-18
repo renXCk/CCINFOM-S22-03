@@ -59,6 +59,8 @@ public class ClientService {
         // set priority upon completing 100 orders
         if (c.getCompletedOrders() > 100) {
             c.setPriorityFlag('1');
+        } else if (c.getCompletedOrders() < 100) {
+            c.setPriorityFlag('0');
         }
 
         return dao.createClient(c);

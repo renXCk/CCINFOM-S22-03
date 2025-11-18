@@ -26,6 +26,7 @@ public class ClientDAO {
             statement.setString(6, client.getAddress());
             statement.setString(7, client.getStatus());
 
+
             int rowsInserted = statement.executeUpdate();
             //return true if inserted a row
             return rowsInserted > 0;
@@ -54,7 +55,9 @@ public class ClientDAO {
                 client.setPhone(rs.getString("phone"));
                 client.setEmail(rs.getString("email"));
                 client.setAddress(rs.getString("address"));
-                client.setPriorityFlag(rs.getString("priority_flag").charAt(0));
+                client.setPriorityFlag(rs.getString(
+                            "priority_flag") != null ?
+                                        rs.getString("priority_flag").charAt(0) : '0');
                 client.setStatus(rs.getString("status"));
                 client.setCompletedOrders(rs.getInt("completed_orders"));
                 return client;
@@ -75,20 +78,22 @@ public class ClientDAO {
 
         try (Connection connection = DBConnection.getConnection();
              Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+             ResultSet rs = statement.executeQuery(query)) {
 
-            while (resultSet.next()) {
+            while (rs.next()) {
                 Client client = new Client();
-                client.setClientId(resultSet.getInt("client_id"));
-                client.setClientType(resultSet.getString("client_type"));
-                client.setName(resultSet.getString("name"));
-                client.setContactPerson(resultSet.getString("contact_person"));
-                client.setPhone(resultSet.getString("phone"));
-                client.setEmail(resultSet.getString("email"));
-                client.setAddress(resultSet.getString("address"));
-                client.setPriorityFlag(resultSet.getString("priority_flag").charAt(0));
-                client.setStatus(resultSet.getString("status"));
-                client.setCompletedOrders(resultSet.getInt("completed_orders"));
+                client.setClientId(rs.getInt("client_id"));
+                client.setClientType(rs.getString("client_type"));
+                client.setName(rs.getString("name"));
+                client.setContactPerson(rs.getString("contact_person"));
+                client.setPhone(rs.getString("phone"));
+                client.setEmail(rs.getString("email"));
+                client.setAddress(rs.getString("address"));
+                client.setPriorityFlag(rs.getString(
+                        "priority_flag") != null ?
+                        rs.getString("priority_flag").charAt(0) : '0');
+                client.setStatus(rs.getString("status"));
+                client.setCompletedOrders(rs.getInt("completed_orders"));
 
                 clientList.add(client);
             }
@@ -127,17 +132,20 @@ public class ClientDAO {
     }
 
     public boolean deleteClient(int clientId) {
-        String query = "DELETE FROM Client WHERE client_id=?";
+        // Change the query to UPDATE the status column instead of DELETE
+        String query = "UPDATE Client SET status='suspended' WHERE client_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, clientId);
-            int rowsDeleted = statement.executeUpdate();
-            return rowsDeleted > 0;
+            int rowsUpdated = statement.executeUpdate();
+
+            // Return true if one row was updated
+            return rowsUpdated > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error deleting client: " + e.getMessage());
+            System.err.println("Error suspending client: " + e.getMessage());
             return false;
         }
     }
