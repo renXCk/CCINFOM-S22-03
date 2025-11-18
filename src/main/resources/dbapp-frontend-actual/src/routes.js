@@ -2,7 +2,7 @@ import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Clients = React.lazy(() => import('./views/clients/Clients'))
-const Triplogs = React.lazy(() => import('./views/triplogs/TripLog'))
+// const Triplogs = React.lazy(() => import('./views/triplogs/TripLog'))
 const Vehicles = React.lazy(() => import('./views/vehicles/Vehicles'))
 const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
 const FuelLogs = React.lazy(() => import ('./views/fuelLogs/FuelLogs'))
@@ -109,7 +109,7 @@ const routes = [
   { path: '/drivers', name: 'Drivers', element: Drivers },
   { path: '/fuelLogs', name: 'FuelLogs', element: FuelLogs },
   { path: '/incidentlogs', name: 'IncidentLogs', element: IncidentLogs },
-  { path: '/triplogs', name: 'TripLogs', element: TripLogs },
+//   { path: '/triplogs', name: 'TripLogs', element: TripLogs },
 
 ]
 
