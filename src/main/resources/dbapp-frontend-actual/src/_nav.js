@@ -14,8 +14,7 @@ import {
   cilSpeedometer,
   cilStar,
   cilPeople,
-  cilTruck
-  cilPeople,
+  cilTruck,
   cilMoodGood,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
@@ -49,9 +48,9 @@ const _nav = [
 
   {
     component: CNavItem,
-    name: 'Eto Sample Ng Page',
-    to: '/clients',
-    icon: <CIcon icon={cilMoodGood} customClassName="nav-icon" />,
+    name: 'Trip Logs',
+    to: '/triplogs',
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
 
   {

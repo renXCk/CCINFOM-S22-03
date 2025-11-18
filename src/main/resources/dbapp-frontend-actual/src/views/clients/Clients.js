@@ -14,17 +14,18 @@
     CInputGroup,
     CInputGroupText,
     CFormInput,
-    CFormTextarea,
     CFormLabel,
-    CForm,
     CFormSelect,
     CButton,
     CModal,
     CModalBody,
     CModalFooter,
     CModalHeader,
-    CModalTitle,
+    CModalTitle, CBadge    
     } from "@coreui/react";
+
+    import CIcon from "@coreui/icons-react";
+    import { cilPlus, cilPencil, cilTrash, } from "@coreui/icons";
 
     import axios from "axios";
 
@@ -33,7 +34,7 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
 ));
 
     /* ===========================
-    ADD CLIENT FORM (CHILD)
+    ADD CLIENT FORM 
     =========================== */
     function AddClientModal({ newClient, setNewClient }) {
     return (
@@ -83,7 +84,7 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
         <PhoneInput
             placeholder="09XX-XXX-XXXX"
             mask="0000-000-0000"
-            overwite={true}
+            overwrite={true}
             unmask={false}
             onAccept={(value) =>
                 setNewClient({ ...newClient, phone: value })
@@ -140,16 +141,30 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
     const [loading, setLoading] = useState(true);
     const [visible, setVisible] = useState(false);
 
-    /* Form State (owned by parent) */
+    /* Form State */
     const [newClient, setNewClient] = useState({
+    client_id: "",    
     name: "",
     client_type: "",
     contact_person: "",
     email: "",
     phone: "",
     status: "",
-    priority_flag: "",
+    priority_flag: "0",
     });
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "active":
+            return "success";   // green
+            case "inactive":
+            return "secondary"; // gray
+            case "blacklisted":
+            return "danger";    // red
+            default:
+            return "dark";
+        }
+    };
 
     /* Load Clients */
     const loadClients = async () => {
@@ -178,10 +193,47 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
     }
     };
 
+    const handleEdit = async () => {
+    try {
+        // Make sure newClient.clientId exists
+        if (!newClient.client_id) {
+            console.error("Client ID missing!");
+            return;
+        }
+
+        await axios.put("http://localhost:8080/api/clients/update", newClient);
+        loadClients();        // Refresh the table
+        setVisible(false);    // Close modal
+    } catch (err) {
+        console.error("Error updating client:", err);
+    }
+    };
+
+
+    const handleEditClick = (client) => {
+        setNewClient(client); // populate modal form with current client data
+        setVisible(true);     // open modal
+    }
+
+    const handleDelete = async (clientId) => {
+    if (window.confirm("Are you sure you want to delete this client?")) {
+        try {
+        await axios.delete(`http://localhost:8080/api/clients/delete/${clientId}`);
+        loadClients(); // refresh table
+        } catch (err) {
+        console.error("Error deleting client:", err);
+        }
+    }
+    };
+
     return (
     <CCard className="mb-4">
         <CCardHeader>
         <strong>Client List</strong>
+        <CButton color="primary" className="float-end" size="sm"  onClick={() => setVisible(true)}>
+              <CIcon icon={cilPlus} className="me-2" />
+              Add Client
+            </CButton>
         </CCardHeader>
 
         <CCardBody>
@@ -191,7 +243,7 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
             <p>Loading clients...</p>
             </div>
         ) : (
-            <CTable striped hover responsive>
+            <CTable striped hover responsive style={{ textAlign: 'center' }}>
             <CTableHead>
                 <CTableRow>
                 <CTableHeaderCell>Client ID</CTableHeaderCell>
@@ -203,6 +255,7 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
                 <CTableHeaderCell>Status</CTableHeaderCell>
                 <CTableHeaderCell>Completed Orders</CTableHeaderCell>
                 <CTableHeaderCell>Priority</CTableHeaderCell>
+                <CTableHeaderCell>Action</CTableHeaderCell>
                 </CTableRow>
             </CTableHead>
 
@@ -215,32 +268,34 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
                     <CTableDataCell>{c.contact_person}</CTableDataCell>
                     <CTableDataCell>{c.email}</CTableDataCell>
                     <CTableDataCell>{c.phone}</CTableDataCell>
-                    <CTableDataCell>{c.status}</CTableDataCell>
+                    <CTableDataCell>
+                        <CBadge color={getStatusColor(c.status)}>
+                            {c.status}
+                        </CBadge>
+                    </CTableDataCell>
                     <CTableDataCell>{c.completed_orders}</CTableDataCell>
                     <CTableDataCell>{c.priority_flag}</CTableDataCell>
+                    <CTableDataCell>
+                        <CButton
+                        size="sm"
+                        onClick={() => handleEditClick(c)}
+                        >
+                        <CIcon icon={cilPencil} style={{ color: "green" }} />
+                        </CButton>
+                        <CButton
+                        size="sm"
+                        onClick={() => handleDelete(c.client_id)}
+                        >
+                        <CIcon icon={cilTrash} style={{ color: "red" }} />
+                        </CButton>
+                    </CTableDataCell>
                 </CTableRow>
                 ))}
             </CTableBody>
             </CTable>
         )}
         </CCardBody>
-
-        {/* BUTTONS */}
-        <div
-        style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-            marginTop: "15px",
-            marginBottom: "15px",
-        }}
-        >
-        <CButton color="primary" onClick={() => setVisible(true)}>
-            Add
-        </CButton>
-        <CButton color="danger">Delete</CButton>
-        <CButton color="warning">Edit</CButton>
-        </div>
+      
 
         {/* MODAL */}
         <CModal visible={visible} onClose={() => setVisible(false)}>
@@ -256,12 +311,16 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
             <CButton color="secondary" onClick={() => setVisible(false)}>
             Close
             </CButton>
-            <CButton color="primary" onClick={handleSave}>
-            Save changes
+            <CButton
+                color="primary"
+                onClick={newClient.client_id ? handleEdit : handleSave}
+                >
+                Save changes
             </CButton>
         </CModalFooter>
         </CModal>
     </CCard>
+    
     );
     };
 
