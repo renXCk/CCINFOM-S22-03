@@ -32,7 +32,7 @@ public class VehicleDAO {
         }
     }
 
-    // Read all vehicles (including inactive)
+    // Read all vehicles
     public List<Vehicle> readVehicles() {
         List<Vehicle> vehicleList = new ArrayList<>();
         String query = "SELECT * FROM Vehicle ORDER BY vehicle_id";
@@ -139,7 +139,7 @@ public class VehicleDAO {
         }
     }
 
-    // Update only vehicle status (common operation for trips/maintenance)
+    // Update only vehicle status
     public boolean updateVehicleStatus(int vehicleId, String status) {
         String query = "UPDATE Vehicle SET status=? WHERE vehicle_id=?";
 
@@ -205,24 +205,6 @@ public class VehicleDAO {
 
         } catch (SQLException e) {
             System.err.println("Error reactivating vehicle: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean updateVehicleStatus(int vehicleId, String status) {
-        String query = "UPDATE Vehicle SET status=? WHERE vehicle_id=?";
-
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setString(1, status);
-            statement.setInt(2, vehicleId);
-
-            int rowsUpdated = statement.executeUpdate();
-            return rowsUpdated > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error updating vehicle status: " + e.getMessage());
             return false;
         }
     }
