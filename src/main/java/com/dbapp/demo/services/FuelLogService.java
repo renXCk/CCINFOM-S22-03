@@ -118,4 +118,8 @@ public class FuelLogService {
                 .filter(log -> !log.isReimbursed())
                 .toList();
     }
+
+    public FuelLog getFuelLogById(int fuelId) {
+        return fuelLogDAO.getFuelLogById(fuelId);
+    }
 }
