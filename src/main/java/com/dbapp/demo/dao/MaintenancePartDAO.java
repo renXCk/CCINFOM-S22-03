@@ -1,7 +1,7 @@
 package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.MaintenancePart;
-import Data.util.DBConnection;
+import com.dbapp.demo.util.DBConnection;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;

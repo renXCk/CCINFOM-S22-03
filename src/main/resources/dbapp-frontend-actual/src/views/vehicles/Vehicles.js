@@ -1,280 +1,439 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState, useMemo } from "react";
 import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CRow,
   CTable,
   CTableBody,
   CTableDataCell,
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CSpinner,
+  CInputGroup,
+  CInputGroupText,
+  CFormInput,
+  CFormLabel,
+  CFormSelect,
   CButton,
   CModal,
-  CModalHeader,
-  CModalTitle,
   CModalBody,
   CModalFooter,
-  CForm,
-  CFormLabel,
-  CFormInput,
-  CFormSelect,
-  CBadge
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
+  CModalHeader,
+  CModalTitle,
+  CBadge,
+  CRow,
+  CCol
+} from "@coreui/react";
+import CIcon from '@coreui/icons-react';
+import { cilPencil, cilTrash, cilPlus, cilFilter, cilSortAlphaDown } from '@coreui/icons';
+import axios from "axios";
 
+/* ===========================
+   VEHICLE FORM (CHILD)
+   =========================== */
+function VehicleFormModal({ formData, setFormData, editMode }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  return (
+    <>
+      <CFormLabel>Plate Number</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>🔢</CInputGroupText>
+        <CFormInput
+          name="plateNumber"
+          placeholder="ABC 123"
+          value={formData.plateNumber}
+          onChange={handleChange}
+        />
+      </CInputGroup>
+
+      <CFormLabel>Vehicle Type</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>🚛</CInputGroupText>
+        <CFormSelect name="vehicleType" value={formData.vehicleType} onChange={handleChange}>
+          <option value="motorcycle">Motorcycle</option>
+          <option value="sedan">Sedan</option>
+          <option value="van">Van</option>
+          <option value="truck">Truck</option>
+        </CFormSelect>
+      </CInputGroup>
+
+      <CFormLabel>Model / Brand</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>🚘</CInputGroupText>
+        <CFormInput
+          name="model"
+          placeholder="e.g. Toyota Vios"
+          value={formData.model}
+          onChange={handleChange}
+        />
+      </CInputGroup>
+
+      <CFormLabel>Fuel Type</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>⛽</CInputGroupText>
+        <CFormSelect name="fuelType" value={formData.fuelType} onChange={handleChange}>
+          <option value="diesel">Diesel</option>
+          <option value="gasoline">Gasoline</option>
+        </CFormSelect>
+      </CInputGroup>
+
+      <CFormLabel>Status</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>⚙️</CInputGroupText>
+        <CFormSelect
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          disabled={formData.status === 'on_trip' || formData.status === 'maintenance'}
+        >
+          <option value="available">Available</option>
+          <option value="inactive">Inactive</option>
+          {(formData.status === 'on_trip') && <option value="on_trip">On Trip (System Set)</option>}
+          {(formData.status === 'maintenance') && <option value="maintenance">Maintenance (System Set)</option>}
+        </CFormSelect>
+      </CInputGroup>
+
+      <CFormLabel>Mileage (km)</CFormLabel>
+      <CInputGroup className="mb-3">
+        <CInputGroupText>📏</CInputGroupText>
+        <CFormInput
+          type="number"
+          name="mileage"
+          value={formData.mileage}
+          readOnly
+          disabled
+          style={{ backgroundColor: '#f0f0f0' }}
+        />
+      </CInputGroup>
+    </>
+  );
+}
+
+/* ===========================
+        MAIN PAGE
+   =========================== */
 const Vehicles = () => {
-  const [vehicles, setVehicles] = useState([])
-  const [modalVisible, setModalVisible] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [currentId, setCurrentId] = useState(null)
+  const API_URL = "http://localhost:8080/api/vehicle";
 
-  // Default Form State (Matches your Business Rules)
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
+
+  // --- FILTER & SORT STATE ---
+  const [filters, setFilters] = useState({
+    type: "",
+    status: "not_inactive", // Default: Hide inactive vehicles
+    fuel: ""
+  });
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "vehicleId",
+    direction: "asc"
+  });
+
   const initialFormState = {
-    plateNumber: '',
-    vehicleType: 'motorcycle', // Default valid enum
-    model: '',
-    fuelType: 'diesel',        // Default valid enum (No Electric)
-    status: 'available',
-    mileage: 0                 // Default mileage 0
-  }
+    plateNumber: "",
+    vehicleType: "motorcycle",
+    model: "",
+    fuelType: "diesel",
+    status: "available",
+    mileage: 0,
+  };
 
-  const [formData, setFormData] = useState(initialFormState)
+  const [formData, setFormData] = useState(initialFormState);
 
-  // --- 1. FETCH DATA ---
-  const fetchVehicles = async () => {
+  // --- LOAD DATA ---
+  const loadVehicles = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/vehicles/all')
-      const data = await response.json()
-      setVehicles(data)
+      const result = await axios.get(`${API_URL}/vehicles`);
+      setVehicles(result.data);
     } catch (error) {
-      console.error('Error fetching vehicles:', error)
+      console.error("Error fetching vehicles:", error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchVehicles()
-  }, [])
+    loadVehicles();
+  }, []);
 
-  // --- 2. HANDLE INPUT CHANGES ---
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
+  // --- LOGIC: FILTERING & SORTING ---
+  const processedVehicles = useMemo(() => {
+    let result = [...vehicles];
 
-  // --- 3. OPEN ADD MODAL ---
+    if (filters.type) {
+      result = result.filter(v => v.vehicleType.toLowerCase() === filters.type.toLowerCase());
+    }
+    if (filters.fuel) {
+      result = result.filter(v => v.fuelType.toLowerCase() === filters.fuel.toLowerCase());
+    }
+    if (filters.status) {
+      if (filters.status === "not_inactive") {
+        // active only
+        result = result.filter(v => v.status.toLowerCase() !== "inactive");
+      } else {
+        // specific
+        result = result.filter(v => v.status.toLowerCase() === filters.status.toLowerCase());
+      }
+    }
+
+    // 2. Apply Sorting
+    result.sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      // Handle Numbers (ID, Mileage)
+      if (typeof aVal === 'number') {
+        return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      // Handle Strings (Plate, etc)
+      aVal = aVal ? aVal.toString().toLowerCase() : "";
+      bVal = bVal ? bVal.toString().toLowerCase() : "";
+
+      return sortConfig.direction === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    return result;
+  }, [vehicles, filters, sortConfig]);
+
+
+  // --- HANDLERS ---
   const openAddModal = () => {
-    setEditMode(false)
-    setFormData(initialFormState) // Resets to blank/defaults
-    setModalVisible(true)
-  }
+    setEditMode(false);
+    setFormData(initialFormState);
+    setVisible(true);
+  };
 
-  // --- 4. OPEN EDIT MODAL ---
   const openEditModal = (vehicle) => {
-    setEditMode(true)
-    setCurrentId(vehicle.vehicleId)
+    setEditMode(true);
+    setCurrentId(vehicle.vehicleId);
     setFormData({
       plateNumber: vehicle.plateNumber,
       vehicleType: vehicle.vehicleType,
       model: vehicle.model,
       fuelType: vehicle.fuelType,
       status: vehicle.status,
-      mileage: vehicle.mileage
-    })
-    setModalVisible(true)
-  }
+      mileage: vehicle.mileage,
+    });
+    setVisible(true);
+  };
 
-  // --- 5. SUBMIT FORM ---
-  const handleSubmit = async () => {
-    const url = editMode
-      ? 'http://localhost:8080/api/vehicles/update'
-      : 'http://localhost:8080/api/vehicles/add'
-
-    const method = editMode ? 'PUT' : 'POST'
-
-    const bodyData = editMode
-      ? { ...formData, vehicleId: currentId }
-      : formData
-
+  const handleSave = async () => {
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyData)
-      })
+      const url = editMode ? `${API_URL}/update` : `${API_URL}/add`;
+      const method = editMode ? 'put' : 'post';
+      const body = editMode ? { ...formData, vehicleId: currentId } : formData;
 
-      if (response.ok) {
-        setModalVisible(false)
-        fetchVehicles()
+      const response = await axios[method](url, body);
+
+      if (response.data === true) {
+        loadVehicles();
+        setVisible(false);
+        alert(editMode ? "Vehicle updated successfully!" : "Vehicle added successfully!");
       } else {
-        alert('Failed to save vehicle')
+        alert("Operation failed. Check for duplicate plate numbers or invalid data.");
       }
-    } catch (error) {
-      console.error('Error saving vehicle:', error)
+    } catch (err) {
+      console.error("Error saving vehicle:", err);
+      alert("Error connecting to server.");
     }
-  }
+  };
 
-  // --- 6. DELETE VEHICLE ---
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this vehicle?')) return
-
+    if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/delete/${id}`, {
-        method: 'DELETE'
-      })
-      if (response.ok) {
-        fetchVehicles()
-      }
-    } catch (error) {
-      console.error('Error deleting vehicle:', error)
+      const response = await axios.delete(`${API_URL}/delete/${id}`);
+      if (response.status === 200) loadVehicles();
+    } catch (err) {
+      console.error("Error deleting vehicle:", err);
     }
-  }
+  };
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'available': return 'success'
-      case 'on_trip': return 'warning'
-      case 'maintenance': return 'danger'
-      case 'inactive': return 'secondary'
-      default: return 'primary'
+    switch (status?.toLowerCase()) {
+      case 'available': return 'success';
+      case 'on_trip': return 'warning';
+      case 'maintenance': return 'danger';
+      case 'inactive': return 'secondary';
+      default: return 'primary';
     }
-  }
+  };
+
+  // Helper for filter inputs
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
 
   return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Vehicle Fleet</strong>
-            <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
-              <CIcon icon={cilPlus} className="me-2" />
-              Add Vehicle
-            </CButton>
-          </CCardHeader>
+    <CCard className="mb-4">
+      <CCardHeader>
+        <strong>Vehicles</strong>
+        <CButton color="primary" className="float-end btn-sm" onClick={openAddModal}>
+            <CIcon icon={cilPlus} className="me-2" />
+            Add Vehicle
+        </CButton>
+      </CCardHeader>
 
-          <CCardBody>
-            <CTable hover bordered responsive>
-              <CTableHead>
+      <CCardBody>
+        {/* ===========================
+             FILTER & SORT TOOLBAR
+           =========================== */}
+        <CRow className="mb-4">
+          {/* Sort Controls */}
+          <CCol md={3}>
+            <CFormLabel className="small text-muted">Sort By</CFormLabel>
+            <CInputGroup>
+              <CInputGroupText><CIcon icon={cilSortAlphaDown} /></CInputGroupText>
+              <CFormSelect
+                value={sortConfig.key}
+                onChange={(e) => setSortConfig({ ...sortConfig, key: e.target.value })}
+              >
+                <option value="vehicleId">ID</option>
+                <option value="plateNumber">Plate Number</option>
+                <option value="mileage">Mileage</option>
+              </CFormSelect>
+              <CButton
+                color="secondary"
+                variant="outline"
+                onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
+              >
+                {sortConfig.direction === 'asc' ? '⬆' : '⬇'}
+              </CButton>
+            </CInputGroup>
+          </CCol>
+
+          {/* Filter Controls */}
+          <CCol md={3}>
+            <CFormLabel className="small text-muted">Filter by Status</CFormLabel>
+            <CFormSelect name="status" value={filters.status} onChange={handleFilterChange}>
+              <option value="">None</option>
+              <option value="not_inactive">Hide Inactive</option>
+              <option value="available">Available</option>
+              <option value="on_trip">On Trip</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="inactive">Inactive</option>
+            </CFormSelect>
+          </CCol>
+
+          <CCol md={3}>
+            <CFormLabel className="small text-muted">Filter by Type</CFormLabel>
+            <CFormSelect name="type" value={filters.type} onChange={handleFilterChange}>
+              <option value="">None</option>
+              <option value="motorcycle">Motorcycle</option>
+              <option value="sedan">Sedan</option>
+              <option value="van">Van</option>
+              <option value="truck">Truck</option>
+            </CFormSelect>
+          </CCol>
+
+          <CCol md={3}>
+            <CFormLabel className="small text-muted">Filter by Fuel</CFormLabel>
+            <CFormSelect name="fuel" value={filters.fuel} onChange={handleFilterChange}>
+              <option value="">None</option>
+              <option value="diesel">Diesel</option>
+              <option value="gasoline">Gasoline</option>
+            </CFormSelect>
+          </CCol>
+        </CRow>
+
+        {/* ===========================
+                 DATA TABLE
+           =========================== */}
+        {loading ? (
+          <div className="text-center">
+            <CSpinner />
+            <p>Loading vehicles...</p>
+          </div>
+        ) : (
+          <CTable striped hover responsive bordered className="align-middle">
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>ID</CTableHeaderCell>
+                <CTableHeaderCell>Plate No.</CTableHeaderCell>
+                <CTableHeaderCell>Type</CTableHeaderCell>
+                <CTableHeaderCell>Model</CTableHeaderCell>
+                <CTableHeaderCell>Status</CTableHeaderCell>
+                <CTableHeaderCell>Mileage</CTableHeaderCell>
+                <CTableHeaderCell>Fuel</CTableHeaderCell>
+                <CTableHeaderCell>Actions</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+
+            <CTableBody>
+              {processedVehicles.length === 0 ? (
                 <CTableRow>
-                  <CTableHeaderCell>Plate No.</CTableHeaderCell>
-                  <CTableHeaderCell>Type</CTableHeaderCell>
-                  <CTableHeaderCell>Model</CTableHeaderCell>
-                  <CTableHeaderCell>Status</CTableHeaderCell>
-                  <CTableHeaderCell>Mileage</CTableHeaderCell>
-                  <CTableHeaderCell>Actions</CTableHeaderCell>
+                  <CTableDataCell colSpan="8">No vehicles match your filters.</CTableDataCell>
                 </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {vehicles.map((item) => (
-                  <CTableRow key={item.vehicleId}>
-                    <CTableDataCell>{item.plateNumber}</CTableDataCell>
-                    <CTableDataCell className="text-capitalize">{item.vehicleType}</CTableDataCell>
-                    <CTableDataCell>{item.model}</CTableDataCell>
+              ) : (
+                processedVehicles.map((v) => (
+                  <CTableRow key={v.vehicleId}>
+                    <CTableDataCell>{v.vehicleId}</CTableDataCell>
+                    <CTableDataCell>{v.plateNumber}</CTableDataCell>
+                    <CTableDataCell className="text-capitalize">{v.vehicleType}</CTableDataCell>
+                    <CTableDataCell>{v.model}</CTableDataCell>
                     <CTableDataCell>
-                      <CBadge color={getStatusBadge(item.status)}>
-                        {item.status}
+                      <CBadge color={getStatusBadge(v.status)}>
+                          {v.status}
                       </CBadge>
                     </CTableDataCell>
-                    <CTableDataCell>{item.mileage} km</CTableDataCell>
+                    <CTableDataCell>{v.mileage} km</CTableDataCell>
+                    <CTableDataCell className="text-capitalize">{v.fuelType}</CTableDataCell>
                     <CTableDataCell>
-                      <CButton color="info" size="sm" variant="ghost" className="me-2" onClick={() => openEditModal(item)}>
-                        <CIcon icon={cilPencil} />
+                      <CButton
+                          color="info"
+                          variant="ghost"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => openEditModal(v)}
+                      >
+                          <CIcon icon={cilPencil} />
                       </CButton>
-                      <CButton color="danger" size="sm" variant="ghost" onClick={() => handleDelete(item.vehicleId)}>
-                        <CIcon icon={cilTrash} />
+                      <CButton
+                          color="danger"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(v.vehicleId)}
+                      >
+                          <CIcon icon={cilTrash} />
                       </CButton>
                     </CTableDataCell>
                   </CTableRow>
-                ))}
-              </CTableBody>
-            </CTable>
-          </CCardBody>
-        </CCard>
-      </CCol>
+                ))
+              )}
+            </CTableBody>
+          </CTable>
+        )}
+      </CCardBody>
 
-      {/* --- MODAL --- */}
-      <CModal visible={modalVisible} onClose={() => setModalVisible(false)}>
+      <CModal visible={visible} onClose={() => setVisible(false)}>
         <CModalHeader>
-          <CModalTitle>{editMode ? 'Edit Vehicle' : 'Add New Vehicle'}</CModalTitle>
+          <CModalTitle>{editMode ? "Edit Vehicle" : "Add New Vehicle"}</CModalTitle>
         </CModalHeader>
         <CModalBody>
-          <CForm>
-            {/* Plate Number: Editable Always */}
-            <div className="mb-3">
-              <CFormLabel>Plate Number</CFormLabel>
-              <CFormInput name="plateNumber" value={formData.plateNumber} onChange={handleInputChange} />
-            </div>
-
-            {/* Model: Editable Always */}
-            <div className="mb-3">
-              <CFormLabel>Model</CFormLabel>
-              <CFormInput name="model" value={formData.model} onChange={handleInputChange} />
-            </div>
-
-            {/* Type: Editable Always */}
-            <div className="mb-3">
-              <CFormLabel>Type</CFormLabel>
-              <CFormSelect name="vehicleType" value={formData.vehicleType} onChange={handleInputChange}>
-                <option value="motorcycle">Motorcycle</option>
-                <option value="sedan">Sedan</option>
-                <option value="van">Van</option>
-                <option value="truck">Truck</option>
-              </CFormSelect>
-            </div>
-
-            {/* Status: Editable, but restricted options */}
-            <div className="mb-3">
-              <CFormLabel>Status</CFormLabel>
-              <CFormSelect name="status" value={formData.status} onChange={handleInputChange}>
-                <option value="available">Available</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="inactive">Inactive</option>
-                {/* 'on_trip' is excluded as it should be set by Trip transactions */}
-              </CFormSelect>
-            </div>
-
-            {/* Fuel Type: DISABLED IN EDIT MODE. No Electric. */}
-            <div className="mb-3">
-              <CFormLabel>Fuel Type</CFormLabel>
-              <CFormSelect
-                name="fuelType"
-                value={formData.fuelType}
-                onChange={handleInputChange}
-                disabled={editMode} // Cannot change fuel type after creation
-              >
-                <option value="diesel">Diesel</option>
-                <option value="gasoline">Gasoline</option>
-              </CFormSelect>
-            </div>
-
-            {/* Mileage: DISABLED IN EDIT MODE. Default 0. */}
-            <div className="mb-3">
-              <CFormLabel>Mileage</CFormLabel>
-              <CFormInput
-                type="number"
-                name="mileage"
-                value={formData.mileage}
-                onChange={handleInputChange}
-                disabled={editMode} // Cannot manually edit mileage here (must use Trip logs)
-              />
-            </div>
-
-          </CForm>
+          <VehicleFormModal
+            formData={formData}
+            setFormData={setFormData}
+            editMode={editMode}
+          />
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="primary" onClick={handleSubmit}>
-            {editMode ? 'Update Vehicle' : 'Save Vehicle'}
-          </CButton>
+          <CButton color="secondary" onClick={() => setVisible(false)}>Close</CButton>
+          <CButton color="primary" onClick={handleSave}>Save Changes</CButton>
         </CModalFooter>
       </CModal>
-    </CRow>
-  )
-}
+    </CCard>
+  );
+};
 
-export default Vehicles
+export default Vehicles;

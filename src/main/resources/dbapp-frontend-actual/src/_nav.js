@@ -16,6 +16,7 @@ import {
   cilPeople,
   cilTruck,
   cilMoodGood,
+  cilWarning,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -51,6 +52,27 @@ const _nav = [
     name: 'Trip Logs',
     to: '/triplogs',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+  },
+
+  {
+  component: CNavItem,
+  name: 'Drivers',
+  to: '/drivers',
+  icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+  },
+
+  {
+  component: CNavItem,
+  name: 'IncidentLogs',
+  to: '/incidentLogs',
+  icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,
+  },
+
+  {
+      component: CNavItem,
+      name: 'Fuel Logs',
+      to: '/fuel-logs', // Must match the path in routes.js
+      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
   },
 
   {

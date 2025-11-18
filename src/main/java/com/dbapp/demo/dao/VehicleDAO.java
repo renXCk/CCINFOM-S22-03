@@ -1,7 +1,7 @@
 package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.Vehicle;
-import Data.util.DBConnection;
+import com.dbapp.demo.util.DBConnection;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -118,17 +118,22 @@ public class VehicleDAO {
     }
 
     public boolean updateVehicle(Vehicle vehicle) {
-        String query = "UPDATE Vehicle SET vehicle_type=?, model=?, fuel_type=?, status=?, mileage=? WHERE vehicle_id=?";
+        // ADDED 'plate_number=?' to the query
+        String query = "UPDATE Vehicle SET plate_number=?, vehicle_type=?, model=?, fuel_type=?, status=?, mileage=? WHERE vehicle_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1, vehicle.getVehicleType());
-            statement.setString(2, vehicle.getModel());
-            statement.setString(3, vehicle.getFuelType());
-            statement.setString(4, vehicle.getStatus());
-            statement.setInt(5, vehicle.getMileage());
-            statement.setInt(6, vehicle.getVehicleId());
+            // ADDED parameter 1 for plate_number
+            statement.setString(1, vehicle.getPlateNumber());
+
+            // Shifted all other numbers down by 1
+            statement.setString(2, vehicle.getVehicleType());
+            statement.setString(3, vehicle.getModel());
+            statement.setString(4, vehicle.getFuelType());
+            statement.setString(5, vehicle.getStatus());
+            statement.setInt(6, vehicle.getMileage());
+            statement.setInt(7, vehicle.getVehicleId());
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;

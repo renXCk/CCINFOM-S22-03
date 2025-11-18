@@ -4,7 +4,9 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Clients = React.lazy(() => import('./views/clients/Clients'))
 const Triplogs = React.lazy(() => import('./views/triplogs/TripLog'))
 const Vehicles = React.lazy(() => import('./views/vehicles/Vehicles'))
-// const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
+const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
+const FuelLogs = React.lazy(() => import ('./views/fuelLogs/FuelLogs'))
+const IncidentLogs = React.lazy(() => import('./views/incidentlogs/IncidentLogs'))
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -104,7 +106,11 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/clients', exact: true, name: 'Clients', element: Clients},
   { path: '/vehicles', name: 'Vehicles', element: Vehicles },
-  //{ path: '/drivers', name: 'Drivers', element: Drivers },
+  { path: '/drivers', name: 'Drivers', element: Drivers },
+  { path: '/fuelLogs', name: 'FuelLogs', element: FuelLogs },
+  { path: '/incidentlogs', name: 'IncidentLogs', element: IncidentLogs },
+  { path: '/triplogs', name: 'TripLogs', element: TripLogs },
+
 ]
 
 export default routes
