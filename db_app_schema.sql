@@ -272,27 +272,27 @@ INSERT INTO TripLog (client_id, vehicle_id, driver_id, pick_up_loc, drop_off_loc
 (5, 5, 5, '654 Cedar St', '987 Spruce St', '2025-11-19 08:15:00', NULL, 0, 0, 'pending'),
 (6, 6, 6, '987 Spruce St', '123 Main St', '2025-11-19 10:00:00', NULL, 0, 0, 'pending');
 
-INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, status) VALUES
-(1, '2025-11-01 08:00:00', '2025-11-01 12:00:00', 'Completed'),
-(2, '2025-11-02 09:00:00', '2025-11-02 14:00:00', 'Completed'),
-(3, '2025-11-03 07:30:00', NULL, 'Ongoing'),
-(4, '2025-11-04 10:00:00', '2025-11-04 15:30:00', 'Completed'),
-(5, '2025-11-05 08:45:00', NULL, 'Pending'),
-(6, '2025-11-06 09:15:00', '2025-11-06 13:00:00', 'Cancelled'),
-(7, '2025-11-07 08:00:00', '2025-11-07 11:30:00', 'Completed'),
-(8, '2025-11-08 09:30:00', NULL, 'Ongoing'),
-(9, '2025-11-09 10:15:00', '2025-11-09 14:00:00', 'Completed'),
-(10, '2025-11-10 07:00:00', '2025-11-10 12:30:00', 'Completed'),
-(11, '2025-11-11 08:45:00', NULL, 'Pending'),
-(12, '2025-11-12 09:20:00', '2025-11-12 15:00:00', 'Completed'),
-(13, '2025-11-13 07:50:00', NULL, 'Ongoing'),
-(14, '2025-11-14 10:10:00', '2025-11-14 13:30:00', 'Cancelled'),
-(15, '2025-11-15 08:30:00', '2025-11-15 12:00:00', 'Completed'),
-(16, '2025-11-16 09:00:00', NULL, 'Pending'),
-(17, '2025-11-17 08:15:00', '2025-11-17 11:45:00', 'Completed'),
-(18, '2025-11-18 09:40:00', NULL, 'Ongoing'),
-(19, '2025-11-19 07:50:00', '2025-11-19 13:00:00', 'Completed'),
-(20, '2025-11-20 10:05:00', NULL, 'Pending');
+INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, description, status) VALUES
+(1, '2025-11-01 08:00:00', '2025-11-01 12:00:00', 'Routine 50,000 km service and oil change.', 'Completed'),
+(2, '2025-11-02 09:00:00', '2025-11-02 14:00:00', 'Replaced all brake pads and rotors.', 'Completed'),
+(3, '2025-11-03 07:30:00', NULL, 'Diagnosing intermittent engine stalling issue.', 'Ongoing'),
+(4, '2025-11-04 10:00:00', '2025-11-04 15:30:00', 'Fixed damaged side mirror and repainted door.', 'Completed'),
+(5, '2025-11-05 08:45:00', NULL, 'Waiting for new transmission fluid and filter.', 'Pending'),
+(6, '2025-11-06 09:15:00', '2025-11-06 13:00:00', 'Scheduled tire rotation was cancelled by driver.', 'Cancelled'),
+(7, '2025-11-07 08:00:00', '2025-11-07 11:30:00', 'Replaced faulty headlight bulb assembly.', 'Completed'),
+(8, '2025-11-08 09:30:00', NULL, 'Major engine overhaul requiring parts delivery.', 'Ongoing'),
+(9, '2025-11-09 10:15:00', '2025-11-09 14:00:00', 'Routine inspection and chassis lubrication.', 'Completed'),
+(10, '2025-11-10 07:00:00', '2025-11-10 12:30:00', 'Checked and refilled AC coolant system.', 'Completed'),
+(11, '2025-11-11 08:45:00', NULL, 'Diagnostic check requested due to unusual noise.', 'Pending'),
+(12, '2025-11-12 09:20:00', '2025-11-12 15:00:00', 'Replaced two worn-out front tires.', 'Completed'),
+(13, '2025-11-13 07:50:00', NULL, 'Repairing a punctured fuel line in the engine bay.', 'Ongoing'),
+(14, '2025-11-14 10:10:00', '2025-11-14 13:30:00', 'Scheduled repair for minor dent was cancelled.', 'Cancelled'),
+(15, '2025-11-15 08:30:00', '2025-11-15 12:00:00', 'Standard oil and filter change service.', 'Completed'),
+(16, '2025-11-16 09:00:00', NULL, 'Waiting for technician availability for deep cleaning.', 'Pending'),
+(17, '2025-11-17 08:15:00', '2025-11-17 11:45:00', 'Fixed loose battery terminal and cleaned contacts.', 'Completed'),
+(18, '2025-11-18 09:40:00', NULL, 'Troubleshooting an electronic dash malfunction.', 'Ongoing'),
+(19, '2025-11-19 07:50:00', '2025-11-19 13:00:00', 'Replaced worn wiper blades and top-up fluids.', 'Completed'),
+(20, '2025-11-20 10:05:00', NULL, 'Awaiting approval for body work estimate.', 'Pending');
 
 INSERT INTO MaintenancePart (maintenance_id, part_id, quantity_used, cost_per_part) VALUES
 (1, 1, 2, 350.00),
