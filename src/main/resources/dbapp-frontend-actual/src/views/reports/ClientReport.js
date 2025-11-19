@@ -24,7 +24,7 @@ const ClientReport = () => {
   const [reportData, setReportData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1)
 
@@ -51,11 +51,11 @@ const ClientReport = () => {
       const response = await fetch(
         `http://localhost:8080/api/reports/clients?year=${selectedYear}&month=${selectedMonth}`
       )
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
-      
+
       const data = await response.json()
       setReportData(data)
     } catch (err) {
@@ -88,8 +88,8 @@ const ClientReport = () => {
                 <strong>Client Shipment Statistics</strong>
               </div>
               <div className="d-flex gap-2">
-                <CFormSelect 
-                  size="sm" 
+                <CFormSelect
+                  size="sm"
                   style={{ width: '120px' }}
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
@@ -99,8 +99,8 @@ const ClientReport = () => {
                   ))}
                 </CFormSelect>
 
-                <CFormSelect 
-                  size="sm" 
+                <CFormSelect
+                  size="sm"
                   style={{ width: '100px' }}
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
@@ -109,7 +109,7 @@ const ClientReport = () => {
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </CFormSelect>
-                
+
                 <CButton color="primary" size="sm" variant="outline" onClick={fetchReport}>
                   <CIcon icon={cilFilter} />
                 </CButton>

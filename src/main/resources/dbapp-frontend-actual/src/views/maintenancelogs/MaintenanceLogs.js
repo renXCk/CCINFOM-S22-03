@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   CCard,
   CCardBody,
@@ -22,10 +22,13 @@ import {
   CFormInput,
   CFormSelect,
   CBadge,
-  CAlert
+  CAlert,
+  CInputGroup,
+  CInputGroupText,
+  CSpinner
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus, cilCheckCircle, cilX } from '@coreui/icons'
+import { cilPencil, cilTrash, cilPlus, cilCheckCircle, cilX, cilSortAlphaDown } from '@coreui/icons'
 
 const MaintenanceLogs = () => {
   const [maintenanceLogs, setMaintenanceLogs] = useState([])
@@ -36,6 +39,12 @@ const MaintenanceLogs = () => {
   const [currentId, setCurrentId] = useState(null)
   const [selectedParts, setSelectedParts] = useState([])
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  // Toolbar state
+  const [search, setSearch] = useState('')
+  const [filters, setFilters] = useState({ status: '' })
+  const [sortConfig, setSortConfig] = useState({ key: 'maintenanceId', direction: 'asc' })
 
   // Default Form State
   const initialFormState = {
@@ -47,21 +56,36 @@ const MaintenanceLogs = () => {
 
   const [formData, setFormData] = useState(initialFormState)
 
-  // --- 1. FETCH DATA ---
+  // --- Fetch All Data ---
   const fetchAllData = async () => {
+    setLoading(true)
     try {
+      // Keep your existing endpoints (they look like hashed routes in your app)
       const mainRes = await fetch('http://localhost:3000/#/maintenancelogs')
-      if (mainRes.ok) setMaintenanceLogs(await mainRes.json())
+      if (mainRes.ok) {
+        const data = await mainRes.json()
+        setMaintenanceLogs(Array.isArray(data) ? data : [])
+      } else {
+        // fallback to empty
+        setMaintenanceLogs([])
+      }
 
       const vehRes = await fetch('http://localhost:3000/#/vehicle')
-      if (vehRes.ok) setVehicles(await vehRes.json())
+      if (vehRes.ok) {
+        const data = await vehRes.json()
+        setVehicles(Array.isArray(data) ? data : [])
+      }
 
       const partsRes = await fetch('http://localhost:3000/#/parts')
-      if (partsRes.ok) setParts(await partsRes.json())
-
-    } catch (error) {
-      console.error('Error fetching data:', error)
+      if (partsRes.ok) {
+        const data = await partsRes.json()
+        setParts(Array.isArray(data) ? data : [])
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err)
       setError('Failed to load data')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -69,28 +93,38 @@ const MaintenanceLogs = () => {
     fetchAllData()
   }, [])
 
-  // --- 2. HANDLE INPUT CHANGES ---
+  // --- Input Handlers ---
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // --- 3. HANDLE PART SELECTION ---
+  const handleFilterChange = (e) => {
+    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const toggleSortDirection = () => {
+    setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))
+  }
+
+  // --- Parts handlers (unchanged semantics) ---
   const handleAddPart = () => {
-    setSelectedParts([...selectedParts, { partId: '', quantityUsed: 1 }])
+    setSelectedParts(prev => ([...prev, { partId: '', quantityUsed: 1 }]))
   }
 
   const handleRemovePart = (index) => {
-    setSelectedParts(selectedParts.filter((_, i) => i !== index))
+    setSelectedParts(prev => prev.filter((_, i) => i !== index))
   }
 
   const handlePartChange = (index, field, value) => {
-    const updated = [...selectedParts]
-    updated[index][field] = value
-    setSelectedParts(updated)
+    setSelectedParts(prev => {
+      const copy = [...prev]
+      copy[index] = { ...copy[index], [field]: value }
+      return copy
+    })
   }
 
-  // --- 4. OPEN ADD MODAL ---
+  // --- Modal open / edit / add ---
   const openAddModal = () => {
     setEditMode(false)
     setFormData(initialFormState)
@@ -99,11 +133,9 @@ const MaintenanceLogs = () => {
     setModalVisible(true)
   }
 
-  // --- 5. OPEN EDIT MODAL ---
   const openEditModal = (maintenance) => {
     setEditMode(true)
     setError('')
-
     const mainId = maintenance.maintenanceId || maintenance.maintenance_id
     setCurrentId(mainId)
 
@@ -114,35 +146,35 @@ const MaintenanceLogs = () => {
       status: maintenance.status || 'Ongoing'
     })
 
-    // Fetch parts for this maintenance
+    // fetch parts
     fetchMaintenanceParts(mainId)
     setModalVisible(true)
   }
 
-  // --- 6. FETCH PARTS FOR MAINTENANCE ---
   const fetchMaintenanceParts = async (maintenanceId) => {
     try {
       const response = await fetch(`http://localhost:3000/#/maintenancelogs/${maintenanceId}/parts`)
       if (response.ok) {
         const partsData = await response.json()
-        const formatted = partsData
-          .filter(p => p.partId != null)
-          .map(p => ({
-            partId: p.partId,
-            quantityUsed: p.quantityUsed || 0
-          }))
+        const formatted = Array.isArray(partsData)
+          ? partsData.filter(p => p.partId != null).map(p => ({
+              partId: p.partId,
+              quantityUsed: p.quantityUsed || 0
+            }))
+          : []
         setSelectedParts(formatted)
+      } else {
+        setSelectedParts([])
       }
-    } catch (error) {
-      console.error('Error fetching maintenance parts:', error)
+    } catch (err) {
+      console.error('Error fetching maintenance parts:', err)
     }
   }
 
-  // --- 7. SUBMIT FORM ---
+  // --- Submit (add/update) ---
   const handleSubmit = async () => {
     setError('')
 
-    // Validation
     if (!formData.vehicleId) {
       setError('Please select a vehicle')
       return
@@ -158,13 +190,9 @@ const MaintenanceLogs = () => {
 
     const method = editMode ? 'PUT' : 'POST'
 
-    // Format parts data
     const formattedParts = selectedParts
-      .filter(p => p.partId && p.quantityUsed > 0)
-      .map(p => ({
-        partId: parseInt(p.partId),
-        quantityUsed: parseInt(p.quantityUsed)
-      }))
+      .filter(p => p.partId && Number(p.quantityUsed) > 0)
+      .map(p => ({ partId: parseInt(p.partId), quantityUsed: parseInt(p.quantityUsed) }))
 
     const bodyData = editMode
       ? {
@@ -178,7 +206,7 @@ const MaintenanceLogs = () => {
 
     try {
       const response = await fetch(url, {
-        method: method,
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyData)
       })
@@ -190,79 +218,54 @@ const MaintenanceLogs = () => {
         const errorText = await response.text()
         setError(errorText || 'Failed to save maintenance record')
       }
-    } catch (error) {
-      console.error('Error saving maintenance:', error)
-      setError('Error saving maintenance: ' + error.message)
+    } catch (err) {
+      console.error('Error saving maintenance:', err)
+      setError('Error saving maintenance: ' + err.message)
     }
   }
 
-  // --- 8. COMPLETE MAINTENANCE ---
+  // --- Actions: complete / cancel / delete ---
   const handleComplete = async (id) => {
     const dateTimeCompleted = new Date().toISOString().slice(0, 19).replace('T', ' ')
-
     try {
       const response = await fetch(
         `http://localhost:3000/#/maintenancelogs/complete/${id}?dateTimeCompleted=${encodeURIComponent(dateTimeCompleted)}`,
         { method: 'PUT' }
       )
-
-      if (response.ok) {
-        fetchAllData()
-      } else {
-        alert('Failed to complete maintenance')
-      }
-    } catch (error) {
-      console.error('Error completing maintenance:', error)
+      if (response.ok) fetchAllData()
+      else alert('Failed to complete maintenance')
+    } catch (err) {
+      console.error('Error completing maintenance:', err)
     }
   }
 
-  // --- 9. CANCEL MAINTENANCE ---
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this maintenance? Parts will be restocked.')) return
-
     try {
-      const response = await fetch(`http://localhost:3000/#/maintenancelogs/cancel/${id}`, {
-        method: 'PUT'
-      })
-      if (response.ok) {
-        fetchAllData()
-      }
-    } catch (error) {
-      console.error('Error canceling maintenance:', error)
+      const response = await fetch(`http://localhost:3000/#/maintenancelogs/cancel/${id}`, { method: 'PUT' })
+      if (response.ok) fetchAllData()
+    } catch (err) {
+      console.error('Error cancelling maintenance:', err)
     }
   }
 
-  // --- 10. DELETE MAINTENANCE ---
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this maintenance log?')) return
-
     try {
-      const response = await fetch(`http://localhost:3000/#/maintenancelogs/delete/${id}`, {
-        method: 'DELETE'
-      })
-      if (response.ok) {
-        fetchAllData()
-      }
-    } catch (error) {
-      console.error('Error deleting maintenance:', error)
+      const response = await fetch(`http://localhost:3000/#/maintenancelogs/delete/${id}`, { method: 'DELETE' })
+      if (response.ok) fetchAllData()
+    } catch (err) {
+      console.error('Error deleting maintenance:', err)
     }
   }
 
-  // --- HELPER: Get Vehicle Info by ID ---
-  const getVehicleInfo = (id) => {
-    if (!id) return ''
-    const veh = vehicles.find(v => (v.vehicleId || v.vehicle_id) == id)
-    return veh ? `${veh.plateNumber || veh.plate_number} - ${veh.model}` : `ID: ${id}`
-  }
-
-  // --- HELPER: Get Part Name by ID ---
+  // --- Helpers ---
   const getPartName = (id) => {
     if (!id) return ''
     const part = parts.find(p => (p.partId || p.part_id) == id)
     return part ? part.partName || part.part_name : `ID: ${id}`
   }
 
-  // --- HELPER: Status Badge ---
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Ongoing': return 'warning'
@@ -272,7 +275,6 @@ const MaintenanceLogs = () => {
     }
   }
 
-  // --- HELPER: Format DateTime ---
   const formatDateTime = (dateStr) => {
     if (!dateStr) return 'N/A'
     try {
@@ -282,96 +284,209 @@ const MaintenanceLogs = () => {
     }
   }
 
+  // Status ordering for sorting: Ongoing -> Completed -> Cancelled
+  const getStatusOrder = (status) => {
+    switch (status) {
+      case 'Ongoing': return 1
+      case 'Completed': return 2
+      case 'Cancelled': return 3
+      default: return 99
+    }
+  }
+
+  // --- Processed list (search + filter + sort) ---
+  const processedMaintenanceLogs = useMemo(() => {
+    let result = Array.isArray(maintenanceLogs) ? [...maintenanceLogs] : []
+
+    // Search: only on description (user requested)
+    if (search && search.trim() !== '') {
+      const lower = search.toLowerCase()
+      result = result.filter(item => (item.description || '').toLowerCase().includes(lower))
+    }
+
+    // Filter by status
+    if (filters.status) {
+      result = result.filter(item => String(item.status) === String(filters.status))
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      const dir = sortConfig.direction === 'asc' ? 1 : -1
+      const key = sortConfig.key
+
+      if (key === 'maintenanceId') {
+        const na = Number(a.maintenanceId || a.maintenance_id) || 0
+        const nb = Number(b.maintenanceId || b.maintenance_id) || 0
+        return (na - nb) * dir
+      }
+
+      if (key === 'dateTimeStart' || key === 'dateTimeCompleted') {
+        const aVal = (a[key] || a[key === 'dateTimeStart' ? 'date_time_start' : 'date_time_completed'] || '') + ''
+        const bVal = (b[key] || b[key === 'dateTimeStart' ? 'date_time_start' : 'date_time_completed'] || '') + ''
+        // compare ISO-like strings lexicographically (fallback to localeCompare)
+        return (aVal.toString().localeCompare(bVal.toString())) * dir
+      }
+
+      if (key === 'status') {
+        const oa = getStatusOrder(a.status)
+        const ob = getStatusOrder(b.status)
+        return (oa - ob) * dir
+      }
+
+      // default fallback: string compare
+      const aVal = (a[key] || '').toString().toLowerCase()
+      const bVal = (b[key] || '').toString().toLowerCase()
+      return aVal.localeCompare(bVal) * dir
+    })
+
+    return result
+  }, [maintenanceLogs, search, filters, sortConfig, parts])
+
+  // --- Render ---
   return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Maintenance Logs</strong>
-            <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
-              <CIcon icon={cilPlus} className="me-2" />
-              Schedule Maintenance
-            </CButton>
-          </CCardHeader>
+    <CCard className="mb-4">
+      <CCardHeader>
+        <strong>Maintenance Logs</strong>
+        <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
+          <CIcon icon={cilPlus} className="me-2" />
+          Schedule Maintenance
+        </CButton>
+      </CCardHeader>
 
-          <CCardBody>
-            <CTable hover bordered responsive>
-              <CTableHead>
+      <CCardBody>
+        {/* Toolbar: Search / Filter / Sort */}
+        <CRow className="mb-3 g-3">
+          <CCol md={4}>
+            <CFormLabel className="small text-muted">Search Description</CFormLabel>
+            <CInputGroup>
+              <CInputGroupText>🔎</CInputGroupText>
+              <CFormInput
+                placeholder="Search description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </CInputGroup>
+          </CCol>
+
+          <CCol md={3}>
+            <CFormLabel className="small text-muted">Filter by Status</CFormLabel>
+            <CFormSelect name="status" value={filters.status} onChange={handleFilterChange}>
+              <option value="">All Statuses</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </CFormSelect>
+          </CCol>
+
+          <CCol md={4}>
+            <CFormLabel className="small text-muted">Sort By</CFormLabel>
+            <CInputGroup>
+              <CInputGroupText><CIcon icon={cilSortAlphaDown} /></CInputGroupText>
+              <CFormSelect
+                value={sortConfig.key}
+                onChange={(e) => setSortConfig(prev => ({ ...prev, key: e.target.value }))}
+              >
+                <option value="maintenanceId">ID</option>
+                <option value="dateTimeStart">Start Date/Time</option>
+                <option value="dateTimeCompleted">Completed Date/Time</option>
+                <option value="status">Status (Ongoing → Completed → Cancelled)</option>
+              </CFormSelect>
+              <CButton color="secondary" variant="outline" onClick={toggleSortDirection}>
+                {sortConfig.direction === 'asc' ? '⬆' : '⬇'}
+              </CButton>
+            </CInputGroup>
+          </CCol>
+        </CRow>
+
+        {/* Table */}
+        {loading ? (
+          <div className="text-center"><CSpinner /><p>Loading maintenance logs...</p></div>
+        ) : (
+          <CTable hover bordered responsive style={{ textAlign: 'left' }}>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>ID</CTableHeaderCell>
+                <CTableHeaderCell>Vehicle (ID)</CTableHeaderCell>
+                <CTableHeaderCell>Start Date/Time</CTableHeaderCell>
+                <CTableHeaderCell>Completed Date/Time</CTableHeaderCell>
+                <CTableHeaderCell>Description</CTableHeaderCell>
+                <CTableHeaderCell>Status</CTableHeaderCell>
+                <CTableHeaderCell>Actions</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
+
+            <CTableBody>
+              {processedMaintenanceLogs.length === 0 ? (
                 <CTableRow>
-                  <CTableHeaderCell>ID</CTableHeaderCell>
-                  <CTableHeaderCell>Vehicle</CTableHeaderCell>
-                  <CTableHeaderCell>Start Date/Time</CTableHeaderCell>
-                  <CTableHeaderCell>Completed Date/Time</CTableHeaderCell>
-                  <CTableHeaderCell>Description</CTableHeaderCell>
-                  <CTableHeaderCell>Status</CTableHeaderCell>
-                  <CTableHeaderCell>Actions</CTableHeaderCell>
+                  <CTableDataCell colSpan="7" className="text-center">No maintenance logs found.</CTableDataCell>
                 </CTableRow>
-              </CTableHead>
-              <CTableBody>
-                {maintenanceLogs.map((item) => (
-                  <CTableRow key={item.maintenanceId || item.maintenance_id}>
-                    <CTableDataCell>{item.maintenanceId || item.maintenance_id}</CTableDataCell>
-                    <CTableDataCell>{getVehicleInfo(item.vehicleId || item.vehicle_id)}</CTableDataCell>
-                    <CTableDataCell>{formatDateTime(item.dateTimeStart || item.date_time_start)}</CTableDataCell>
-                    <CTableDataCell>{formatDateTime(item.dateTimeCompleted || item.date_time_completed)}</CTableDataCell>
-                    <CTableDataCell>{item.description || 'N/A'}</CTableDataCell>
-                    <CTableDataCell>
-                      <CBadge color={getStatusBadge(item.status)}>
-                        {item.status}
-                      </CBadge>
-                    </CTableDataCell>
-                    <CTableDataCell>
-                      {item.status === 'Ongoing' && (
-                        <>
-                          <CButton
-                            color="success"
-                            size="sm"
-                            variant="ghost"
-                            className="me-2"
-                            onClick={() => handleComplete(item.maintenanceId || item.maintenance_id)}
-                            title="Complete"
-                          >
-                            <CIcon icon={cilCheckCircle} />
-                          </CButton>
-                          <CButton
-                            color="warning"
-                            size="sm"
-                            variant="ghost"
-                            className="me-2"
-                            onClick={() => handleCancel(item.maintenanceId || item.maintenance_id)}
-                            title="Cancel"
-                          >
-                            <CIcon icon={cilX} />
-                          </CButton>
-                        </>
-                      )}
-                      <CButton
-                        color="info"
-                        size="sm"
-                        variant="ghost"
-                        className="me-2"
-                        onClick={() => openEditModal(item)}
-                      >
-                        <CIcon icon={cilPencil} />
-                      </CButton>
-                      <CButton
-                        color="danger"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDelete(item.maintenanceId || item.maintenance_id)}
-                      >
-                        <CIcon icon={cilTrash} />
-                      </CButton>
-                    </CTableDataCell>
-                  </CTableRow>
-                ))}
-              </CTableBody>
-            </CTable>
-          </CCardBody>
-        </CCard>
-      </CCol>
+              ) : (
+                processedMaintenanceLogs.map(item => {
+                  const id = item.maintenanceId || item.maintenance_id
+                  const vehicleId = item.vehicleId || item.vehicle_id || ''
+                  return (
+                    <CTableRow key={id}>
+                      <CTableDataCell>{id}</CTableDataCell>
+                      <CTableDataCell>{vehicleId}</CTableDataCell>
+                      <CTableDataCell>{formatDateTime(item.dateTimeStart || item.date_time_start)}</CTableDataCell>
+                      <CTableDataCell>{formatDateTime(item.dateTimeCompleted || item.date_time_completed)}</CTableDataCell>
+                      <CTableDataCell>{item.description || 'N/A'}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color={getStatusBadge(item.status)}>{item.status}</CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        {item.status === 'Ongoing' && (
+                          <>
+                            <CButton
+                              color="success"
+                              size="sm"
+                              variant="ghost"
+                              className="me-2"
+                              onClick={() => handleComplete(id)}
+                              title="Complete"
+                            >
+                              <CIcon icon={cilCheckCircle} />
+                            </CButton>
+                            <CButton
+                              color="warning"
+                              size="sm"
+                              variant="ghost"
+                              className="me-2"
+                              onClick={() => handleCancel(id)}
+                              title="Cancel"
+                            >
+                              <CIcon icon={cilX} />
+                            </CButton>
+                          </>
+                        )}
+                        <CButton
+                          color="info"
+                          size="sm"
+                          variant="ghost"
+                          className="me-2"
+                          onClick={() => openEditModal(item)}
+                        >
+                          <CIcon icon={cilPencil} />
+                        </CButton>
+                        <CButton
+                          color="danger"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDelete(id)}
+                        >
+                          <CIcon icon={cilTrash} />
+                        </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
+                  )
+                })
+              )}
+            </CTableBody>
+          </CTable>
+        )}
+      </CCardBody>
 
-      {/* --- MODAL --- */}
+      {/* Modal (keeps your original fields/layout, visually polished) */}
       <CModal visible={modalVisible} onClose={() => setModalVisible(false)} size="lg">
         <CModalHeader>
           <CModalTitle>{editMode ? 'Edit Maintenance' : 'Schedule New Maintenance'}</CModalTitle>
@@ -384,18 +499,10 @@ const MaintenanceLogs = () => {
               <CCol md={6}>
                 <CFormLabel>Vehicle *</CFormLabel>
                 {editMode ? (
-                  <CFormInput
-                    type="text"
-                    value={getVehicleInfo(formData.vehicleId) || ''}
-                    disabled
-                  />
+                  // show raw vehicleId when editing (per your choice D)
+                  <CFormInput type="text" value={(formData.vehicleId || '')} disabled />
                 ) : (
-                  <CFormSelect
-                    name="vehicleId"
-                    value={formData.vehicleId || ''}
-                    onChange={handleInputChange}
-                    required
-                  >
+                  <CFormSelect name="vehicleId" value={formData.vehicleId || ''} onChange={handleInputChange} required>
                     <option value="">Select Vehicle</option>
                     {vehicles
                       .filter(v => v.status === 'available')
@@ -404,6 +511,7 @@ const MaintenanceLogs = () => {
                           key={v.vehicleId || v.vehicle_id || index}
                           value={v.vehicleId || v.vehicle_id}
                         >
+                          {/* Keep human-friendly labels in select, even though table shows ID only */}
                           {v.plateNumber || v.plate_number} - {v.model}
                         </option>
                       ))}
@@ -437,11 +545,7 @@ const MaintenanceLogs = () => {
             {editMode && (
               <div className="mb-3">
                 <CFormLabel>Status</CFormLabel>
-                <CFormSelect
-                  name="status"
-                  value={formData.status || 'Ongoing'}
-                  onChange={handleInputChange}
-                >
+                <CFormSelect name="status" value={formData.status || 'Ongoing'} onChange={handleInputChange}>
                   <option value="Ongoing">Ongoing</option>
                   <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>
@@ -469,10 +573,7 @@ const MaintenanceLogs = () => {
                       >
                         <option value="">Select Part</option>
                         {parts.map((p, pIndex) => (
-                          <option
-                            key={p.partId || p.part_id || pIndex}
-                            value={p.partId || p.part_id}
-                          >
+                          <option key={p.partId || p.part_id || pIndex} value={p.partId || p.part_id}>
                             {p.partName || p.part_name} (Stock: {p.stockQty || p.stock_qty})
                           </option>
                         ))}
@@ -488,11 +589,7 @@ const MaintenanceLogs = () => {
                       />
                     </CCol>
                     <CCol md={2}>
-                      <CButton
-                        color="danger"
-                        size="sm"
-                        onClick={() => handleRemovePart(index)}
-                      >
+                      <CButton color="danger" size="sm" onClick={() => handleRemovePart(index)}>
                         <CIcon icon={cilTrash} />
                       </CButton>
                     </CCol>
@@ -506,16 +603,13 @@ const MaintenanceLogs = () => {
             )}
           </CForm>
         </CModalBody>
+
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="primary" onClick={handleSubmit}>
-            {editMode ? 'Update Log' : 'Save Log'}
-          </CButton>
+          <CButton color="secondary" onClick={() => setModalVisible(false)}>Close</CButton>
+          <CButton color="primary" onClick={handleSubmit}>{editMode ? 'Update Log' : 'Save Log'}</CButton>
         </CModalFooter>
       </CModal>
-    </CRow>
+    </CCard>
   )
 }
 
