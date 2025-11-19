@@ -33,55 +33,68 @@ const _nav = [
     },
   },
 
+  // --- GROUP 1: RECORDS (Master Data) ---
   {
-      component: CNavItem,
-      name: 'Vehicles',
-      to: '/vehicles',
-      icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
-    },
-
-
-  {
-    component: CNavItem,
-    name: 'Clients',
-    to: '/clients',
-    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+    component: CNavGroup,
+    name: 'Records',
+    to: '/records',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Vehicles',
+        to: '/vehicles',
+        icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Drivers',
+        to: '/drivers',
+        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Clients',
+        to: '/clients',
+        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      },
+    ],
   },
 
+  // --- GROUP 2: TRANSACTIONS (Logs) ---
   {
-    component: CNavItem,
-    name: 'TripLogs',
-    to: '/triplogs',
+    component: CNavGroup,
+    name: 'Transactions',
+    to: '/logs',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Trip Logs',
+        to: '/triplogs',
+        icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Incident Logs',
+        to: '/incidentLogs',
+        icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Fuel Logs',
+        to: '/fuelLogs',
+        icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+      },
+    ],
   },
 
-  {
-  component: CNavItem,
-  name: 'Drivers',
-  to: '/drivers',
-  icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-  },
-
-  {
-  component: CNavItem,
-  name: 'IncidentLogs',
-  to: '/incidentLogs',
-  icon: <CIcon icon={cilWarning} customClassName="nav-icon" />,
-  },
-
-  {
-      component: CNavItem,
-      name: 'Fuel Logs',
-      to: '/fuelLogs',
-      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
-  },
+  // --- GROUP 3: REPORTS ---
   {
     component: CNavGroup,
     name: 'Reports',
     to: '/reports',
     icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
-
-    // Child Items inside the group
     items: [
       {
         component: CNavItem,
@@ -91,7 +104,6 @@ const _nav = [
       },
     ],
   },
-
   {
     component: CNavTitle,
     name: 'Theme',

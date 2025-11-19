@@ -16,10 +16,21 @@ import {
   CFormLabel,
   CFormInput,
   CAlert,
+  CWidgetStatsF, // Using standard card structures for widgets
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilFilter, cilFile, cilMagnifyingGlass, cilCloudDownload, cilChartPie } from '@coreui/icons'
-import { CChart } from '@coreui/react-chartjs' // Import Chart Component
+import {
+  cilFilter,
+  cilFile,
+  cilMagnifyingGlass,
+  cilCloudDownload,
+  cilChartPie,
+  cilSpeedometer,
+  cilLocationPin,
+  cilTruck,
+  cilChartLine
+} from '@coreui/icons'
+import { CChart } from '@coreui/react-chartjs'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -89,69 +100,81 @@ const MileageReport = () => {
     setFilters({ ...filters, [name]: value })
   }
 
-  // --- 2. Process Data for Charts (Memoized) ---
-  // We use useMemo so we don't recalculate this on every render, only when data changes
-  const chartData = useMemo(() => {
-    if (!reportData.length) return { vehicles: {}, timeline: {} };
+  // --- 2. Process Data for Charts & Summary (Memoized) ---
+  const processedData = useMemo(() => {
+    if (!reportData.length) return {
+        chart: { vehicles: {}, timeline: {} },
+        summary: { totalDistance: 0, totalTrips: 0, avgPerTrip: 0, uniqueVehicles: 0 }
+    };
 
-    // Group by Vehicle (Plate)
-    const byVehicle = reportData.reduce((acc, item) => {
-      const key = `${item.vehicleModel} (${item.plateNumber})`;
-      acc[key] = (acc[key] || 0) + item.totalDistanceTraveled;
-      return acc;
-    }, {});
+    // -- A. Calculate Summaries --
+    let totalDistance = 0;
+    let totalTrips = 0;
+    const uniquePlates = new Set();
 
-    // Group by Date
-    const byDate = reportData.reduce((acc, item) => {
-      const date = item.reportDate;
-      acc[date] = (acc[date] || 0) + item.totalDistanceTraveled;
-      return acc;
-    }, {});
+    // -- B. Prepare Chart Groupings --
+    const byVehicle = {};
+    const byDate = {};
+
+    reportData.forEach(item => {
+        // Summary calcs
+        totalDistance += item.totalDistanceTraveled;
+        totalTrips += item.tripCount;
+        uniquePlates.add(item.plateNumber);
+
+        // Chart calcs
+        const key = `${item.vehicleModel} (${item.plateNumber})`;
+        byVehicle[key] = (byVehicle[key] || 0) + item.totalDistanceTraveled;
+
+        const date = item.reportDate;
+        byDate[date] = (byDate[date] || 0) + item.totalDistanceTraveled;
+    });
 
     return {
-      vehicleLabels: Object.keys(byVehicle),
-      vehicleValues: Object.values(byVehicle),
-      dateLabels: Object.keys(byDate).sort(), // Ensure dates are chronological
-      dateValues: Object.keys(byDate).sort().map(date => byDate[date])
+      chart: {
+        vehicleLabels: Object.keys(byVehicle),
+        vehicleValues: Object.values(byVehicle),
+        dateLabels: Object.keys(byDate).sort(),
+        dateValues: Object.keys(byDate).sort().map(date => byDate[date])
+      },
+      summary: {
+        totalDistance: totalDistance.toFixed(2),
+        totalTrips: totalTrips,
+        avgPerTrip: totalTrips > 0 ? (totalDistance / totalTrips).toFixed(2) : 0,
+        uniqueVehicles: uniquePlates.size
+      }
     };
   }, [reportData]);
-
 
   // --- 3. PDF Export Logic ---
   const exportToPDF = () => {
     const doc = new jsPDF();
-
-    // Header
     doc.setFontSize(18);
     doc.text("Mileage Report", 14, 20);
-
     doc.setFontSize(11);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
     doc.text(`Period: ${filters.startDate} to ${filters.endDate}`, 14, 34);
 
-    // Table Definition
-    const tableColumn = ["Date", "Model", "Plate No.", "Total Distance", "Trips", "Current Vehicle Mileage"];
-    const tableRows = [];
+    // Add Summary to PDF
+    doc.text(`Total Distance: ${processedData.summary.totalDistance} km`, 14, 42);
+    doc.text(`Total Trips: ${processedData.summary.totalTrips}`, 100, 42);
 
-    reportData.forEach(item => {
-      const rowData = [
+    const tableColumn = ["Date", "Model", "Plate No.", "Distance", "Trips", "Odometer"];
+    const tableRows = reportData.map(item => [
         item.reportDate,
         item.vehicleModel,
         item.plateNumber,
         item.totalDistanceTraveled.toFixed(2),
         item.tripCount,
         item.currentMileage
-      ];
-      tableRows.push(rowData);
-    });
+    ]);
 
-    // Generate Table
     autoTable(doc, {
-      startY: 40,
+      startY: 50,
       head: [tableColumn],
       body: tableRows,
       theme: 'striped',
-      headStyles: { fillColor: [50, 31, 219] }, // CoreUI Primary Color
+      headStyles: { fillColor: [50, 31, 219] },
     });
 
     doc.save(`Mileage_Report_${filters.startDate}_to_${filters.endDate}.pdf`);
@@ -190,10 +213,66 @@ const MileageReport = () => {
         {/* --- ERROR HANDLING --- */}
         {error && <CAlert color="danger" className="text-center">{error}</CAlert>}
 
-        {/* --- CHARTS SECTION (Only show if we have data) --- */}
+        {/* --- SUMMARY CARDS (WIDGETS) --- */}
+        {!loading && reportData.length > 0 && (
+            <CRow className="mb-4">
+                {/* Card 1: Total Distance */}
+                <CCol sm={6} lg={3}>
+                    <CCard className="mb-4 text-white bg-primary">
+                        <CCardBody className="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div className="fs-4 fw-semibold">{processedData.summary.totalDistance} <span className="fs-6 fw-normal">km</span></div>
+                                <div>Total Distance</div>
+                            </div>
+                            <CIcon icon={cilSpeedometer} height={52} className="my-4 text-white text-opacity-75" />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+
+                {/* Card 2: Total Trips */}
+                <CCol sm={6} lg={3}>
+                    <CCard className="mb-4 text-white bg-info">
+                        <CCardBody className="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div className="fs-4 fw-semibold">{processedData.summary.totalTrips}</div>
+                                <div>Total Trips</div>
+                            </div>
+                            <CIcon icon={cilLocationPin} height={52} className="my-4 text-white text-opacity-75" />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+
+                {/* Card 3: Average Distance per Trip */}
+                <CCol sm={6} lg={3}>
+                    <CCard className="mb-4 text-white bg-warning">
+                        <CCardBody className="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div className="fs-4 fw-semibold">{processedData.summary.avgPerTrip} <span className="fs-6 fw-normal">km</span></div>
+                                <div>Avg Dist / Trip</div>
+                            </div>
+                            <CIcon icon={cilChartLine} height={52} className="my-4 text-white text-opacity-75" />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+
+                {/* Card 4: Active Vehicles */}
+                <CCol sm={6} lg={3}>
+                    <CCard className="mb-4 text-white bg-danger">
+                        <CCardBody className="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div className="fs-4 fw-semibold">{processedData.summary.uniqueVehicles}</div>
+                                <div>Active Vehicles</div>
+                            </div>
+                            <CIcon icon={cilTruck} height={52} className="my-4 text-white text-opacity-75" />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+            </CRow>
+        )}
+
+        {/* --- CHARTS SECTION --- */}
         {!loading && reportData.length > 0 && (
           <CRow className="mb-4">
-             {/* Chart 1: Distance by Vehicle */}
             <CCol md={6} className="mb-3">
               <CCard className="h-100">
                 <CCardHeader><CIcon icon={cilChartPie} className="me-2"/>Distance per Vehicle</CCardHeader>
@@ -201,12 +280,12 @@ const MileageReport = () => {
                   <CChart
                     type="bar"
                     data={{
-                      labels: chartData.vehicleLabels,
+                      labels: processedData.chart.vehicleLabels,
                       datasets: [
                         {
                           label: 'Total Distance',
                           backgroundColor: '#321fdb',
-                          data: chartData.vehicleValues,
+                          data: processedData.chart.vehicleValues,
                         },
                       ],
                     }}
@@ -215,7 +294,6 @@ const MileageReport = () => {
               </CCard>
             </CCol>
 
-            {/* Chart 2: Distance over Time */}
             <CCol md={6} className="mb-3">
               <CCard className="h-100">
                 <CCardHeader><CIcon icon={cilChartPie} className="me-2"/>Daily Fleet Mileage</CCardHeader>
@@ -223,15 +301,15 @@ const MileageReport = () => {
                   <CChart
                     type="line"
                     data={{
-                      labels: chartData.dateLabels,
+                      labels: processedData.chart.dateLabels,
                       datasets: [
                         {
                           label: 'Daily Distance',
-                          backgroundColor: 'rgba(229, 83, 83, 0.2)',
+                          backgroundColor: 'rgba(229, 83, 83, 0.2)', // Faded gradient style
                           borderColor: '#e55353',
                           pointBackgroundColor: '#e55353',
                           pointBorderColor: '#fff',
-                          data: chartData.dateValues,
+                          data: processedData.chart.dateValues,
                           fill: true,
                         },
                       ],
@@ -276,7 +354,7 @@ const MileageReport = () => {
                       <CTableHeaderCell>Plate No.</CTableHeaderCell>
                       <CTableHeaderCell>Total Distance</CTableHeaderCell>
                       <CTableHeaderCell>Trips</CTableHeaderCell>
-                      <CTableHeaderCell>Current Vehicle Mileage</CTableHeaderCell>
+                      <CTableHeaderCell>Odometer</CTableHeaderCell>
                     </CTableRow>
                   </CTableHead>
                   <CTableBody>

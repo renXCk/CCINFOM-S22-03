@@ -15,11 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * REST Controller and Report Generator for Vehicle Mileage and Usage.
- * This class handles both the HTTP request mapping and the core logic
- * for generating the mileage report by querying the database.
- */
+
 @RestController
 @RequestMapping("/api/reports")
 @CrossOrigin("http://localhost:3000")
@@ -64,18 +60,9 @@ public class MileageReportGenerator {
     }
 
     // (Service/DAO equivalent)
-
-    /**
-     * Executes the core report generation logic by querying the database.
-     *
-     * @param startDate The start date for filtering completed trips (YYYY-MM-DD).
-     * @param endDate The end date for filtering completed trips (YYYY-MM-DD).
-     * @return A list of MileageReportEntry objects.
-     */
     public List<MileageReportEntry> generateReport(String startDate, String endDate) {
         List<MileageReportEntry> report = new ArrayList<>();
 
-        // SQL Query to aggregate distance and count trips, and fetch the current odometer (mileage)
         String query =
                 "SELECT " +
                         "    DATE(t.date_time_completed) as report_date, " +
