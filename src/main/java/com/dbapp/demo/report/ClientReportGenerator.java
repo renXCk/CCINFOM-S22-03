@@ -4,12 +4,14 @@ import com.dbapp.demo.util.DBConnection;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +44,18 @@ public class ClientReportGenerator {
     }
 
     @GetMapping("/clients")
-    public List<ClientReportEntry> getClientReport() {
-        System.out.println("Generating Client Shipment Report (All-Time)");
-        return generateReport();
+    public List<ClientReportEntry> getClientReport(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month
+    ) {
+        int targetYear = (year != null) ? year : LocalDate.now().getYear();
+        int targetMonth = (month != null) ? month : LocalDate.now().getMonthValue();
+
+        System.out.println("Generating Client Report for: " + targetMonth + "/" + targetYear);
+        return generateReport(targetYear, targetMonth);
     }
 
-    public List<ClientReportEntry> generateReport() {
+    public List<ClientReportEntry> generateReport(int year, int month) {
         List<ClientReportEntry> report = new ArrayList<>();
 
         String query =
@@ -64,6 +72,8 @@ public class ClientReportGenerator {
                         "    Client c " +
                         "LEFT JOIN " +
                         "    TripLog t ON c.client_id = t.client_id " +
+                        "    AND YEAR(t.date_time_start) = ? " +
+                        "    AND MONTH(t.date_time_start) = ? " +
                         "LEFT JOIN " +
                         "    Vehicle v ON t.vehicle_id = v.vehicle_id " +
                         "GROUP BY " +
@@ -73,6 +83,9 @@ public class ClientReportGenerator {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            stmt.setInt(1, year);
+            stmt.setInt(2, month);
 
             ResultSet rs = stmt.executeQuery();
 
