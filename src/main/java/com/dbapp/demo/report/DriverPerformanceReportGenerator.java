@@ -1,10 +1,7 @@
 package com.dbapp.demo.report;
 
 import com.dbapp.demo.util.DBConnection;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,6 +18,9 @@ public class DriverPerformanceReportGenerator {
         private String name;
         private long numberOfCompletedTrips;
         private long numberOfIncidents;
+        private double  incidentRate;
+        private double  avgTripDuration;
+        private double  avgTripDistance;
 
         // Getters and Setters
         public Date getReportDate() { return reportDate; }
@@ -37,15 +37,40 @@ public class DriverPerformanceReportGenerator {
 
         public long getNumberOfIncidents() { return numberOfIncidents; }
         public void setNumberOfIncidents(long numberOfIncidents) { this.numberOfIncidents = numberOfIncidents; }
+
+        public double getIncidentRate() {
+            return incidentRate;
+        }
+
+        public void setIncidentRate(double incidentRate) {
+            this.incidentRate = incidentRate;
+        }
+
+        public double getAvgTripDuration() {
+            return avgTripDuration;
+        }
+
+        public void setAvgTripDuration(double avgTripDuration) {
+            this.avgTripDuration = avgTripDuration;
+        }
+
+        public double getAvgTripDistance() {
+            return avgTripDistance;
+        }
+
+        public void setAvgTripDistance(double avgTripDistance) {
+            this.avgTripDistance = avgTripDistance;
+        }
     }
 
     @GetMapping("/performance")
-    public List<DriverPerformanceEntry> getDriverPerformanceReport() {
+    public List<DriverPerformanceEntry> getDriverPerformanceReport(@RequestParam("start") String startDate,
+                                                                   @RequestParam("end") String endDate) {
         System.out.println("Generating Driver Performance Report...");
-        return generateReport();
+        return generateReport(startDate, endDate);
     }
 
-    public List<DriverPerformanceEntry> generateReport() {
+    public List<DriverPerformanceEntry> generateReport(String startDate, String endDate) {
         List<DriverPerformanceEntry> report = new ArrayList<>();
 
         String query =
@@ -54,8 +79,11 @@ public class DriverPerformanceReportGenerator {
                         "    d.driver_id, " +
                         "    CONCAT(d.first_name, ' ', d.last_name) AS name, " +
                         "    COUNT(DISTINCT t.trip_id) AS completed_trips, " +
-                        "    COUNT(DISTINCT i.incident_id) AS incident_count" +
-                        "FROM Driver d"+
+                        "    COUNT(DISTINCT i.incident_id) AS incident_count, " +
+                        "    ROUND(COUNT(DISTINCT i.incident_id) / COUNT(DISTINCT t.trip_id), 2) AS incident_rate, " +
+                        "    ROUND(AVG(TIMESTAMPDIFF(MINUTE, t.date_time_start, t.date_time_completed)) / 60, 2) AS avg_trip_duration_hours, " +
+                        "    ROUND(AVG(t.total_distance), 1) AS avg_trip_distance " +
+                        "FROM Driver d " +
                         "JOIN " +
                         "    TripLog t ON d.driver_id = t.driver_id " +
                         "JOIN " +
@@ -69,14 +97,20 @@ public class DriverPerformanceReportGenerator {
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
 
+            stmt.setString(1, startDate + " 00:00:00");
+            stmt.setString(2, endDate + " 23:59:59");
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 DriverPerformanceEntry entry = new DriverPerformanceEntry();
                 entry.setReportDate(rs.getDate("report_date"));
                 entry.setDriverId(rs.getInt("driver_id"));
                 entry.setName(rs.getString("name"));
-                entry.setNumberOfCompletedTrips(rs.getLong("number_of_completed_trips"));
-                entry.setNumberOfIncidents(rs.getLong("number_of_incidents"));
+                entry.setNumberOfCompletedTrips(rs.getLong("completed_trips"));
+                entry.setNumberOfIncidents(rs.getLong("incident_count"));
+                entry.setIncidentRate(rs.getDouble("incident_rate"));
+                entry.setAvgTripDuration(rs.getDouble("avg_trip_duration_hours"));
+                entry.setAvgTripDistance(rs.getDouble("avg_trip_distance"));
                 report.add(entry);
             }
         } catch (SQLException e) {
