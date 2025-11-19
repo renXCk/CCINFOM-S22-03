@@ -51,8 +51,10 @@ public class MaintenanceReportGenerator {
         for (MaintenanceLog log : logs) {
             MaintenanceDetail detail = new MaintenanceDetail();
             detail.setMaintenanceId(log.getMaintenanceId());
+            detail.setVehicleId(log.getVehicleId());
             detail.setDateTimeStart(log.getDateTimeStart());
             detail.setDateTimeCompleted(log.getDateTimeCompleted());
+            detail.setDescription(log.getDescription());
             detail.setStatus(log.getStatus());
 
             List<MaintenancePart> parts = maintenancePartDAO.readByMaintenanceId(log.getMaintenanceId());
@@ -87,8 +89,10 @@ public class MaintenanceReportGenerator {
 
     public static class MaintenanceDetail {
         private int maintenanceId;
+        private int vehicleId;
         private String dateTimeStart;
         private String dateTimeCompleted;
+        private String description;
         private String status;
         private List<PartUsageDetail> partsUsed = new ArrayList<>();
 
@@ -106,6 +110,12 @@ public class MaintenanceReportGenerator {
 
         public List<PartUsageDetail> getPartsUsed() { return partsUsed; }
         public void setPartsUsed(List<PartUsageDetail> partsUsed) { this.partsUsed = partsUsed; }
+
+        public int getVehicleId() { return vehicleId; }
+        public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
     }
 
     public static class PartUsageDetail {
