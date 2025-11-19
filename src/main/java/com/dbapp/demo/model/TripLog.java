@@ -10,17 +10,19 @@ public class TripLog {
     private String startTime;
     private String completeTime;
     private float tripCost;
+    private int totalDistance;
     private String status;
 
     public TripLog() {}
 
-    public TripLog(int clientId, int vehicleId, int driverId, String pickUpLocation, String dropOffLocation, float tripCost, String status) {
+    public TripLog(int clientId, int vehicleId, int driverId, String pickUpLocation, String dropOffLocation, float tripCost, int totalDistance, String status) {
         this.clientId = clientId;
         this.vehicleId = vehicleId;
         this.driverId = driverId;
         this.pickUpLocation = pickUpLocation;
         this.dropOffLocation = dropOffLocation;
         this.tripCost = tripCost;
+        this.totalDistance = totalDistance;
         this.status = status;
     }
 
@@ -51,6 +53,9 @@ public class TripLog {
 
     public float getTripCost() { return tripCost; }
     public void setTripCost(float tripCost) { this.tripCost = tripCost; }
+
+    public int getTotalDistance() { return totalDistance; }
+    public void setTotalDistance(int totalDistance) { this.totalDistance = totalDistance; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

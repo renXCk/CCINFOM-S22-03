@@ -12,7 +12,7 @@ import java.util.List;
 public class TripLogDAO {
 
     public boolean createTripLog(TripLog tripLog) {
-        String query = "INSERT INTO TripLog (client_id, vehicle_id, driver_id, pick_up_loc, drop_off_loc, date_time_start, date_time_completed, trip_cost, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO TripLog (client_id, vehicle_id, driver_id, pick_up_loc, drop_off_loc, date_time_start, date_time_completed, trip_cost, total_distance, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)){
@@ -25,7 +25,8 @@ public class TripLogDAO {
             statement.setString(6, tripLog.getStartTime());
             statement.setString(7, tripLog.getCompleteTime());
             statement.setFloat(8, tripLog.getTripCost());
-            statement.setString(9, tripLog.getStatus());
+            statement.setInt(9, tripLog.getTotalDistance());
+            statement.setString(10, tripLog.getStatus());
 
             int rowsInserted = statement.executeUpdate();
             //return true if we inserted a row
@@ -57,6 +58,7 @@ public class TripLogDAO {
                 tripLog.setStartTime(resultSet.getString("date_time_start"));
                 tripLog.setCompleteTime(resultSet.getString("date_time_completed"));
                 tripLog.setTripCost(resultSet.getFloat("trip_cost"));
+                tripLog.setTotalDistance(resultSet.getInt("total_distance"));
                 tripLog.setStatus(resultSet.getString("status"));
 
                 tripLogList.add(tripLog);
@@ -90,6 +92,7 @@ public class TripLogDAO {
                 tripLog.setStartTime(resultSet.getString("date_time_start"));
                 tripLog.setCompleteTime(resultSet.getString("date_time_completed"));
                 tripLog.setTripCost(resultSet.getFloat("trip_cost"));
+                tripLog.setTotalDistance(resultSet.getInt("total_distance"));
                 tripLog.setStatus(resultSet.getString("status"));
 
             }
@@ -102,7 +105,7 @@ public class TripLogDAO {
     }
 
     public boolean updateTripLog(TripLog tripLog) {
-        String query = "UPDATE TripLog SET client_id=?, vehicle_id=?, driver_id=?, pick_up_loc=?, drop_off_loc=?, date_time_start=?, date_time_completed=?, trip_cost=?, status=? WHERE trip_id=?";
+        String query = "UPDATE TripLog SET client_id=?, vehicle_id=?, driver_id=?, pick_up_loc=?, drop_off_loc=?, date_time_start=?, date_time_completed=?, trip_cost=?, total_distance=?, status=? WHERE trip_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -116,7 +119,8 @@ public class TripLogDAO {
             statement.setString(7, tripLog.getCompleteTime());
             statement.setFloat(8, tripLog.getTripCost());
             statement.setString(9, tripLog.getStatus());
-            statement.setInt(10, tripLog.getTripId());
+            statement.setInt(10, tripLog.getTotalDistance());
+            statement.setInt(11, tripLog.getTripId());
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;
