@@ -152,10 +152,10 @@ function AddEditTripLogModal({ newTripLog, setNewTripLog, clients, drivers, vehi
                 <CInputGroup>
                     <CInputGroupText>🛣️</CInputGroupText>
                     <CFormInput
-                        name="tripDistance"
+                        name="totalDistance"
                         type="number"
                         step="1"
-                        value={newTripLog.tripDistance || ""}
+                        value={newTripLog.totalDistance || ""}
                         onChange={handleNumericChange}
                         placeholder="0"
                     />
@@ -215,7 +215,7 @@ const TripLogs = () => {
         startTime: "",
         completeTime: null,
         tripCost: 0,
-        tripDistance: 0,
+        totalDistance: 0,
         status: "Pending",
     };
 
@@ -313,7 +313,7 @@ const TripLogs = () => {
                 driverId: parseInt(newTripLog.driverId) || null,
                 vehicleId: parseInt(newTripLog.vehicleId) || null,
                 tripCost: parseFloat(newTripLog.tripCost) || 0,
-                tripDistance: parseFloat(newTripLog.tripDistance) || 0,
+                totalDistance: parseFloat(newTripLog.totalDistance) || 0,
             };
             
             if (newTripLog.tripId) {
@@ -398,7 +398,7 @@ const TripLogs = () => {
             let bVal = b[sortConfig.key];
             const direction = sortConfig.direction === "asc" ? 1 : -1;
 
-            if (["tripId", "clientId", "driverId", "vehicleId", "tripCost", "tripDistance"].includes(sortConfig.key)) {
+            if (["tripId", "clientId", "driverId", "vehicleId", "tripCost", "totalDistance"].includes(sortConfig.key)) {
                 // Numeric comparison
                 const numA = Number(aVal) || 0;
                 const numB = Number(bVal) || 0;
@@ -483,7 +483,7 @@ const TripLogs = () => {
                                 <option value="tripId">ID</option>
                                 <option value="startTime">Start Time</option>
                                 <option value="tripCost">Cost</option>
-                                <option value="tripDistance">Distance</option>
+                                <option value="totalDistance">Distance</option>
                                 <option value="status">Status</option>
                             </CFormSelect>
                             <CButton
@@ -536,7 +536,7 @@ const TripLogs = () => {
                                         <CTableDataCell>{t.startTime}</CTableDataCell>
                                         <CTableDataCell>{t.completeTime || 'N/A'}</CTableDataCell>
                                         <CTableDataCell>₱{t.tripCost?.toFixed(2) || '0.00'}</CTableDataCell>
-                                        <CTableDataCell>{t.tripDistance?.toFixed(2) || '0'} km</CTableDataCell>
+                                        <CTableDataCell>{t.totalDistance?.toFixed(0) || '0'} km</CTableDataCell>
                                         <CTableDataCell>
                                             <CBadge color={getStatusColor(t.status)}>
                                                 {t.status}
