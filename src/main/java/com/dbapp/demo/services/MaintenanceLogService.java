@@ -8,7 +8,6 @@ import com.dbapp.demo.model.Vehicle;
 import com.dbapp.demo.model.Part;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -67,9 +66,19 @@ public class MaintenanceLogService {
                     continue;
                 }
 
+                if (quantityNeeded <= 0) {
+                    System.err.println("Quantity used must be greater than 0 for part ID " + partId);
+                    return false;
+                }
+
                 Part part = partService.getPartById(partId);
                 if (part == null) {
                     System.err.println("Part with ID " + partId + " does not exist");
+                    return false;
+                }
+
+                if (partService.isPartInactive(partId)) {
+                    System.err.println("Part " + partId + " (" + part.getPartName() + ") is inactive and cannot be assigned to maintenance");
                     return false;
                 }
 
@@ -181,6 +190,12 @@ public class MaintenanceLogService {
             return false;
         }
 
+        if (!isCompletionDateValid(maintenance.getDateTimeStart(), dateTimeCompleted)) {
+            System.err.println("Completion date must be equal to or later than the start date (" +
+                    maintenance.getDateTimeStart() + ")");
+            return false;
+        }
+
         maintenance.setDateTimeCompleted(dateTimeCompleted);
         maintenance.setStatus("Completed");
         dao.updateMaintenanceLog(maintenance);
@@ -255,36 +270,18 @@ public class MaintenanceLogService {
             return false;
         }
     }
-//
-//    @Transactional
-//    public boolean addPartToMaintenance(int maintenanceId, MaintenancePart part) {
-//        MaintenanceLog log = dao.getMaintenanceLogById(maintenanceId);
-//
-//        if (log == null) {
-//            System.err.println("Maintenance log not found");
-//            return false;
-//        }
-//
-//        if (!"Ongoing".equals(log.getStatus())) {
-//            System.err.println("Can only add parts to ongoing maintenance");
-//            return false;
-//        }
-//
-//        // Validate part availability
-//        Part p = partService.getPartById(part.getPartId());
-//        if (p == null || p.getStockQty() < part.getQuantityUsed()) {
-//            System.err.println("Insufficient stock");
-//            return false;
-//        }
-//
-//        part.setMaintenanceId(maintenanceId);
-//        part.setCostPerPart(p.getCost());
-//
-//        boolean added = maintenancePartDAO.createMaintenancePart(part);
-//        if (added) {
-//            partService.decreaseStock(part.getPartId(), part.getQuantityUsed());
-//        }
-//
-//        return added;
-//    }
+
+    private boolean isCompletionDateValid(String startDateStr, String completionDateStr) {
+        if (startDateStr == null || completionDateStr == null) {
+            return false;
+        }
+        try {
+            LocalDateTime startDate = LocalDateTime.parse(startDateStr, formatter);
+            LocalDateTime completionDate = LocalDateTime.parse(completionDateStr, formatter);
+            return !completionDate.isBefore(startDate);
+        } catch (Exception e) {
+            System.err.println("Invalid date format. Expected: yyyy-MM-dd HH:mm:ss");
+            return false;
+        }
+    }
 }

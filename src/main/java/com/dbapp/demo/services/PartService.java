@@ -9,22 +9,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class PartService {
-
     private final PartDAO dao;
 
-    public PartService(PartDAO dao) {
-        this.dao = dao;
+    public PartService(PartDAO partDAO) {
+        this.dao = partDAO;
     }
 
-    private boolean validatePart(Part part) {
-        if (part == null) {
-            System.err.println("Part object cannot be null");
-            return false;
-        }
+    public boolean addPart(Part part) {
         if (part.getPartName() == null || part.getPartName().trim().isEmpty()) {
             System.err.println("Part name cannot be empty");
             return false;
         }
+
         if (part.getSupplier() == null || part.getSupplier().trim().isEmpty()) {
             System.err.println("Supplier cannot be empty");
             return false;
@@ -39,11 +35,18 @@ public class PartService {
             System.err.println("Cost cannot be negative");
             return false;
         }
-        return true;
-    }
 
-    public boolean addPart(Part part) {
-        if (!validatePart(part)) return false;
+        List<Part> existingParts = dao.readPart();
+        boolean duplicateExists = existingParts.stream()
+                .anyMatch(p -> p.getPartName().equalsIgnoreCase(part.getPartName()) &&
+                        p.getSupplier().equalsIgnoreCase(part.getSupplier()));
+
+        if (duplicateExists) {
+            System.err.println("A part with name '" + part.getPartName() +
+                    "' from supplier '" + part.getSupplier() + "' already exists");
+            return false;
+        }
+
         return dao.createPart(part);
     }
 
@@ -52,19 +55,22 @@ public class PartService {
     }
 
     public List<Part> getActiveParts() {
-        return dao.readPart().stream()
+        List<Part> allParts = dao.readPart();
+        return allParts.stream()
                 .filter(part -> part.getStockQty() > 0 || part.isPendingDelivery())
                 .collect(Collectors.toList());
     }
 
     public List<Part> getInactiveParts() {
-        return dao.readPart().stream()
+        List<Part> allParts = dao.readPart();
+        return allParts.stream()
                 .filter(part -> part.getStockQty() == 0 && !part.isPendingDelivery())
                 .collect(Collectors.toList());
     }
 
     public List<Part> getOutOfStockParts() {
-        return dao.readPart().stream()
+        List<Part> allParts = dao.readPart();
+        return allParts.stream()
                 .filter(part -> part.getStockQty() == 0)
                 .collect(Collectors.toList());
     }
@@ -75,19 +81,52 @@ public class PartService {
 
     public boolean updatePart(Part part) {
         Part existingPart = dao.getPartById(part.getPartId());
-
         if (existingPart == null) {
             System.err.println("Part does not exist");
             return false;
         }
 
-        if (!validatePart(part)) return false;
+        if (part.getPartName() == null || part.getPartName().trim().isEmpty()) {
+            System.err.println("Part name cannot be empty");
+            return false;
+        }
 
-        if (existingPart.isPendingDelivery()
-                && part.getStockQty() != existingPart.getStockQty()
-                && part.isPendingDelivery()) {
+        if (part.getSupplier() == null || part.getSupplier().trim().isEmpty()) {
+            System.err.println("Supplier cannot be empty");
+            return false;
+        }
+
+        if (part.getStockQty() < 0) {
+            System.err.println("Stock quantity cannot be negative");
+            return false;
+        }
+
+        if (part.getCost() < 0) {
+            System.err.println("Cost cannot be negative");
+            return false;
+        }
+
+        List<Part> existingParts = dao.readPart();
+        boolean duplicateExists = existingParts.stream()
+                .anyMatch(p -> p.getPartId() != part.getPartId() &&
+                        p.getPartName().equalsIgnoreCase(part.getPartName()) &&
+                        p.getSupplier().equalsIgnoreCase(part.getSupplier()));
+
+        if (duplicateExists) {
+            System.err.println("Another part with name '" + part.getPartName() +
+                    "' from supplier '" + part.getSupplier() + "' already exists");
+            return false;
+        }
+
+        if (existingPart.isPendingDelivery() &&
+                part.getStockQty() != existingPart.getStockQty() &&
+                part.isPendingDelivery()) {
             System.err.println("Cannot update stock quantity while delivery is pending. Complete delivery first.");
             return false;
+        }
+
+        if (isPartInactive(part.getPartId())) {
+            System.out.println("Warning: Editing an inactive part. This will not affect historical maintenance records.");
         }
 
         return dao.updatePart(part);
@@ -95,14 +134,13 @@ public class PartService {
 
     public boolean requestShipment(int partId) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
         }
 
         if (part.isPendingDelivery()) {
-            System.err.println("Part already has a pending delivery");
+            System.err.println("Part already has a pending delivery. Complete the current delivery before requesting another.");
             return false;
         }
 
@@ -112,7 +150,6 @@ public class PartService {
 
     public boolean completeDelivery(int partId, int quantityReceived) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
@@ -136,7 +173,6 @@ public class PartService {
 
     public boolean decreaseStock(int partId, int quantity) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
@@ -162,7 +198,6 @@ public class PartService {
 
     public boolean increaseStock(int partId, int quantity) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
@@ -179,28 +214,37 @@ public class PartService {
 
     public boolean isPartAvailable(int partId) {
         Part part = dao.getPartById(partId);
-        return part != null && part.getStockQty() > 0 && !part.isPendingDelivery();
+        if (part == null) {
+            return false;
+        }
+        return part.getStockQty() > 0 && !part.isPendingDelivery();
     }
 
     public boolean hasSufficientStock(int partId, int requiredQuantity) {
         Part part = dao.getPartById(partId);
-        return part != null && part.getStockQty() >= requiredQuantity;
+        if (part == null) {
+            return false;
+        }
+        return part.getStockQty() >= requiredQuantity;
     }
 
     public List<Part> getPartsBySupplier(String supplier) {
-        return dao.readPart().stream()
+        List<Part> allParts = dao.readPart();
+        return allParts.stream()
                 .filter(part -> part.getSupplier().equalsIgnoreCase(supplier))
                 .collect(Collectors.toList());
     }
 
     public boolean isPartInactive(int partId) {
         Part part = dao.getPartById(partId);
-        return part != null && part.getStockQty() == 0 && !part.isPendingDelivery();
+        if (part == null) {
+            return false;
+        }
+        return part.getStockQty() == 0 && !part.isPendingDelivery();
     }
 
     public boolean deletePart(int partId) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
@@ -214,7 +258,6 @@ public class PartService {
 
     public boolean reactivatePart(int partId) {
         Part part = dao.getPartById(partId);
-
         if (part == null) {
             System.err.println("Part does not exist");
             return false;
@@ -227,19 +270,4 @@ public class PartService {
 
         return requestShipment(partId);
     }
-
-//    public List<Vehicle> getVehiclesByPartId(int partId) {
-//        List<Integer> vehicleIds = maintenancePartDAO.getVehicleIdsByPartId(partId);
-//        List<Vehicle> vehicles = new ArrayList<>();
-//
-//        for (Integer vehicleId : vehicleIds) {
-//            Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
-//            if (vehicle != null) {
-//                vehicles.add(vehicle);
-//            }
-//        }
-//
-//        return vehicles;
-//    }
-
 }
