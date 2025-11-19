@@ -27,7 +27,15 @@ import {
   CInputGroupText
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus, cilListRich, cilSortAlphaDown, cilCarAlt } from '@coreui/icons'
+import { 
+  cilPencil, 
+  cilTrash, 
+  cilPlus, 
+  cilListRich, 
+  cilSortAlphaDown, 
+  cilCarAlt,
+  cilFilter 
+} from '@coreui/icons'
 
 /* ===========================
    DRIVER VEHICLE VIEW (CHILD)
@@ -37,7 +45,6 @@ function DriverVehicleHistory({ drivers }) {
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch vehicles when a driver is selected
     useEffect(() => {
         if (!selectedDriverId) {
             setVehicles([]);
@@ -47,7 +54,6 @@ function DriverVehicleHistory({ drivers }) {
         const fetchDriverVehicles = async () => {
             setLoading(true);
             try {
-                // Matches DriverController.java: getVehiclesByDriver(int id)
                 const response = await fetch(`http://localhost:8080/api/drivers/vehicledriver?id=${selectedDriverId}`);
                 if (response.ok) {
                     const data = await response.json();
@@ -131,14 +137,20 @@ const Drivers = () => {
   
   // Modals
   const [modalVisible, setModalVisible] = useState(false)
-  const [historyVisible, setHistoryVisible] = useState(false) // "View Other Records" modal
+  const [historyVisible, setHistoryVisible] = useState(false)
   
   const [editMode, setEditMode] = useState(false)
   const [currentId, setCurrentId] = useState(null)
 
-  // Sorting State
+  // NEW: Track the original trip count to enforce increment-only logic
+  const [originalTrips, setOriginalTrips] = useState(0)
+
+  // Filter State
+  const [statusFilter, setStatusFilter] = useState('All')
+
+  // Sorting State - Default by 'status'
   const [sortConfig, setSortConfig] = useState({
-    key: "driverId",
+    key: "status",
     direction: "asc"
   })
 
@@ -173,10 +185,16 @@ const Drivers = () => {
     fetchDrivers()
   }, [])
 
-  // --- 2. SORTING LOGIC (useMemo) ---
+  // --- 2. FILTERING & SORTING LOGIC ---
   const processedDrivers = useMemo(() => {
     let result = [...drivers];
 
+    // 1. Filter by Status
+    if (statusFilter !== 'All') {
+        result = result.filter(d => d.status.toLowerCase() === statusFilter.toLowerCase());
+    }
+
+    // 2. Sort
     result.sort((a, b) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
@@ -193,7 +211,7 @@ const Drivers = () => {
     });
 
     return result;
-  }, [drivers, sortConfig]);
+  }, [drivers, sortConfig, statusFilter]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -210,12 +228,24 @@ const Drivers = () => {
 
   // --- 3. FORM HANDLERS ---
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    const { name, value } = e.target;
+
+    // ENFORCEMENT: Only allow Increment for Completed Trips in Edit Mode
+    if (editMode && name === 'completedTrips') {
+        const numValue = parseInt(value, 10);
+        
+        // If user tries to delete everything (NaN) or go below original, block it
+        if (isNaN(numValue) || numValue < originalTrips) {
+            return; // Do nothing, effectively rejecting the input
+        }
+    }
+
+    setFormData({ ...formData, [name]: value });
   }
 
   const openAddModal = () => {
     setEditMode(false)
+    setOriginalTrips(0) // Reset
     setFormData(initialFormState)
     setModalVisible(true)
   }
@@ -223,6 +253,8 @@ const Drivers = () => {
   const openEditModal = (driver) => {
     setEditMode(true)
     setCurrentId(driver.driverId)
+    setOriginalTrips(driver.completedTrips) // Store the original db value
+    
     setFormData({
       firstName: driver.firstName,
       lastName: driver.lastName,
@@ -300,6 +332,24 @@ const Drivers = () => {
 
       <CCardBody>
         <CRow className="mb-4">
+            {/* FILTER BY STATUS */}
+            <CCol md={4}>
+                <CFormLabel className="small text-muted">Filter by Status</CFormLabel>
+                <CInputGroup>
+                    <CInputGroupText><CIcon icon={cilFilter} /></CInputGroupText>
+                    <CFormSelect 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                    </CFormSelect>
+                </CInputGroup>
+            </CCol>
+
+            {/* SORT OPTIONS */}
             <CCol md={4}>
                 <CFormLabel className="small text-muted">Sort Options</CFormLabel>
                 <CInputGroup>
@@ -386,17 +436,37 @@ const Drivers = () => {
             <CRow className="mb-3">
               <CCol>
                 <CFormLabel>First Name</CFormLabel>
-                <CFormInput name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+                <CFormInput 
+                  name="firstName" 
+                  value={formData.firstName} 
+                  onChange={handleInputChange} 
+                  required 
+                  disabled={editMode} 
+                />
               </CCol>
               <CCol>
                 <CFormLabel>Last Name</CFormLabel>
-                <CFormInput name="lastName" value={formData.lastName} onChange={handleInputChange} required />
+                <CFormInput 
+                  name="lastName" 
+                  value={formData.lastName} 
+                  onChange={handleInputChange} 
+                  required 
+                  disabled={editMode} 
+                />
               </CCol>
             </CRow>
             <div className="mb-3">
               <CFormLabel>License Number</CFormLabel>
-              <CFormInput name="licenseNum" value={formData.licenseNum} onChange={handleInputChange} required />
+              <CFormInput 
+                name="licenseNum" 
+                value={formData.licenseNum} 
+                onChange={handleInputChange} 
+                required 
+                disabled={editMode} 
+              />
             </div>
+            
+            {/* EDITABLE FIELDS */}
             <div className="mb-3">
               <CFormLabel>Contact Number</CFormLabel>
               <CFormInput name="contactNum" value={formData.contactNum} onChange={handleInputChange} />
@@ -415,7 +485,18 @@ const Drivers = () => {
             </div>
             <div className="mb-3">
               <CFormLabel>Completed Trips</CFormLabel>
-              <CFormInput type="number" name="completedTrips" value={formData.completedTrips} onChange={handleInputChange} disabled={editMode} />
+              <CFormInput 
+                type="number" 
+                name="completedTrips" 
+                value={formData.completedTrips} 
+                onChange={handleInputChange} 
+                min={editMode ? originalTrips : 0} // HTML5 constraint
+              />
+              {editMode && (
+                <small className="text-muted">
+                  * You can only increase completed trips.
+                </small>
+              )}
             </div>
           </CForm>
         </CModalBody>

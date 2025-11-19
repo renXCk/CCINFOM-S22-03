@@ -65,21 +65,9 @@ public class IncidentLogService {
             return false;
         }
 
-        String vehicleStatus = vehicle.getStatus();
-        if (!vehicleStatus.equals("on_trip")) {
-            System.err.println("Vehicle status must be 'on_trip'. Current status: " + vehicleStatus);
-            return false;
-        }
-
         Driver driver = driverDAO.getDriverById(i.getDriverId());
         if (driver == null) {
             System.err.println("Vehicle does not exist");
-            return false;
-        }
-
-        String driverStatus = driver.getStatus();
-        if (!driverStatus.equals("active")) {
-            System.err.println("Driver status must be 'active'. Current status: " + vehicleStatus);
             return false;
         }
 
