@@ -41,7 +41,7 @@ const formatDate = (date) => date.toISOString().split('T')[0]
 const defaultStartDate = new Date()
 defaultStartDate.setDate(defaultStartDate.getDate() - 30)
 
-const API_BASE_URL = 'http://localhost:3000/reports'
+const API_BASE_URL = 'http://localhost:8080/api/reports';
 
 const MaintenanceReport = () => {
   const [reportData, setReportData] = useState([])
