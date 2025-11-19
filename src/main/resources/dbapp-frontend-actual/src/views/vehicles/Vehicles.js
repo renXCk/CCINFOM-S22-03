@@ -30,21 +30,19 @@ import CIcon from '@coreui/icons-react';
 import { cilPencil, cilTrash, cilPlus, cilFilter, cilSortAlphaDown, cilListRich, cilCalendar } from '@coreui/icons';
 import axios from "axios";
 
-/* ===========================
-   HELPER: PLATE VALIDATION
-   =========================== */
 const validatePlate = (plate, type) => {
     if (!plate) return false;
     const cleanPlate = plate.trim().toUpperCase();
 
-    // Regex Rules:
-    // Motorcycle: 2 letters + optional space + 5 digits OR 3 letters + optional space + 3 digits
-    // Others (Sedan/Van/Truck): 3 letters + optional space + 3 or 4 digits
+    // Regex Rules (Strict Space Required):
+    // Motorcycle: 2 letters + SPACE + 5 digits OR 3 letters + SPACE + 3 digits
+    // Others: 3 letters + SPACE + 3 or 4 digits
 
     if (type === 'motorcycle') {
-        return /^([A-Z]{2}\s?\d{5}|[A-Z]{3}\s?\d{3})$/.test(cleanPlate);
+        // \s means exactly one whitespace is required
+        return /^([A-Z]{2}\s\d{5}|[A-Z]{3}\s\d{3})$/.test(cleanPlate);
     } else {
-        return /^[A-Z]{3}\s?\d{3,4}$/.test(cleanPlate);
+        return /^[A-Z]{3}\s\d{3,4}$/.test(cleanPlate);
     }
 };
 
