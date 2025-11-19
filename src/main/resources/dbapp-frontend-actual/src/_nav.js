@@ -17,6 +17,7 @@ import {
   cilTruck,
   cilMoodGood,
   cilWarning,
+  cilFile
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -73,6 +74,22 @@ const _nav = [
       name: 'Fuel Logs',
       to: '/fuelLogs',
       icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavGroup,
+    name: 'Reports',
+    to: '/reports',
+    icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
+
+    // Child Items inside the group
+    items: [
+      {
+        component: CNavItem,
+        name: 'Mileage Report',
+        to: '/reports/mileage',
+        icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+      },
+    ],
   },
 
   {

@@ -9,23 +9,43 @@
 
 USE deliveryshipment;
 
--- 1. Temporarily disable foreign key checks
--- SET FOREIGN_KEY_CHECKS = 0;
+-- Temporarily disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
 
--- -- 2. Truncate all tables (order does not matter here due to step 1)
+-- 2. Truncate all tables (order does not matter here due to step 1)
 
--- TRUNCATE TABLE Vehicle;
--- TRUNCATE TABLE Client;
--- TRUNCATE TABLE Parts;
--- TRUNCATE TABLE Driver;
--- TRUNCATE TABLE FuelLog;
--- TRUNCATE TABLE TripLog;
--- TRUNCATE TABLE MaintenanceLog;
--- TRUNCATE TABLE MaintenancePart;
--- TRUNCATE TABLE IncidentLog;
+TRUNCATE TABLE Vehicle;
+TRUNCATE TABLE Client;
+TRUNCATE TABLE Parts;
+TRUNCATE TABLE Driver;
+TRUNCATE TABLE FuelLog;
+TRUNCATE TABLE TripLog;
+TRUNCATE TABLE MaintenanceLog;
+TRUNCATE TABLE MaintenancePart;
+TRUNCATE TABLE IncidentLog;
 
--- -- 3. Re-enable foreign key checks
--- SET FOREIGN_KEY_CHECKS = 1;
+-- 3. Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- =====================================================
+-- 						DROP TABLES (Removing Structure & Data)
+-- =====================================================
+
+-- -- Drop View first
+-- DROP VIEW IF EXISTS VehicleView;
+
+-- -- Drop all tables
+-- DROP TABLE IF EXISTS MaintenancePart;
+-- DROP TABLE IF EXISTS TripLog;
+-- DROP TABLE IF EXISTS FuelLog;
+-- DROP TABLE IF EXISTS IncidentLog;
+-- DROP TABLE IF EXISTS MaintenanceLog;
+-- DROP TABLE IF EXISTS Vehicle;
+-- DROP TABLE IF EXISTS Driver;
+-- DROP TABLE IF EXISTS Client;
+-- DROP TABLE IF EXISTS Parts;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
