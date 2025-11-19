@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   CCard,
   CCardBody,
@@ -21,32 +21,142 @@ import {
   CFormLabel,
   CFormInput,
   CFormSelect,
-  CBadge
+  CBadge,
+  CSpinner,
+  CInputGroup,
+  CInputGroupText
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
+import { cilPencil, cilTrash, cilPlus, cilListRich, cilSortAlphaDown, cilCarAlt } from '@coreui/icons'
 
+/* ===========================
+   DRIVER VEHICLE VIEW (CHILD)
+   =========================== */
+function DriverVehicleHistory({ drivers }) {
+    const [selectedDriverId, setSelectedDriverId] = useState("");
+    const [vehicles, setVehicles] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // Fetch vehicles when a driver is selected
+    useEffect(() => {
+        if (!selectedDriverId) {
+            setVehicles([]);
+            return;
+        }
+
+        const fetchDriverVehicles = async () => {
+            setLoading(true);
+            try {
+                // Matches DriverController.java: getVehiclesByDriver(int id)
+                const response = await fetch(`http://localhost:8080/api/drivers/vehicledriver?id=${selectedDriverId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setVehicles(data);
+                }
+            } catch (error) {
+                console.error("Error fetching driver vehicles:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDriverVehicles();
+    }, [selectedDriverId]);
+
+    return (
+        <div>
+            <div className="mb-4 p-3 bg-secondary rounded-3 shadow-sm text-white">
+                <CFormLabel className="fw-semibold mb-2">Select Driver to View History</CFormLabel>
+                <CInputGroup>
+                    <CInputGroupText><CIcon icon={cilListRich} /></CInputGroupText>
+                    <CFormSelect 
+                        value={selectedDriverId} 
+                        onChange={(e) => setSelectedDriverId(e.target.value)}
+                    >
+                        <option value="">-- Select a Driver --</option>
+                        {drivers.map(d => (
+                            <option key={d.driverId} value={d.driverId}>
+                                {d.firstName} {d.lastName} (ID: {d.driverId})
+                            </option>
+                        ))}
+                    </CFormSelect>
+                </CInputGroup>
+            </div>
+
+            {loading ? (
+                <div className="text-center p-4">
+                    <CSpinner />
+                    <p>Loading vehicle history...</p>
+                </div>
+            ) : (
+                <CTable striped hover responsive bordered className="align-middle small">
+                    <CTableHead color="dark">
+                        <CTableRow>
+                            <CTableHeaderCell>Vehicle ID</CTableHeaderCell>
+                            <CTableHeaderCell>Plate Number</CTableHeaderCell>
+                            <CTableHeaderCell>Model</CTableHeaderCell>
+                            <CTableHeaderCell>Type</CTableHeaderCell>
+                        </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                        {vehicles.length === 0 ? (
+                            <CTableRow>
+                                <CTableDataCell colSpan="4" className="text-center">
+                                    {selectedDriverId ? "No vehicles found for this driver." : "Please select a driver."}
+                                </CTableDataCell>
+                            </CTableRow>
+                        ) : (
+                            vehicles.map((v, index) => (
+                                <CTableRow key={index}>
+                                    <CTableDataCell>{v.vehicleId}</CTableDataCell>
+                                    <CTableDataCell className="fw-semibold">{v.plateNumber}</CTableDataCell>
+                                    <CTableDataCell>{v.model}</CTableDataCell>
+                                    <CTableDataCell className="text-capitalize">{v.vehicleType}</CTableDataCell>
+                                </CTableRow>
+                            ))
+                        )}
+                    </CTableBody>
+                </CTable>
+            )}
+        </div>
+    );
+}
+
+/* ===========================
+   MAIN COMPONENT
+   =========================== */
 const Drivers = () => {
   const [drivers, setDrivers] = useState([])
+  const [loading, setLoading] = useState(true)
+  
+  // Modals
   const [modalVisible, setModalVisible] = useState(false)
+  const [historyVisible, setHistoryVisible] = useState(false) // "View Other Records" modal
+  
   const [editMode, setEditMode] = useState(false)
   const [currentId, setCurrentId] = useState(null)
 
-  // Default Form State (Matches your SQL Schema)
+  // Sorting State
+  const [sortConfig, setSortConfig] = useState({
+    key: "driverId",
+    direction: "asc"
+  })
+
+  // Form State
   const initialFormState = {
     firstName: '',
     lastName: '',
     licenseNum: '',
     contactNum: '',
     email: '',
-    status: 'active',     // Default valid enum
-    completedTrips: 0     // Default 0
+    status: 'active',
+    completedTrips: 0
   }
-
   const [formData, setFormData] = useState(initialFormState)
 
   // --- 1. FETCH DATA ---
   const fetchDrivers = async () => {
+    setLoading(true)
     try {
       const response = await fetch('http://localhost:8080/api/drivers/all')
       if (!response.ok) throw new Error('Network response was not ok')
@@ -54,6 +164,8 @@ const Drivers = () => {
       setDrivers(data)
     } catch (error) {
       console.error('Error fetching drivers:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -61,20 +173,53 @@ const Drivers = () => {
     fetchDrivers()
   }, [])
 
-  // --- 2. HANDLE INPUT CHANGES ---
+  // --- 2. SORTING LOGIC (useMemo) ---
+  const processedDrivers = useMemo(() => {
+    let result = [...drivers];
+
+    result.sort((a, b) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      if (typeof aVal === 'number') {
+        return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      aVal = aVal ? aVal.toString().toLowerCase() : "";
+      bVal = bVal ? bVal.toString().toLowerCase() : "";
+
+      return sortConfig.direction === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+
+    return result;
+  }, [drivers, sortConfig]);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+        direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return '↕';
+    return sortConfig.direction === 'asc' ? '⬆' : '⬇';
+  };
+
+  // --- 3. FORM HANDLERS ---
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
   }
 
-  // --- 3. OPEN ADD MODAL ---
   const openAddModal = () => {
     setEditMode(false)
-    setFormData(initialFormState) // Resets to blank/defaults
+    setFormData(initialFormState)
     setModalVisible(true)
   }
 
-  // --- 4. OPEN EDIT MODAL ---
   const openEditModal = (driver) => {
     setEditMode(true)
     setCurrentId(driver.driverId)
@@ -90,17 +235,12 @@ const Drivers = () => {
     setModalVisible(true)
   }
 
-  // --- 5. SUBMIT FORM ---
   const handleSubmit = async () => {
     const url = editMode
       ? 'http://localhost:8080/api/drivers/update'
       : 'http://localhost:8080/api/drivers/add'
-
     const method = editMode ? 'PUT' : 'POST'
-
-    const bodyData = editMode
-      ? { ...formData, driverId: currentId }
-      : formData
+    const bodyData = editMode ? { ...formData, driverId: currentId } : formData
 
     try {
       const response = await fetch(url, {
@@ -120,24 +260,18 @@ const Drivers = () => {
     }
   }
 
-  // --- 6. DELETE DRIVER ---
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this driver?')) return
-
     try {
-      const response = await fetch(`http://localhost:8080/api/drivers/delete/${id}`, {
-        method: 'DELETE'
-      })
-      if (response.ok) {
-        fetchDrivers()
-      }
+      const response = await fetch(`http://localhost:8080/api/drivers/delete/${id}`, { method: 'DELETE' })
+      if (response.ok) fetchDrivers()
     } catch (error) {
       console.error('Error deleting driver:', error)
     }
   }
 
   const getStatusBadge = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'active': return 'success'
       case 'inactive': return 'secondary'
       case 'suspended': return 'danger'
@@ -146,46 +280,85 @@ const Drivers = () => {
   }
 
   return (
-    <CRow>
-      <CCol xs={12}>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Driver Management</strong>
-            <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
-              <CIcon icon={cilPlus} className="me-2" />
-              Add Driver
-            </CButton>
-          </CCardHeader>
+    <CCard className="mb-4">
+      <CCardHeader>
+        <strong>Driver Management</strong>
+        <CButton color="primary" className="float-end btn-sm" onClick={openAddModal}>
+          <CIcon icon={cilPlus} className="me-2" />
+          Add Driver
+        </CButton>
+        <CButton 
+            color="secondary" 
+            variant="outline" 
+            className="float-end btn-sm me-2"
+            onClick={() => setHistoryVisible(true)}
+        >
+            <CIcon icon={cilListRich} className="me-2" />
+            View With Other Records
+        </CButton>
+      </CCardHeader>
 
-          <CCardBody>
-            <CTable striped hover responsive>
+      <CCardBody>
+        <CRow className="mb-4">
+            <CCol md={4}>
+                <CFormLabel className="small text-muted">Sort Options</CFormLabel>
+                <CInputGroup>
+                    <CInputGroupText><CIcon icon={cilSortAlphaDown} /></CInputGroupText>
+                    <CFormSelect 
+                        value={sortConfig.key} 
+                        onChange={(e) => setSortConfig({ ...sortConfig, key: e.target.value })}
+                    >
+                        <option value="driverId">ID</option>
+                        <option value="status">Status</option>
+                        <option value="completedTrips">Completed Trips</option>
+                    </CFormSelect>
+                    <CButton 
+                        color="secondary" 
+                        variant="outline"
+                        onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
+                    >
+                        {sortConfig.direction === 'asc' ? '⬆' : '⬇'}
+                    </CButton>
+                </CInputGroup>
+            </CCol>
+        </CRow>
+
+        {loading ? (
+            <div className="text-center">
+                <CSpinner />
+                <p>Loading drivers...</p>
+            </div>
+        ) : (
+            <CTable striped hover responsive bordered className="align-middle">
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell>ID</CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('driverId')} style={{ cursor: 'pointer' }}>
+                      ID {getSortIcon('driverId')}
+                  </CTableHeaderCell>
                   <CTableHeaderCell>Name</CTableHeaderCell>
                   <CTableHeaderCell>License No.</CTableHeaderCell>
                   <CTableHeaderCell>Contact Info</CTableHeaderCell>
-                  <CTableHeaderCell>Status</CTableHeaderCell>
-                  <CTableHeaderCell>Trips</CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
+                      Status {getSortIcon('status')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('completedTrips')} style={{ cursor: 'pointer' }}>
+                      Trips {getSortIcon('completedTrips')}
+                  </CTableHeaderCell>
                   <CTableHeaderCell>Actions</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {drivers.map((item) => (
+                {processedDrivers.map((item) => (
                   <CTableRow key={item.driverId}>
                     <CTableDataCell>{item.driverId}</CTableDataCell>
-                    <CTableDataCell>
-                      {item.firstName} {item.lastName}
-                    </CTableDataCell>
+                    <CTableDataCell>{item.firstName} {item.lastName}</CTableDataCell>
                     <CTableDataCell>{item.licenseNum}</CTableDataCell>
                     <CTableDataCell>
                       <div><small>{item.contactNum}</small></div>
                       <div className="text-muted"><small>{item.email}</small></div>
                     </CTableDataCell>
                     <CTableDataCell>
-                      <CBadge color={getStatusBadge(item.status)}>
-                        {item.status}
-                      </CBadge>
+                      <CBadge color={getStatusBadge(item.status)}>{item.status}</CBadge>
                     </CTableDataCell>
                     <CTableDataCell>{item.completedTrips}</CTableDataCell>
                     <CTableDataCell>
@@ -200,18 +373,16 @@ const Drivers = () => {
                 ))}
               </CTableBody>
             </CTable>
-          </CCardBody>
-        </CCard>
-      </CCol>
+        )}
+      </CCardBody>
 
-      {/* --- MODAL --- */}
+      {/* --- CRUD MODAL --- */}
       <CModal visible={modalVisible} onClose={() => setModalVisible(false)}>
         <CModalHeader>
           <CModalTitle>{editMode ? 'Edit Driver' : 'Add New Driver'}</CModalTitle>
         </CModalHeader>
         <CModalBody>
           <CForm>
-            {/* Name Fields */}
             <CRow className="mb-3">
               <CCol>
                 <CFormLabel>First Name</CFormLabel>
@@ -222,25 +393,18 @@ const Drivers = () => {
                 <CFormInput name="lastName" value={formData.lastName} onChange={handleInputChange} required />
               </CCol>
             </CRow>
-
-            {/* License Number */}
             <div className="mb-3">
               <CFormLabel>License Number</CFormLabel>
               <CFormInput name="licenseNum" value={formData.licenseNum} onChange={handleInputChange} required />
             </div>
-
-            {/* Contact Information */}
             <div className="mb-3">
               <CFormLabel>Contact Number</CFormLabel>
               <CFormInput name="contactNum" value={formData.contactNum} onChange={handleInputChange} />
             </div>
-
             <div className="mb-3">
               <CFormLabel>Email Address</CFormLabel>
               <CFormInput type="email" name="email" value={formData.email} onChange={handleInputChange} />
             </div>
-
-            {/* Status: Enum Options */}
             <div className="mb-3">
               <CFormLabel>Status</CFormLabel>
               <CFormSelect name="status" value={formData.status} onChange={handleInputChange}>
@@ -249,31 +413,31 @@ const Drivers = () => {
                 <option value="suspended">Suspended</option>
               </CFormSelect>
             </div>
-
-            {/* Completed Trips: Disabled in Edit Mode */}
             <div className="mb-3">
               <CFormLabel>Completed Trips</CFormLabel>
-              <CFormInput
-                type="number"
-                name="completedTrips"
-                value={formData.completedTrips}
-                onChange={handleInputChange}
-                disabled={editMode}
-              />
+              <CFormInput type="number" name="completedTrips" value={formData.completedTrips} onChange={handleInputChange} disabled={editMode} />
             </div>
-
           </CForm>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setModalVisible(false)}>
-            Close
-          </CButton>
-          <CButton color="primary" onClick={handleSubmit}>
-            {editMode ? 'Update Driver' : 'Save Driver'}
-          </CButton>
+          <CButton color="secondary" onClick={() => setModalVisible(false)}>Close</CButton>
+          <CButton color="primary" onClick={handleSubmit}>{editMode ? 'Update Driver' : 'Save Driver'}</CButton>
         </CModalFooter>
       </CModal>
-    </CRow>
+
+      {/* --- HISTORY/RELATED RECORDS MODAL --- */}
+      <CModal size="xl" visible={historyVisible} onClose={() => setHistoryVisible(false)}>
+        <CModalHeader className="bg-dark text-white">
+          <CModalTitle><CIcon icon={cilCarAlt} className="me-2" />Driver Vehicle History</CModalTitle>
+        </CModalHeader>
+        <CModalBody className="bg-dark text-white">
+            <DriverVehicleHistory drivers={drivers} />
+        </CModalBody>
+        <CModalFooter className="bg-dark">
+          <CButton color="secondary" onClick={() => setHistoryVisible(false)}>Close</CButton>
+        </CModalFooter>
+      </CModal>
+    </CCard>
   )
 }
 
