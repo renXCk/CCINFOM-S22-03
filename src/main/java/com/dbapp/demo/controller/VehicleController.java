@@ -1,6 +1,7 @@
 package com.dbapp.demo.controller;
 
 import com.dbapp.demo.model.Vehicle;
+import com.dbapp.demo.model.VehicleView;
 import com.dbapp.demo.services.VehicleService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,12 @@ public class VehicleController {
 
     public VehicleController(VehicleService vehicleService) {
         this.vehicleService = vehicleService;
+    }
+
+    @GetMapping("/history")
+    public List<VehicleView> getVehicleHistory() {
+        // Calls the service method you just created
+        return vehicleService.getVehicleHistory();
     }
 
     @GetMapping("/all")

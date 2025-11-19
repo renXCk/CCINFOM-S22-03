@@ -49,7 +49,7 @@ const _nav = [
 
   {
     component: CNavItem,
-    name: 'Trip Logs',
+    name: 'TripLogs',
     to: '/triplogs',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
@@ -71,7 +71,7 @@ const _nav = [
   {
       component: CNavItem,
       name: 'Fuel Logs',
-      to: '/fuel-logs', // Must match the path in routes.js
+      to: '/fuelLogs',
       icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
   },
 

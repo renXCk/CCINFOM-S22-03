@@ -42,12 +42,6 @@ public class IncidentLogService {
             return false;
         }
 
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        if (i.getIncidentDateTime().after(now)) {
-            System.err.println("Incident date cannot be in the future");
-            return false;
-        }
-
         if(!i.getIncidentSeverity().equals("Minor") &&
                 !i.getIncidentSeverity().equals("Moderate") &&
                 !i.getIncidentSeverity().equals("Major")){
@@ -86,12 +80,6 @@ public class IncidentLogService {
         String driverStatus = driver.getStatus();
         if (!driverStatus.equals("active")) {
             System.err.println("Driver status must be 'active'. Current status: " + vehicleStatus);
-            return false;
-        }
-
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        if (i.getIncidentDateTime().after(now)) {
-            System.err.println("Incident date cannot be in the future");
             return false;
         }
 
