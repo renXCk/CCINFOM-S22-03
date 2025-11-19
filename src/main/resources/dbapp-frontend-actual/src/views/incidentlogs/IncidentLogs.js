@@ -182,7 +182,7 @@ const IncidentLogs = () => {
           </CCardHeader>
 
           <CCardBody>
-            <CTable hover bordered responsive>
+            <CTable striped hover responsive>
               <CTableHead>
                 <CTableRow>
                   <CTableHeaderCell>ID</CTableHeaderCell>
@@ -191,7 +191,7 @@ const IncidentLogs = () => {
                   <CTableHeaderCell>Driver ID</CTableHeaderCell>
                   <CTableHeaderCell>Driver Name</CTableHeaderCell>
                   <CTableHeaderCell>Vehicle ID</CTableHeaderCell>
-                  <CTableHeaderCell>Vehicle Plate</CTableHeaderCell>
+                  <CTableHeaderCell>Vehicle Info</CTableHeaderCell>
                   <CTableHeaderCell>Location</CTableHeaderCell>
                   <CTableHeaderCell>Severity</CTableHeaderCell>
                   <CTableHeaderCell>Actions</CTableHeaderCell>
