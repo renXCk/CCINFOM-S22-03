@@ -2,6 +2,8 @@ package com.dbapp.demo.services;
 
 import com.dbapp.demo.model.Driver;
 import com.dbapp.demo.dao.DriverDAO;
+import com.dbapp.demo.dao.DriverViewDAO;
+import com.dbapp.demo.model.DriverView;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 @Service
 public class DriverService {
     private final DriverDAO dao = new DriverDAO();
+    private final DriverViewDAO viewDAO = new DriverViewDAO();
     private final String licensePattern = "^[A-Za-z]\\d{2}-\\d{2}-\\d{6}$";
     private final String phonePattern = "^09\\d{2}-\\d{3}-\\d{4}$";
     private final String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
@@ -51,6 +54,10 @@ public class DriverService {
 
     public List<Driver> getAllDrivers() {
         return dao.readDrivers();
+    }
+
+    public List<DriverView> getVehiclesByDriver(int id) {
+        return viewDAO.getVehiclesByDriver(id);
     }
 
     public Driver getDriverById(int driverId){ return dao.getDriverById(driverId); }

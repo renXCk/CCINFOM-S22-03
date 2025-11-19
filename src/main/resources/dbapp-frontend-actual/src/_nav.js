@@ -107,6 +107,12 @@ const _nav = [
     to: '/reports/mileage',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
   },
+  {
+    component: CNavItem,
+    name: 'Client Report',
+    to: '/reports/clients',
+    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+  },
 ]
 
 export default _nav

@@ -1,6 +1,7 @@
 package com.dbapp.demo.controller;
 
 import com.dbapp.demo.model.Driver;
+import com.dbapp.demo.model.DriverView;
 import com.dbapp.demo.services.DriverService;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,12 @@ public class DriverController {
     @GetMapping("/all")
     public List<Driver> getAllClients(){
         return driverService.getAllDrivers();
+    }
+
+    @GetMapping("/vehicledriver")
+    public List<DriverView> getVehiclesByDriver(int id) {
+        // Calls the service method you just created
+        return driverService.getVehiclesByDriver(id);
     }
 
     // get indiv driver by id

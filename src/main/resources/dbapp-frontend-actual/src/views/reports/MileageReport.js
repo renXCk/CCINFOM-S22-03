@@ -289,6 +289,15 @@ const MileageReport = () => {
                         },
                       ],
                     }}
+                    options={{
+                        scales: {
+                            x: {
+                                ticks: {
+                                    display: false // Hide Vehicle Labels
+                                }
+                            }
+                        }
+                    }}
                   />
                 </CCardBody>
               </CCard>
@@ -313,6 +322,15 @@ const MileageReport = () => {
                           fill: true,
                         },
                       ],
+                    }}
+                    options={{
+                        scales: {
+                            x: {
+                                ticks: {
+                                    display: false // Hide Date Labels
+                                }
+                            }
+                        }
                     }}
                   />
                 </CCardBody>

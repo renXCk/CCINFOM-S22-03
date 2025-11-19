@@ -34,18 +34,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- =====================================================
 
 -- -- Drop View first
--- DROP VIEW IF EXISTS VehicleView;
+DROP VIEW IF EXISTS VehicleView;
 
 -- -- Drop all tables
--- DROP TABLE IF EXISTS MaintenancePart;
--- DROP TABLE IF EXISTS TripLog;
--- DROP TABLE IF EXISTS FuelLog;
--- DROP TABLE IF EXISTS IncidentLog;
--- DROP TABLE IF EXISTS MaintenanceLog;
--- DROP TABLE IF EXISTS Vehicle;
--- DROP TABLE IF EXISTS Driver;
--- DROP TABLE IF EXISTS Client;
--- DROP TABLE IF EXISTS Parts;
+DROP TABLE IF EXISTS MaintenancePart;
+DROP TABLE IF EXISTS TripLog;
+DROP TABLE IF EXISTS FuelLog;
+DROP TABLE IF EXISTS IncidentLog;
+DROP TABLE IF EXISTS MaintenanceLog;
+DROP TABLE IF EXISTS Vehicle;
+DROP TABLE IF EXISTS Driver;
+DROP TABLE IF EXISTS Client;
+DROP TABLE IF EXISTS Parts;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
@@ -192,6 +192,19 @@ FROM TripLog t
 JOIN Vehicle v ON t.vehicle_id = v.vehicle_id
 JOIN Driver d ON t.driver_id = d.driver_id
 JOIN Client c ON t.client_id = c.client_id;
+
+CREATE OR REPLACE VIEW DriverView AS
+SELECT DISTINCT
+    d.driver_id,
+    CONCAT(d.first_name, ' ', d.last_name) AS driver_name,
+    d.license_num,
+    v.vehicle_id,
+    v.plate_number,
+    v.model,
+    v.vehicle_type
+FROM TripLog t
+JOIN Driver d ON t.driver_id = d.driver_id
+JOIN Vehicle v ON t.vehicle_id = v.vehicle_id;
 
 
 -- SAMPLE/GENERATED RECORDS 
