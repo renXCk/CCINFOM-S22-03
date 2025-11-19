@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS Client (
 );
 
 -- Parts (Duncan)
-CREATE TABLE IF NOT EXISTS Parts (
+CREATE TABLE IF NOT EXISTS Part (
     part_id         INT AUTO_INCREMENT NOT NULL,
     part_name       VARCHAR(30) NOT NULL,
     description     VARCHAR(50),
@@ -238,7 +238,7 @@ INSERT INTO Client (client_type, name, contact_person, phone, email, address, pr
 ('Retail', 'SuperMart', 'Manager Mike', '0919-555-6666', 'supply@supermart.com', '789 Market Ave, Taguig', 1, 'active', 50),
 ('Corporate', 'Tech Solutions', 'Sarah Lee', '0920-777-8888', 'admin@techsol.com', '101 Tech Park, Pasig', 0, 'inactive', 10);
 
-INSERT INTO Parts (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
+INSERT INTO Part (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
 ('Oil Filter', 'Standard Oil Filter', 50, 350.00, 'AutoSupply Co.', 0),
 ('Brake Pad', 'Ceramic Brake Pads', 20, 1500.00, 'Brake Masters', 1),
 ('Tire', 'R15 All Season', 10, 4500.00, 'Rubber World', 0),
