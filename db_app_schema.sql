@@ -197,12 +197,26 @@ JOIN Client c ON t.client_id = c.client_id;
 -- SAMPLE/GENERATED RECORDS 
 
 INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, mileage) VALUES
-('ABC123', 'motorcycle', 'Honda Wave', 'available', 'gasoline', 12000),
-('DEF456', 'sedan', 'Toyota Corolla', 'on_trip', 'gasoline', 45000),
-('GHI789', 'van', 'Nissan NV200', 'maintenance', 'diesel', 78000),
-('JKL012', 'truck', 'Isuzu D-Max', 'available', 'diesel', 95000),
-('MNO345', 'sedan', 'Honda Civic', 'inactive', 'gasoline', 67000),
-('PQR678', 'motorcycle', 'Yamaha NMAX', 'available', 'gasoline', 15000);
+('AB 12345', 'motorcycle', 'Honda Wave', 'available', 'gasoline', 0),
+('DEF 456', 'sedan', 'Toyota Corolla', 'on_trip', 'gasoline', 0),
+('GHI 789', 'van', 'Nissan NV200', 'maintenance', 'diesel', 0),
+('JKL 4567', 'truck', 'Isuzu D-Max', 'available', 'diesel', 0),
+('MNO 345', 'sedan', 'Honda Civic', 'inactive', 'gasoline', 0),
+('PQR 678', 'motorcycle', 'Yamaha NMAX', 'available', 'gasoline', 0),
+('STU 901', 'sedan', 'Toyota Vios', 'available', 'gasoline', 0),
+('VWX 2345', 'truck', 'Mitsubishi Canter', 'available', 'diesel', 0),
+('YZ 67890', 'motorcycle', 'Honda Click', 'on_trip', 'gasoline', 0),
+('ABC 111', 'van', 'Toyota HiAce', 'available', 'diesel', 50),
+('DEF 2222', 'truck', 'Ford Ranger', 'maintenance', 'diesel', 0),
+('GHI 333', 'sedan', 'Nissan Almera', 'available', 'gasoline', 0),
+('JKL 444', 'motorcycle', 'Kawasaki Barako', 'inactive', 'gasoline', 0),
+('MNO 5555', 'van', 'Hyundai Starex', 'available', 'diesel', 0),
+('PQR 666', 'sedan', 'Mazda 3', 'on_trip', 'gasoline', 120),
+('ST 77777', 'motorcycle', 'Suzuki Raider', 'available', 'gasoline', 0),
+('VWX 888', 'truck', 'Isuzu Elf', 'available', 'diesel', 0),
+('YZ 9999', 'sedan', 'Honda City', 'available', 'gasoline', 0),
+('ABC 000', 'van', 'L300', 'maintenance', 'diesel', 0),
+('DEF 123', 'motorcycle', 'Honda PCX', 'available', 'gasoline', 0);
 
 INSERT INTO Client (client_type, name, contact_person, phone, email, address, priority_flag, status, completed_orders) VALUES
 ('Regular', 'Acme Corp', 'John Doe', '09171234567', 'john@acme.com', '123 Main St', 1, 'active', 15),
