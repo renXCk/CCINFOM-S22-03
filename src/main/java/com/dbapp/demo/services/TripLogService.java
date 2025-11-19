@@ -124,18 +124,37 @@ public class TripLogService {
     }
 
     public boolean updateTripLog(TripLog t) {
+        TripLog old = dao.readTripLogById(t.getTripId());
+        if (old == null) {
+            System.err.println("Trip not found.");
+            return false;
+        }
 
-        // A trip can only be cancelled if it has not yet been completed.
-        if (t.getStatus().equals("Cancelled")) {
-            TripLog old = dao.readTripLogById(t.getTripId());
-            if (old != null && "Completed".equals(old.getStatus())) {
-                System.err.println("Cannot cancel a completed trip.");
-                return false;
-            }
+        String oldStatus = old.getStatus();
+        String newStatus = t.getStatus();
+
+        // Prohibited status switches
+        if (oldStatus.equals("Archived") || oldStatus.equals("Cancelled")) {
+            System.err.println("Cannot change status from " + oldStatus);
+            return false;
+        }
+        if (oldStatus.equals("Completed") && (newStatus.equals("Pending") || newStatus.equals("Ongoing"))) {
+            System.err.println("Completed trips cannot switch to Pending or Ongoing.");
+            return false;
+        }
+        if (oldStatus.equals("Ongoing") && newStatus.equals("Pending")) {
+            System.err.println("Ongoing trips cannot switch to Pending.");
+            return false;
+        }
+
+        if (newStatus.equals("Cancelled") && oldStatus.equals("Completed")) {
+            System.err.println("Cannot cancel a completed trip.");
+            return false;
         }
 
         return dao.updateTripLog(t);
     }
+
 
     // actual: soft deletes in dao
     public boolean deleteTripLog(int id) {
