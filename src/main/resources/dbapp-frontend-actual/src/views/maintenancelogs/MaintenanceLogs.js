@@ -61,7 +61,7 @@ const MaintenanceLogs = () => {
     setLoading(true)
     try {
       // Keep your existing endpoints (they look like hashed routes in your app)
-      const mainRes = await fetch('http://localhost:3000/#/maintenancelogs')
+      const mainRes = await fetch('http://localhost:8080/api/maintenancelogs/all')
       if (mainRes.ok) {
         const data = await mainRes.json()
         setMaintenanceLogs(Array.isArray(data) ? data : [])
