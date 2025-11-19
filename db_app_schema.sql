@@ -9,6 +9,24 @@
 
 USE deliveryshipment;
 
+-- 1. Temporarily disable foreign key checks
+-- SET FOREIGN_KEY_CHECKS = 0;
+
+-- -- 2. Truncate all tables (order does not matter here due to step 1)
+
+-- TRUNCATE TABLE Vehicle;
+-- TRUNCATE TABLE Client;
+-- TRUNCATE TABLE Parts;
+-- TRUNCATE TABLE Driver;
+-- TRUNCATE TABLE FuelLog;
+-- TRUNCATE TABLE TripLog;
+-- TRUNCATE TABLE MaintenanceLog;
+-- TRUNCATE TABLE MaintenancePart;
+-- TRUNCATE TABLE IncidentLog;
+
+-- -- 3. Re-enable foreign key checks
+-- SET FOREIGN_KEY_CHECKS = 1;
+
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
     vehicle_id 		INT AUTO_INCREMENT NOT NULL,
@@ -134,6 +152,27 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
 	CONSTRAINT FK_Incident_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
     CONSTRAINT FK_Incident_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
+
+CREATE OR REPLACE VIEW VehicleView AS
+SELECT 
+    v.vehicle_id,
+    v.plate_number,
+    v.model,
+    t.trip_id,
+    t.date_time_start,
+    t.date_time_completed,
+    t.status AS trip_status,
+    d.driver_id,
+    CONCAT(d.first_name, ' ', d.last_name) AS driver_name,
+    d.license_num,
+    c.client_id,
+    c.name AS client_name,
+    c.client_type
+FROM TripLog t
+JOIN Vehicle v ON t.vehicle_id = v.vehicle_id
+JOIN Driver d ON t.driver_id = d.driver_id
+JOIN Client c ON t.client_id = c.client_id;
+
 
 -- SAMPLE/GENERATED RECORDS 
 
