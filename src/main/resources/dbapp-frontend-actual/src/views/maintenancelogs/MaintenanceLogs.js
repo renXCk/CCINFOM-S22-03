@@ -70,13 +70,13 @@ const MaintenanceLogs = () => {
         setMaintenanceLogs([])
       }
 
-      const vehRes = await fetch('http://localhost:3000/#/vehicle')
+      const vehRes = await fetch('http://localhost:8080/api/vehicles/all')
       if (vehRes.ok) {
         const data = await vehRes.json()
         setVehicles(Array.isArray(data) ? data : [])
       }
 
-      const partsRes = await fetch('http://localhost:3000/#/parts')
+      const partsRes = await fetch('http://localhost:8080/api/parts/all')
       if (partsRes.ok) {
         const data = await partsRes.json()
         setParts(Array.isArray(data) ? data : [])
