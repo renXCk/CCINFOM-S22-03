@@ -34,18 +34,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- =====================================================
 
 -- -- Drop View first
--- DROP VIEW IF EXISTS VehicleView;
+DROP VIEW IF EXISTS VehicleView;
 
 -- -- Drop all tables
--- DROP TABLE IF EXISTS MaintenancePart;
--- DROP TABLE IF EXISTS TripLog;
--- DROP TABLE IF EXISTS FuelLog;
--- DROP TABLE IF EXISTS IncidentLog;
--- DROP TABLE IF EXISTS MaintenanceLog;
--- DROP TABLE IF EXISTS Vehicle;
--- DROP TABLE IF EXISTS Driver;
--- DROP TABLE IF EXISTS Client;
--- DROP TABLE IF EXISTS Parts;
+DROP TABLE IF EXISTS MaintenancePart;
+DROP TABLE IF EXISTS TripLog;
+DROP TABLE IF EXISTS FuelLog;
+DROP TABLE IF EXISTS IncidentLog;
+DROP TABLE IF EXISTS MaintenanceLog;
+DROP TABLE IF EXISTS Vehicle;
+DROP TABLE IF EXISTS Driver;
+DROP TABLE IF EXISTS Client;
+DROP TABLE IF EXISTS Parts;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
