@@ -54,6 +54,12 @@ const _nav = [
     to: '/clients',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
   },
+  {
+      component: CNavItem,
+      name: 'Parts',
+      to: '/parts',
+      icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+    },
 
   // =========================================
   // SECTION: TRANSACTIONS
@@ -80,6 +86,13 @@ const _nav = [
     to: '/fuelLogs',
     icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
   },
+  {
+      component: CNavItem,
+      name: 'Maintenance Logs',
+      to: '/maintenancelogs',
+      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+  },
+
 
   // =========================================
   // SECTION: REPORTS
