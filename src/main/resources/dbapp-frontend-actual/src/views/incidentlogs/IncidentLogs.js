@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   CCard,
   CCardBody,
@@ -21,10 +21,22 @@ import {
   CFormLabel,
   CFormInput,
   CFormSelect,
-  CBadge
+  CBadge,
+  CInputGroup,
+  CInputGroupText
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
+import { 
+  cilPencil, 
+  cilTrash, 
+  cilPlus, 
+  cilFilter, 
+  cilSortNumericDown, 
+  cilSortNumericUp,
+  cilUser,
+  cilCarAlt,
+  cilWarning 
+} from '@coreui/icons'
 
 const IncidentLogs = () => {
   const [incidents, setIncidents] = useState([])
@@ -33,6 +45,12 @@ const IncidentLogs = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [currentId, setCurrentId] = useState(null)
+
+  // --- FILTER & SORT STATE ---
+  const [filterDriver, setFilterDriver] = useState('All')
+  const [filterVehicle, setFilterVehicle] = useState('All')
+  const [filterSeverity, setFilterSeverity] = useState('All')
+  const [sortOrder, setSortOrder] = useState('desc') // 'desc' = Latest First
 
   // Default Form State
   const initialFormState = {
@@ -66,30 +84,55 @@ const IncidentLogs = () => {
     fetchAllData()
   }, [])
 
-  // --- 2. HANDLE INPUT CHANGES ---
+  // --- 2. FILTER & SORT LOGIC (useMemo) ---
+  const filteredIncidents = useMemo(() => {
+    let result = [...incidents];
+
+    // A. Filtering
+    result = result.filter(item => {
+      const dId = item.driverId || item.driver_id;
+      const vId = item.vehicleId || item.vehicle_id;
+      const severity = item.incidentSeverity || item.incident_severity;
+
+      if (filterDriver !== 'All' && String(dId) !== filterDriver) return false;
+      if (filterVehicle !== 'All' && String(vId) !== filterVehicle) return false;
+      if (filterSeverity !== 'All' && severity !== filterSeverity) return false;
+
+      return true;
+    });
+
+    // B. Sorting (Date)
+    result.sort((a, b) => {
+      const dateA = new Date(a.incidentDateTime || a.incident_date_time);
+      const dateB = new Date(b.incidentDateTime || b.incident_date_time);
+
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    return result;
+  }, [incidents, filterDriver, filterVehicle, filterSeverity, sortOrder]);
+
+  // --- 3. HANDLE INPUT CHANGES ---
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
   }
 
-  // --- 3. OPEN ADD MODAL ---
+  // --- 4. OPEN ADD MODAL ---
   const openAddModal = () => {
     setEditMode(false)
     setFormData(initialFormState)
     setModalVisible(true)
   }
 
-  // --- 4. OPEN EDIT MODAL ---
+  // --- 5. OPEN EDIT MODAL ---
   const openEditModal = (incident) => {
     setEditMode(true)
     
-    // FIX: Support both camelCase (from JSON) and snake_case (just in case)
-    // This ensures we actually capture the ID regardless of backend format
     const incId = incident.incidentId || incident.incident_id;
     setCurrentId(incId)
     
     setFormData({
-      // FIX: Use camelCase first (incident.driverId) to match the Table data
       driverId: incident.driverId || incident.driver_id || '',
       vehicleId: incident.vehicleId || incident.vehicle_id || '',
       incidentType: incident.incidentType || incident.incident_type || '',
@@ -99,7 +142,7 @@ const IncidentLogs = () => {
     setModalVisible(true)
   }
 
-  // --- 5. SUBMIT FORM ---
+  // --- 6. SUBMIT FORM ---
   const handleSubmit = async () => {
     const url = editMode
       ? 'http://localhost:8080/api/incidentlogs/update'
@@ -129,7 +172,7 @@ const IncidentLogs = () => {
     }
   }
 
-  // --- 6. DELETE INCIDENT ---
+  // --- 7. DELETE INCIDENT ---
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this incident log?')) return
 
@@ -145,15 +188,13 @@ const IncidentLogs = () => {
     }
   }
 
-  // --- HELPER: Get Driver Name by ID ---
+  // --- HELPERS ---
   const getDriverName = (id) => {
     if (!id) return '';
-    // Check both camelCase and snake_case properties for the driver object
-    const drv = drivers.find(d => (d.driverId || d.driver_id) == id) // using == for loose type comparison (string vs int)
+    const drv = drivers.find(d => (d.driverId || d.driver_id) == id) 
     return drv ? `${drv.firstName || drv.first_name} ${drv.lastName || drv.last_name}` : `ID: ${id}`
   }
 
-  // --- HELPER: Get Vehicle Plate by ID ---
   const getVehiclePlate = (id) => {
     if (!id) return '';
     const veh = vehicles.find(v => (v.vehicleId || v.vehicle_id) == id)
@@ -182,15 +223,76 @@ const IncidentLogs = () => {
           </CCardHeader>
 
           <CCardBody>
+            {/* --- FILTER CONTROLS --- */}
+            <CRow className="mb-4">
+                <CCol md={3}>
+                    <CFormLabel className="small text-muted mb-1">Filter by Driver</CFormLabel>
+                    <CInputGroup size="sm">
+                        <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
+                        <CFormSelect value={filterDriver} onChange={(e) => setFilterDriver(e.target.value)}>
+                            <option value="All">All Drivers</option>
+                            {drivers.map(d => (
+                                <option key={d.driverId || d.driver_id} value={d.driverId || d.driver_id}>
+                                    {d.firstName || d.first_name} {d.lastName || d.last_name}
+                                </option>
+                            ))}
+                        </CFormSelect>
+                    </CInputGroup>
+                </CCol>
+
+                <CCol md={3}>
+                    <CFormLabel className="small text-muted mb-1">Filter by Vehicle</CFormLabel>
+                    <CInputGroup size="sm">
+                        <CInputGroupText><CIcon icon={cilCarAlt} /></CInputGroupText>
+                        <CFormSelect value={filterVehicle} onChange={(e) => setFilterVehicle(e.target.value)}>
+                            <option value="All">All Vehicles</option>
+                            {vehicles.map(v => (
+                                <option key={v.vehicleId || v.vehicle_id} value={v.vehicleId || v.vehicle_id}>
+                                    {v.plateNumber || v.plate_number}
+                                </option>
+                            ))}
+                        </CFormSelect>
+                    </CInputGroup>
+                </CCol>
+
+                <CCol md={3}>
+                    <CFormLabel className="small text-muted mb-1">Filter by Severity</CFormLabel>
+                    <CInputGroup size="sm">
+                        <CInputGroupText><CIcon icon={cilWarning} /></CInputGroupText>
+                        <CFormSelect value={filterSeverity} onChange={(e) => setFilterSeverity(e.target.value)}>
+                            <option value="All">All Severities</option>
+                            <option value="Minor">Minor</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Major">Major</option>
+                        </CFormSelect>
+                    </CInputGroup>
+                </CCol>
+
+                <CCol md={3}>
+                    <CFormLabel className="small text-muted mb-1">Sort by Date</CFormLabel>
+                    <div className="d-grid">
+                        <CButton 
+                            color="light" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                            className="d-flex justify-content-between align-items-center px-3"
+                        >
+                            {sortOrder === 'desc' ? 'Latest First' : 'Oldest First'}
+                            <CIcon icon={sortOrder === 'desc' ? cilSortNumericDown : cilSortNumericUp} />
+                        </CButton>
+                    </div>
+                </CCol>
+            </CRow>
+            {/* --- END FILTER CONTROLS --- */}
+
             <CTable striped hover responsive>
               <CTableHead>
                 <CTableRow>
                   <CTableHeaderCell>ID</CTableHeaderCell>
                   <CTableHeaderCell>Date/Time</CTableHeaderCell>
                   <CTableHeaderCell>Type</CTableHeaderCell>
-                  <CTableHeaderCell>Driver ID</CTableHeaderCell>
                   <CTableHeaderCell>Driver Name</CTableHeaderCell>
-                  <CTableHeaderCell>Vehicle ID</CTableHeaderCell>
                   <CTableHeaderCell>Vehicle Info</CTableHeaderCell>
                   <CTableHeaderCell>Location</CTableHeaderCell>
                   <CTableHeaderCell>Severity</CTableHeaderCell>
@@ -198,33 +300,45 @@ const IncidentLogs = () => {
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {incidents.map((item) => (
-                  <CTableRow key={item.incidentId || item.incident_id}>
-                    <CTableDataCell>{item.incidentId || item.incident_id}</CTableDataCell>
-                    <CTableDataCell>
-                        {new Date(item.incidentDateTime || item.incident_date_time).toLocaleString()}
-                    </CTableDataCell>
-                    <CTableDataCell>{item.incidentType || item.incident_type}</CTableDataCell>
-                    <CTableDataCell>{item.driverId || item.driver_id}</CTableDataCell>
-                    <CTableDataCell>{getDriverName(item.driverId || item.driver_id)}</CTableDataCell>
-                    <CTableDataCell>{item.vehicleId || item.vehicle_id}</CTableDataCell>
-                    <CTableDataCell>{getVehiclePlate(item.vehicleId || item.vehicle_id)}</CTableDataCell>
-                    <CTableDataCell>{item.incidentLocation || item.incident_location}</CTableDataCell>
-                    <CTableDataCell>
-                      <CBadge color={getSeverityBadge(item.incidentSeverity || item.incident_severity)}>
-                        {item.incidentSeverity || item.incident_severity}
-                      </CBadge>
-                    </CTableDataCell>
-                    <CTableDataCell>
-                      <CButton color="info" size="sm" variant="ghost" className="me-2" onClick={() => openEditModal(item)}>
-                        <CIcon icon={cilPencil} />
-                      </CButton>
-                      <CButton color="danger" size="sm" variant="ghost" onClick={() => handleDelete(item.incidentId || item.incident_id)}>
-                        <CIcon icon={cilTrash} />
-                      </CButton>
-                    </CTableDataCell>
-                  </CTableRow>
-                ))}
+                {filteredIncidents.length === 0 ? (
+                    <CTableRow>
+                        <CTableDataCell colSpan="8" className="text-center text-muted">
+                            No incidents found matching your filters.
+                        </CTableDataCell>
+                    </CTableRow>
+                ) : (
+                    filteredIncidents.map((item) => (
+                    <CTableRow key={item.incidentId || item.incident_id}>
+                        <CTableDataCell>{item.incidentId || item.incident_id}</CTableDataCell>
+                        <CTableDataCell>
+                            {new Date(item.incidentDateTime || item.incident_date_time).toLocaleString()}
+                        </CTableDataCell>
+                        <CTableDataCell>{item.incidentType || item.incident_type}</CTableDataCell>
+                        <CTableDataCell>
+                            <small className="d-block fw-bold text-secondary">ID: {item.driverId || item.driver_id}</small>
+                            {getDriverName(item.driverId || item.driver_id)}
+                        </CTableDataCell>
+                        <CTableDataCell>
+                            <small className="d-block fw-bold text-secondary">ID: {item.vehicleId || item.vehicle_id}</small>
+                            {getVehiclePlate(item.vehicleId || item.vehicle_id)}
+                        </CTableDataCell>
+                        <CTableDataCell>{item.incidentLocation || item.incident_location}</CTableDataCell>
+                        <CTableDataCell>
+                        <CBadge color={getSeverityBadge(item.incidentSeverity || item.incident_severity)}>
+                            {item.incidentSeverity || item.incident_severity}
+                        </CBadge>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                        <CButton color="info" size="sm" variant="ghost" className="me-2" onClick={() => openEditModal(item)}>
+                            <CIcon icon={cilPencil} />
+                        </CButton>
+                        <CButton color="danger" size="sm" variant="ghost" onClick={() => handleDelete(item.incidentId || item.incident_id)}>
+                            <CIcon icon={cilTrash} />
+                        </CButton>
+                        </CTableDataCell>
+                    </CTableRow>
+                    ))
+                )}
               </CTableBody>
             </CTable>
           </CCardBody>
@@ -244,7 +358,6 @@ const IncidentLogs = () => {
                     {editMode ? (
                         <CFormInput 
                             type="text" 
-                            // Display the name, but we keep the ID in formData
                             value={getDriverName(formData.driverId) || ''} 
                             disabled 
                         />
@@ -274,7 +387,6 @@ const IncidentLogs = () => {
                     {editMode ? (
                         <CFormInput 
                             type="text" 
-                            // Display the plate, but we keep the ID in formData
                             value={getVehiclePlate(formData.vehicleId) || ''} 
                             disabled 
                         />

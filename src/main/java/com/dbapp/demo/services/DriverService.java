@@ -14,7 +14,7 @@ public class DriverService {
     private final DriverViewDAO viewDAO = new DriverViewDAO();
     private final String licensePattern = "^[A-Za-z]\\d{2}-\\d{2}-\\d{6}$";
     private final String phonePattern = "^09\\d{2}-\\d{3}-\\d{4}$";
-    private final String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
+    private final String emailPattern = "^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     public boolean addDriver(Driver d) {
 
