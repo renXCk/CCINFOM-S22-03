@@ -164,7 +164,7 @@ public class MaintenanceLogDAO {
         log.setVehicleId(rs.getInt("vehicle_id"));
         log.setDateTimeStart(rs.getString("date_time_start"));
         log.setDateTimeCompleted(rs.getString("date_time_completed"));
-        log.setDescription(rs.getString("description")); // FIX: Add this
+        log.setDescription(rs.getString("description"));
         log.setStatus(rs.getString("status"));
         return log;
     }

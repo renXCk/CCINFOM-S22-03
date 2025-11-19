@@ -16,7 +16,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE Vehicle;
 TRUNCATE TABLE Client;
-TRUNCATE TABLE Parts;
+TRUNCATE TABLE Part;
 TRUNCATE TABLE Driver;
 TRUNCATE TABLE FuelLog;
 TRUNCATE TABLE TripLog;
@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS MaintenanceLog;
 DROP TABLE IF EXISTS Vehicle;
 DROP TABLE IF EXISTS Driver;
 DROP TABLE IF EXISTS Client;
-DROP TABLE IF EXISTS Parts;
+DROP TABLE IF EXISTS Part;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS Client (
     CONSTRAINT Client_PK PRIMARY KEY (client_id)
 );
 
--- Parts (Duncan)
-CREATE TABLE IF NOT EXISTS Parts (
+-- Part (Duncan)
+CREATE TABLE IF NOT EXISTS Part (
     part_id         INT AUTO_INCREMENT NOT NULL,
     part_name       VARCHAR(30) NOT NULL,
     description     VARCHAR(50),
@@ -144,12 +144,13 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     vehicle_id          INT NOT NULL,
     date_time_start     DATETIME,
     date_time_completed DATETIME,
+    description         VARCHAR(255),
     status              ENUM('Pending','Ongoing','Completed','Cancelled'),  
     CONSTRAINT Maintenance_Log_PK PRIMARY KEY (maintenance_id),
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
 
--- Junction Table for Maintenance Log & Parts
+-- Junction Table for Maintenance Log & Part
 CREATE TABLE MaintenancePart (
     maintenance_id INT NOT NULL,
     part_id       INT, -- removed not null
@@ -157,7 +158,7 @@ CREATE TABLE MaintenancePart (
     cost_per_part DECIMAL(10,2),
     CONSTRAINT PK_MaintenancePart PRIMARY KEY (maintenance_id, part_id),
     CONSTRAINT FK_MaintenancePart_Maintenance FOREIGN KEY (maintenance_id) REFERENCES MaintenanceLog(maintenance_id),
-    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Parts(part_id)
+    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Part(part_id)
 );
 
 -- Incident Log (Leelancze)
@@ -261,11 +262,17 @@ INSERT INTO Client (client_type, name, contact_person, phone, email, address, pr
 ('Retail', 'SuperMart', 'Manager Mike', '0919-555-6666', 'supply@supermart.com', '789 Market Ave, Taguig', 1, 'active', 50),
 ('Corporate', 'Tech Solutions', 'Sarah Lee', '0920-777-8888', 'admin@techsol.com', '101 Tech Park, Pasig', 0, 'inactive', 10);
 
-INSERT INTO Parts (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
+INSERT INTO Part (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
 ('Oil Filter', 'Standard Oil Filter', 50, 350.00, 'AutoSupply Co.', 0),
 ('Brake Pad', 'Ceramic Brake Pads', 20, 1500.00, 'Brake Masters', 1),
 ('Tire', 'R15 All Season', 10, 4500.00, 'Rubber World', 0),
-('Headlight Bulb', 'LED H4', 30, 800.00, 'LightOne', 0);
+('Headlight Bulb', 'LED H4', 30, 800.00, 'LightOne', 0),
+('Air Filter', 'Cabin Air Filter', 25, 500.00, 'FilterPro', 0),
+('Spark Plug', 'Standard Spark Plug', 100, 250.00, 'IgniteTech', 0),
+('Battery', '12V Car Battery', 15, 6500.00, 'PowerCells', 1),
+('Brake Disc', 'Front Brake Disc', 12, 3200.00, 'Brake Masters', 0),
+('Windshield Wiper', 'Wiper Blade Set', 40, 400.00, 'ClearView', 0),
+('Coolant', 'Engine Coolant 1L', 60, 300.00, 'CoolTech', 0);
 
 INSERT INTO Driver (first_name, last_name, license_num, contact_num, email, status, completed_trips) VALUES
 ('Juan', 'Dela Cruz', 'N01-99-123456', '0917-123-4567', 'juan.dc@email.com', 'active', 45),
@@ -290,21 +297,52 @@ INSERT INTO TripLog (client_id, vehicle_id, driver_id, pick_up_loc, drop_off_loc
 (5, 5, 5, '654 Cedar St', '987 Spruce St', '2025-11-19 08:15:00', NULL, 0, 0, 'pending'),
 (6, 6, 6, '987 Spruce St', '123 Main St', '2025-11-19 10:00:00', NULL, 0, 0, 'pending');
 
-INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, status) VALUES
-(1, '2025-11-10 08:00:00', '2025-11-10 12:00:00', 'Completed'),
-(2, '2025-11-11 09:00:00', '2025-11-11 14:00:00', 'Completed'),
-(3, '2025-11-12 07:30:00', NULL, 'Ongoing'),
-(4, '2025-11-13 10:00:00', '2025-11-13 15:30:00', 'Completed'),
-(5, '2025-11-14 08:45:00', NULL, 'Pending'),
-(6, '2025-11-15 09:15:00', '2025-11-15 13:00:00', 'Cancelled');
+INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, description, status) VALUES
+(1, '2025-11-01 08:00:00', '2025-11-01 12:00:00', 'Routine 50,000 km service and oil change.', 'Completed'),
+(2, '2025-11-02 09:00:00', '2025-11-02 14:00:00', 'Replaced all brake pads and rotors.', 'Completed'),
+(3, '2025-11-03 07:30:00', NULL, 'Diagnosing intermittent engine stalling issue.', 'Ongoing'),
+(4, '2025-11-04 10:00:00', '2025-11-04 15:30:00', 'Fixed damaged side mirror and repainted door.', 'Completed'),
+(5, '2025-11-05 08:45:00', NULL, 'Waiting for new transmission fluid and filter.', 'Pending'),
+(6, '2025-11-06 09:15:00', '2025-11-06 13:00:00', 'Scheduled tire rotation was cancelled by driver.', 'Cancelled'),
+(7, '2025-11-07 08:00:00', '2025-11-07 11:30:00', 'Replaced faulty headlight bulb assembly.', 'Completed'),
+(8, '2025-11-08 09:30:00', NULL, 'Major engine overhaul requiring parts delivery.', 'Ongoing'),
+(9, '2025-11-09 10:15:00', '2025-11-09 14:00:00', 'Routine inspection and chassis lubrication.', 'Completed'),
+(10, '2025-11-10 07:00:00', '2025-11-10 12:30:00', 'Checked and refilled AC coolant system.', 'Completed'),
+(11, '2025-11-11 08:45:00', NULL, 'Diagnostic check requested due to unusual noise.', 'Pending'),
+(12, '2025-11-12 09:20:00', '2025-11-12 15:00:00', 'Replaced two worn-out front tires.', 'Completed'),
+(13, '2025-11-13 07:50:00', NULL, 'Repairing a punctured fuel line in the engine bay.', 'Ongoing'),
+(14, '2025-11-14 10:10:00', '2025-11-14 13:30:00', 'Scheduled repair for minor dent was cancelled.', 'Cancelled'),
+(15, '2025-11-15 08:30:00', '2025-11-15 12:00:00', 'Standard oil and filter change service.', 'Completed'),
+(16, '2025-11-16 09:00:00', NULL, 'Waiting for technician availability for deep cleaning.', 'Pending'),
+(17, '2025-11-17 08:15:00', '2025-11-17 11:45:00', 'Fixed loose battery terminal and cleaned contacts.', 'Completed'),
+(18, '2025-11-18 09:40:00', NULL, 'Troubleshooting an electronic dash malfunction.', 'Ongoing'),
+(19, '2025-11-19 07:50:00', '2025-11-19 13:00:00', 'Replaced worn wiper blades and top-up fluids.', 'Completed'),
+(20, '2025-11-20 10:05:00', NULL, 'Awaiting approval for body work estimate.', 'Pending');
 
 INSERT INTO MaintenancePart (maintenance_id, part_id, quantity_used, cost_per_part) VALUES
-(1, 1, 4, 1200.00),
-(1, 2, 2, 300.00),
-(2, 3, 6, 150.00),
-(3, 4, 1, 2500.00),
-(4, 5, 1, 5000.00),
-(5, 6, 4, 4500.00);
+(1, 1, 2, 350.00),
+(1, 2, 4, 1500.00),
+(2, 3, 6, 4500.00),
+(3, 5, 1, 500.00),
+(4, 4, 1, 2500.00),
+(5, 6, 2, 250.00),
+(6, 2, 2, 1500.00),
+(7, 1, 3, 350.00),
+(7, 7, 1, 6500.00),
+(8, 8, 2, 3200.00),
+(9, 3, 2, 4500.00),
+(10, 2, 1, 1500.00),
+(10, 9, 2, 400.00),
+(11, 5, 1, 500.00),
+(12, 4, 1, 2500.00),
+(13, 6, 2, 250.00),
+(14, 8, 1, 3200.00),
+(15, 1, 4, 350.00),
+(16, 7, 1, 6500.00),
+(17, 3, 2, 4500.00),
+(18, 9, 1, 400.00),
+(19, 2, 1, 1500.00),
+(20, 10, 3, 300.00);
 
 INSERT INTO IncidentLog (driver_id, vehicle_id, incident_type, incident_date_time, incident_location, incident_severity) VALUES
 (1, 1, 'Minor Scratch', '2025-11-15 08:30:00', '123 Main St', 'Minor'),
