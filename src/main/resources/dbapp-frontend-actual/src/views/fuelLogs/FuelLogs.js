@@ -206,7 +206,7 @@ function FuelLogFormModal({ formData, setFormData, vehicles, drivers }) {
                 value={formData.fuelType}
                 readOnly
                 disabled
-                style={{ backgroundColor: '#e9ecef', textTransform: 'capitalize' }}
+                style={{ backgroundColor: '', textTransform: 'capitalize' }}
                 placeholder="Select a vehicle first"
                 />
             </CInputGroup>
@@ -584,7 +584,7 @@ const FuelLogs = () => {
                     <CTableDataCell>
                         {new Date(log.fuelDate).toLocaleDateString()}
                     </CTableDataCell>
-                    {/* Vehicle ID cell removed */}
+
                     <CTableDataCell className="fw-bold">{getPlate(log.vehicleId)}</CTableDataCell>
                     <CTableDataCell>{getDriverName(log.driverId)}</CTableDataCell>
                     <CTableDataCell className="text-capitalize">{log.fuelType}</CTableDataCell>

@@ -4,10 +4,13 @@ const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Clients = React.lazy(() => import('./views/clients/Clients'))
 const TripLogs = React.lazy(() => import('./views/triplogs/TripLog'))
 const Vehicles = React.lazy(() => import('./views/vehicles/Vehicles'))
+const Parts = React.lazy(() => import('./views/parts/Parts'))
 const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
 const FuelLogs = React.lazy(() => import ('./views/fuelLogs/FuelLogs'))
+const MaintenanceLogs = React.lazy(() => import('./views/maintenancelogs/MaintenanceLogs'))
 const IncidentLogs = React.lazy(() => import('./views/incidentlogs/IncidentLogs'))
 const MileageReport = React.lazy(() => import('./views/reports/MileageReport'))
+const ClientReport = React.lazy(() => import('./views/reports/ClientReport'))
 
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
@@ -108,11 +111,14 @@ const routes = [
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/clients', exact: true, name: 'Clients', element: Clients},
   { path: '/vehicles', name: 'Vehicles', element: Vehicles },
+  { path: '/parts', name: 'Parts', element: Parts },
   { path: '/drivers', name: 'Drivers', element: Drivers },
   { path: '/fuelLogs', name: 'FuelLogs', element: FuelLogs },
+  { path: '/maintenancelogs', name: 'MaintenanceLogs', element: MaintenanceLogs },
   { path: '/incidentlogs', name: 'IncidentLogs', element: IncidentLogs },
   { path: '/triplogs', name: 'TripLogs', element: TripLogs },
   { path: '/reports/mileage', name: 'Mileage Report', element: MileageReport },
+  { path: '/reports/clients', name: 'Client Report', element: ClientReport },
 
 ]
 

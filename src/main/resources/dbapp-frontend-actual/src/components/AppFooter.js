@@ -8,12 +8,12 @@ const AppFooter = () => {
         <a href="https://coreui.io" target="_blank" rel="noopener noreferrer">
           CoreUI
         </a>
-        <span className="ms-1">&copy; 2025 creativeLabs.</span>
+        <span className="ms-1">&copy; Delivery Shipment.</span>
       </div>
       <div className="ms-auto">
-        <span className="me-1">Powered by</span>
+        <span className="me-1">Group 3</span>
         <a href="https://coreui.io/react" target="_blank" rel="noopener noreferrer">
-          CoreUI React Admin &amp; Dashboard Template
+          CCINFOM-S22; Database Application
         </a>
       </div>
     </CFooter>
