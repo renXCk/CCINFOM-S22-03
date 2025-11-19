@@ -7,15 +7,13 @@
 -- 						CORE TABLES 
 -- =====================================================
 
-DROP DATABASE IF EXISTS deliveryshipment;
-CREATE DATABASE deliveryshipment;
 USE deliveryshipment;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
     vehicle_id 		INT AUTO_INCREMENT NOT NULL,
     plate_number 	VARCHAR(20) NOT NULL UNIQUE,
-    vehicle_type 	ENUM('motorcycle','sedan','van','truck') NOT NULL,
+    vehicle_type 	ENUM('motorcycle','sedan','van','truck'),
     model 			VARCHAR(50) NOT NULL,
     status 			ENUM('available','on_trip','maintenance','inactive') DEFAULT 'available',
     fuel_type 		ENUM('diesel', 'gasoline') NOT NULL DEFAULT 'diesel',
@@ -32,8 +30,8 @@ CREATE TABLE IF NOT EXISTS Client (
     phone			VARCHAR(20),
     email			VARCHAR(30),
     address         VARCHAR(255),
-    priority_flag	BOOLEAN,
-    status			ENUM('active','inactive','suspended') DEFAULT 'active',
+    priority_flag	BOOLEAN DEFAULT 0,
+    status			ENUM('active','inactive','suspended') DEFAULT 'inactive',
     completed_orders 	INT DEFAULT 0,
     CONSTRAINT Client_PK PRIMARY KEY (client_id)
 );
@@ -92,8 +90,9 @@ CREATE TABLE IF NOT EXISTS TripLog (
     drop_off_loc    VARCHAR(255),
     date_time_start DATETIME,
     date_time_completed     DATETIME,
-    trip_cost       INT,
-    status          ENUM('Pending','Ongoing','Completed','Cancelled'),
+    trip_cost       INT DEFAULT 0,
+    total_distance  INT DEFAULT 0,
+    status          ENUM('pending','ongoing','completed','cancelled', 'archive') DEFAULT 'pending',
     CONSTRAINT Trip_Log_PK PRIMARY KEY (trip_id),
     CONSTRAINT FK_Trip_Client FOREIGN KEY (client_id) REFERENCES Client(client_id),
     CONSTRAINT FK_Trip_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
@@ -112,7 +111,7 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
 );
 
 -- Junction Table for Maintenance Log & Parts
-CREATE TABLE IF NOT EXISTS MaintenancePart (
+CREATE TABLE MaintenancePart (
     maintenance_id INT NOT NULL,
     part_id       INT, -- removed not null
     quantity_used INT, -- removed not null
@@ -136,16 +135,84 @@ CREATE TABLE IF NOT EXISTS IncidentLog (
     CONSTRAINT FK_Incident_Driver FOREIGN KEY (driver_id) REFERENCES Driver(driver_id)
 );
 
-INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, mileage) 
-VALUES 
-('ABC-123', 'sedan', 'Toyota Vios 1.3', 'available', 'gasoline', 15400),
-('XYZ-987', 'van', 'Toyota Hiace Commuter', 'on_trip', 'diesel', 45000),
-('MC-8821', 'motorcycle', 'Honda Click 125i', 'available', 'gasoline', 8500),
-('TRK-555', 'truck', 'Isuzu Elf N-Series', 'maintenance', 'diesel', 120000),
-('NBI-404', 'sedan', 'Mitsubishi Mirage G4', 'inactive', 'gasoline', 32000),
-('VAN-202', 'van', 'Nissan Urvan NV350', 'available', 'diesel', 28000),
-('HUL-001', 'truck', 'Mitsubishi Fuso Canter', 'available', 'diesel', 95000),
-('MC-1199', 'motorcycle', 'Yamaha NMAX 155', 'on_trip', 'gasoline', 12000),
-('DEF-456', 'sedan', 'Honda City 1.5', 'maintenance', 'gasoline', 18500),
-('LOG-777', 'truck', 'Hino 300 Series', 'available', 'diesel', 67000);
+-- SAMPLE/GENERATED RECORDS 
+
+INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, mileage) VALUES
+('ABC123', 'motorcycle', 'Honda Wave', 'available', 'gasoline', 12000),
+('DEF456', 'sedan', 'Toyota Corolla', 'on_trip', 'gasoline', 45000),
+('GHI789', 'van', 'Nissan NV200', 'maintenance', 'diesel', 78000),
+('JKL012', 'truck', 'Isuzu D-Max', 'available', 'diesel', 95000),
+('MNO345', 'sedan', 'Honda Civic', 'inactive', 'gasoline', 67000),
+('PQR678', 'motorcycle', 'Yamaha NMAX', 'available', 'gasoline', 15000);
+
+INSERT INTO Client (client_type, name, contact_person, phone, email, address, priority_flag, status, completed_orders) VALUES
+('Regular', 'Acme Corp', 'John Doe', '09171234567', 'john@acme.com', '123 Main St', 1, 'active', 15),
+('VIP', 'Beta Ltd', 'Jane Smith', '09179876543', 'jane@beta.com', '456 Oak St', 1, 'active', 30),
+('Regular', 'Gamma Inc', 'Tom Lee', '09170001122', 'tom@gamma.com', '789 Pine St', 0, 'inactive', 5),
+('Corporate', 'Delta Co', 'Anna Cruz', '09175553344', 'anna@delta.com', '321 Elm St', 0, 'suspended', 0),
+('Regular', 'Epsilon LLC', 'Mark Tan', '09176667788', 'mark@epsilon.com', '654 Cedar St', 0, 'active', 12),
+('VIP', 'Zeta Enterprises', 'Lucy Lim', '09179998877', 'lucy@zeta.com', '987 Spruce St', 1, 'active', 20);
+
+
+INSERT INTO Parts (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
+('Brake Pad', 'Front brake pad', 50, 1200.00, 'AutoParts Co', FALSE),
+('Oil Filter', 'Engine oil filter', 100, 300.00, 'FilterMart', TRUE),
+('Spark Plug', 'NGK Spark Plug', 200, 150.00, 'NGK Supplier', FALSE),
+('Headlight', 'LED headlight', 30, 2500.00, 'LightTech', TRUE),
+('Battery', 'Car battery 12V', 25, 5000.00, 'PowerCells', FALSE),
+('Tire', 'All-season tire', 60, 4500.00, 'TireWorld', TRUE);
+
+INSERT INTO Driver (first_name, last_name, license_num, contact_num, email, status, completed_trips) VALUES
+('John', 'Reyes', 'L1234567', '09171234567', 'john.reyes@gmail.com', 'active', 120),
+('Maria', 'Santos', 'L2345678', '09172345678', 'maria.santos@gmail.com', 'active', 95),
+('Carlos', 'Lopez', 'L3456789', '09173456789', 'carlos.lopez@gmail.com', 'suspended', 45),
+('Ana', 'Velasco', 'L4567890', '09174567890', 'ana.velasco@gmail.com', 'inactive', 10),
+('Peter', 'Tan', 'L5678901', '09175678901', 'peter.tan@gmail.com', 'active', 80),
+('Lucy', 'Cruz', 'L6789012', '09176789012', 'lucy.cruz@gmail.com', 'active', 150);
+
+INSERT INTO FuelLog (vehicle_id, driver_id, fuel_date, fuel_type, liters_filled, price_per_liter, reimbursed) VALUES
+(1, 1, '2025-11-15 08:00:00', 'gasoline', 10.5, 75.00, FALSE),
+(2, 2, '2025-11-16 09:30:00', 'gasoline', 40.0, 75.50, TRUE),
+(3, 3, '2025-11-17 07:45:00', 'diesel', 60.0, 80.00, FALSE),
+(4, 4, '2025-11-18 10:15:00', 'diesel', 55.0, 79.50, TRUE),
+(5, 5, '2025-11-19 08:30:00', 'gasoline', 35.0, 76.00, FALSE),
+(6, 6, '2025-11-19 12:00:00', 'gasoline', 12.5, 75.25, TRUE);
+
+INSERT INTO TripLog (client_id, vehicle_id, driver_id, pick_up_loc, drop_off_loc, date_time_start, date_time_completed, trip_cost, total_distance, status) VALUES
+(1, 2, 1, '123 Main St', '456 Oak St', '2025-11-15 08:00:00', '2025-11-15 09:00:00', 500, 15, 'completed'),
+(2, 3, 2, '456 Oak St', '789 Pine St', '2025-11-16 10:00:00', '2025-11-16 11:15:00', 700, 25, 'completed'),
+(3, 4, 3, '789 Pine St', '321 Elm St', '2025-11-17 09:30:00', NULL, 0, 0, 'ongoing'),
+(4, 1, 4, '321 Elm St', '654 Cedar St', '2025-11-18 07:45:00', '2025-11-18 09:00:00', 450, 20, 'completed'),
+(5, 5, 5, '654 Cedar St', '987 Spruce St', '2025-11-19 08:15:00', NULL, 0, 0, 'pending'),
+(6, 6, 6, '987 Spruce St', '123 Main St', '2025-11-19 10:00:00', NULL, 0, 0, 'pending');
+
+INSERT INTO MaintenanceLog (vehicle_id, date_time_start, date_time_completed, status) VALUES
+(1, '2025-11-10 08:00:00', '2025-11-10 12:00:00', 'Completed'),
+(2, '2025-11-11 09:00:00', '2025-11-11 14:00:00', 'Completed'),
+(3, '2025-11-12 07:30:00', NULL, 'Ongoing'),
+(4, '2025-11-13 10:00:00', '2025-11-13 15:30:00', 'Completed'),
+(5, '2025-11-14 08:45:00', NULL, 'Pending'),
+(6, '2025-11-15 09:15:00', '2025-11-15 13:00:00', 'Cancelled');
+
+INSERT INTO MaintenancePart (maintenance_id, part_id, quantity_used, cost_per_part) VALUES
+(1, 1, 4, 1200.00),
+(1, 2, 2, 300.00),
+(2, 3, 6, 150.00),
+(3, 4, 1, 2500.00),
+(4, 5, 1, 5000.00),
+(5, 6, 4, 4500.00);
+
+INSERT INTO IncidentLog (driver_id, vehicle_id, incident_type, incident_date_time, incident_location, incident_severity) VALUES
+(1, 1, 'Minor Scratch', '2025-11-15 08:30:00', '123 Main St', 'Minor'),
+(2, 2, 'Flat Tire', '2025-11-16 09:45:00', '456 Oak St', 'Moderate'),
+(3, 3, 'Engine Failure', '2025-11-17 10:15:00', '789 Pine St', 'Major'),
+(4, 4, 'Rear-end Collision', '2025-11-18 07:50:00', '321 Elm St', 'Moderate'),
+(5, 5, 'Broken Headlight', '2025-11-19 08:45:00', '654 Cedar St', 'Minor'),
+(6, 6, 'Oil Spill', '2025-11-19 11:00:00', '987 Spruce St', 'Major');
+
+
+
+
+
+	
 	

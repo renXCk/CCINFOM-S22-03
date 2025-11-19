@@ -215,12 +215,12 @@ const Clients = () => {
         // 1. Apply Filtering
         if (filters.status) {
             result = result.filter(
-                (c) => c.status && c.status.toLowerCase() === filters.status.toLowerCase() // Added null check
+                (c) => c.status && c.status.toLowerCase() === filters.status.toLowerCase()
             );
         }
         if (filters.type) {
             result = result.filter(
-                (c) => c.client_type && c.client_type.toLowerCase() === filters.type.toLowerCase() // Added null check
+                (c) => c.client_type && c.client_type.toLowerCase() === filters.type.toLowerCase() 
             );
         }
 
@@ -414,8 +414,7 @@ const Clients = () => {
                                 <CTableHeaderCell>Name</CTableHeaderCell>
                                 <CTableHeaderCell>Type</CTableHeaderCell>
                                 <CTableHeaderCell>Contact Person</CTableHeaderCell>
-                                <CTableHeaderCell>Email</CTableHeaderCell>
-                                <CTableHeaderCell>Phone</CTableHeaderCell>
+                                <CTableHeaderCell>Contact Info</CTableHeaderCell>
                                 <CTableHeaderCell>Status</CTableHeaderCell>
                                 <CTableHeaderCell>Completed Orders</CTableHeaderCell>
                                 <CTableHeaderCell>Priority</CTableHeaderCell>
@@ -435,8 +434,10 @@ const Clients = () => {
                                         <CTableDataCell>{c.name}</CTableDataCell>
                                         <CTableDataCell>{c.client_type}</CTableDataCell>
                                         <CTableDataCell>{c.contact_person}</CTableDataCell>
-                                        <CTableDataCell>{c.email}</CTableDataCell>
-                                        <CTableDataCell>{c.phone}</CTableDataCell>
+                                        <CTableDataCell>
+                                            <div><small>{c.phone}</small></div>
+                                            <div className="text-muted"><small>{c.email}</small></div>
+                                        </CTableDataCell>                                        
                                         <CTableDataCell>
                                             <CBadge color={getStatusColor(c.status)}>
                                                 {c.status}
