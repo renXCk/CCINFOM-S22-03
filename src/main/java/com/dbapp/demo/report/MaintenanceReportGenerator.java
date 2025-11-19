@@ -8,12 +8,14 @@ import com.dbapp.demo.dao.MaintenanceLogDAO;
 import com.dbapp.demo.dao.MaintenancePartDAO;
 import com.dbapp.demo.dao.VehicleDAO;
 import com.dbapp.demo.dao.PartDAO;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class MaintenanceReportGenerator {
     private final MaintenanceLogDAO maintenanceLogDAO;
     private final MaintenancePartDAO maintenancePartDAO;
@@ -21,23 +23,20 @@ public class MaintenanceReportGenerator {
     private final PartDAO partDAO;
     private final DateTimeFormatter formatter;
 
-    public MaintenanceReportGenerator() {
-        this.maintenanceLogDAO = new MaintenanceLogDAO();
-        this.maintenancePartDAO = new MaintenancePartDAO();
-        this.vehicleDAO = new VehicleDAO();
-        this.partDAO = new PartDAO();
+    public MaintenanceReportGenerator(MaintenanceLogDAO maintenanceLogDAO,
+                                      MaintenancePartDAO maintenancePartDAO,
+                                      VehicleDAO vehicleDAO,
+                                      PartDAO partDAO) {
+        this.maintenanceLogDAO = maintenanceLogDAO;
+        this.maintenancePartDAO = maintenancePartDAO;
+        this.vehicleDAO = vehicleDAO;
+        this.partDAO = partDAO;
         this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 
-    /**
-     * Generate maintenance cost report for a specific year
-     * @param year The year to generate report for
-     * @return MaintenanceReport object containing all report data
-     */
     public MaintenanceReport generateAnnualReport(int year) {
         List<MaintenanceLog> allLogs = maintenanceLogDAO.readMaintenanceLogs();
-        
-        // Filter maintenance logs for the specified year
+
         List<MaintenanceLog> yearLogs = allLogs.stream()
                 .filter(log -> isInYear(log.getDateTimeStart(), year))
                 .collect(Collectors.toList());
@@ -52,29 +51,26 @@ public class MaintenanceReportGenerator {
         Map<String, Double> partCostBreakdown = new HashMap<>();
 
         for (MaintenanceLog log : yearLogs) {
-            // Get parts used in this maintenance
             List<MaintenancePart> parts = maintenancePartDAO.readByMaintenanceId(log.getMaintenanceId());
-            
+
             double maintenanceCost = 0.0;
             for (MaintenancePart mp : parts) {
                 if (mp.getPartId() != null && mp.getQuantityUsed() != null && mp.getCostPerPart() != null) {
                     double partCost = mp.getCostPerPart() * mp.getQuantityUsed();
                     maintenanceCost += partCost;
                     totalPartsUsed += mp.getQuantityUsed();
-                    
-                    // Get part name for breakdown
-                    Part part = getPartById(mp.getPartId());
+
+                    Part part = partDAO.getPartById(mp.getPartId());
                     if (part != null) {
                         String partName = part.getPartName();
-                        partCostBreakdown.put(partName, 
-                            partCostBreakdown.getOrDefault(partName, 0.0) + partCost);
+                        partCostBreakdown.put(partName,
+                                partCostBreakdown.getOrDefault(partName, 0.0) + partCost);
                     }
                 }
             }
-            
+
             totalPartsCost += maintenanceCost;
 
-            // Update vehicle summary
             int vehicleId = log.getVehicleId();
             if (!vehicleSummaries.containsKey(vehicleId)) {
                 Vehicle vehicle = vehicleDAO.getVehicleById(vehicleId);
@@ -84,7 +80,7 @@ public class MaintenanceReportGenerator {
                 summary.setModel(vehicle != null ? vehicle.getModel() : "Unknown");
                 vehicleSummaries.put(vehicleId, summary);
             }
-            
+
             VehicleMaintenanceSummary summary = vehicleSummaries.get(vehicleId);
             summary.setMaintenanceCount(summary.getMaintenanceCount() + 1);
             summary.setTotalCost(summary.getTotalCost() + maintenanceCost);
@@ -99,12 +95,6 @@ public class MaintenanceReportGenerator {
         return report;
     }
 
-    /**
-     * Generate maintenance cost report for a specific vehicle in a given year
-     * @param vehicleId The vehicle ID
-     * @param year The year
-     * @return VehicleMaintenanceReport with detailed information
-     */
     public VehicleMaintenanceReport generateVehicleReport(int vehicleId, int year) {
         Vehicle vehicle = vehicleDAO.getVehicleById(vehicleId);
         if (vehicle == null) {
@@ -141,14 +131,14 @@ public class MaintenanceReportGenerator {
             for (MaintenancePart mp : parts) {
                 if (mp.getPartId() != null && mp.getQuantityUsed() != null && mp.getCostPerPart() != null) {
                     PartUsageDetail pud = new PartUsageDetail();
-                    Part part = getPartById(mp.getPartId());
-                    
+                    Part part = partDAO.getPartById(mp.getPartId());
+
                     pud.setPartId(mp.getPartId());
                     pud.setPartName(part != null ? part.getPartName() : "Unknown");
                     pud.setQuantityUsed(mp.getQuantityUsed());
                     pud.setCostPerPart(mp.getCostPerPart());
                     pud.setTotalCost(mp.getCostPerPart() * mp.getQuantityUsed());
-                    
+
                     partDetails.add(pud);
                     maintenanceCost += pud.getTotalCost();
                 }
@@ -166,11 +156,6 @@ public class MaintenanceReportGenerator {
         return report;
     }
 
-    /**
-     * Generate summary statistics for all vehicles in a year
-     * @param year The year
-     * @return Map of statistics
-     */
     public Map<String, Object> generateSummaryStatistics(int year) {
         MaintenanceReport report = generateAnnualReport(year);
         Map<String, Object> stats = new HashMap<>();
@@ -189,7 +174,6 @@ public class MaintenanceReportGenerator {
             stats.put("averageMaintenancePerVehicle", String.format("%.2f", avgMaintenancePerVehicle));
         }
 
-        // Find most expensive maintenance
         double maxCost = 0.0;
         String mostExpensiveVehicle = "";
         for (VehicleMaintenanceSummary vms : report.getVehicleSummaries()) {
@@ -204,9 +188,6 @@ public class MaintenanceReportGenerator {
         return stats;
     }
 
-    /**
-     * Helper method to check if a date string is in a specific year
-     */
     private boolean isInYear(String dateTimeStr, int year) {
         if (dateTimeStr == null || dateTimeStr.trim().isEmpty()) {
             return false;
@@ -219,22 +200,6 @@ public class MaintenanceReportGenerator {
         }
     }
 
-    /**
-     * Helper method to get part by ID
-     */
-    private Part getPartById(int partId) {
-        List<Part> allParts = partDAO.readPart();
-        return allParts.stream()
-                .filter(part -> part.getPartId() == partId)
-                .findFirst()
-                .orElse(null);
-    }
-
-    // ==================== Report Data Classes ====================
-
-    /**
-     * Main report class for annual maintenance summary
-     */
     public static class MaintenanceReport {
         private int year;
         private int totalMaintenanceCount;
@@ -248,41 +213,37 @@ public class MaintenanceReportGenerator {
             this.partCostBreakdown = new HashMap<>();
         }
 
-        // Getters and setters
         public int getYear() { return year; }
         public void setYear(int year) { this.year = year; }
 
         public int getTotalMaintenanceCount() { return totalMaintenanceCount; }
-        public void setTotalMaintenanceCount(int totalMaintenanceCount) { 
-            this.totalMaintenanceCount = totalMaintenanceCount; 
+        public void setTotalMaintenanceCount(int totalMaintenanceCount) {
+            this.totalMaintenanceCount = totalMaintenanceCount;
         }
 
         public double getTotalPartsCost() { return totalPartsCost; }
-        public void setTotalPartsCost(double totalPartsCost) { 
-            this.totalPartsCost = totalPartsCost; 
+        public void setTotalPartsCost(double totalPartsCost) {
+            this.totalPartsCost = totalPartsCost;
         }
 
         public int getTotalPartsUsed() { return totalPartsUsed; }
-        public void setTotalPartsUsed(int totalPartsUsed) { 
-            this.totalPartsUsed = totalPartsUsed; 
+        public void setTotalPartsUsed(int totalPartsUsed) {
+            this.totalPartsUsed = totalPartsUsed;
         }
 
-        public List<VehicleMaintenanceSummary> getVehicleSummaries() { 
-            return vehicleSummaries; 
+        public List<VehicleMaintenanceSummary> getVehicleSummaries() {
+            return vehicleSummaries;
         }
-        public void setVehicleSummaries(List<VehicleMaintenanceSummary> vehicleSummaries) { 
-            this.vehicleSummaries = vehicleSummaries; 
+        public void setVehicleSummaries(List<VehicleMaintenanceSummary> vehicleSummaries) {
+            this.vehicleSummaries = vehicleSummaries;
         }
 
         public Map<String, Double> getPartCostBreakdown() { return partCostBreakdown; }
-        public void setPartCostBreakdown(Map<String, Double> partCostBreakdown) { 
-            this.partCostBreakdown = partCostBreakdown; 
+        public void setPartCostBreakdown(Map<String, Double> partCostBreakdown) {
+            this.partCostBreakdown = partCostBreakdown;
         }
     }
 
-    /**
-     * Summary of maintenance for a specific vehicle
-     */
     public static class VehicleMaintenanceSummary {
         private int vehicleId;
         private String plateNumber;
@@ -297,7 +258,6 @@ public class MaintenanceReportGenerator {
             this.maintenanceLogs = new ArrayList<>();
         }
 
-        // Getters and setters
         public int getVehicleId() { return vehicleId; }
         public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
 
@@ -308,22 +268,19 @@ public class MaintenanceReportGenerator {
         public void setModel(String model) { this.model = model; }
 
         public int getMaintenanceCount() { return maintenanceCount; }
-        public void setMaintenanceCount(int maintenanceCount) { 
-            this.maintenanceCount = maintenanceCount; 
+        public void setMaintenanceCount(int maintenanceCount) {
+            this.maintenanceCount = maintenanceCount;
         }
 
         public double getTotalCost() { return totalCost; }
         public void setTotalCost(double totalCost) { this.totalCost = totalCost; }
 
         public List<MaintenanceLog> getMaintenanceLogs() { return maintenanceLogs; }
-        public void setMaintenanceLogs(List<MaintenanceLog> maintenanceLogs) { 
-            this.maintenanceLogs = maintenanceLogs; 
+        public void setMaintenanceLogs(List<MaintenanceLog> maintenanceLogs) {
+            this.maintenanceLogs = maintenanceLogs;
         }
     }
 
-    /**
-     * Detailed report for a single vehicle
-     */
     public static class VehicleMaintenanceReport {
         private int vehicleId;
         private String plateNumber;
@@ -338,7 +295,6 @@ public class MaintenanceReportGenerator {
             this.maintenanceDetails = new ArrayList<>();
         }
 
-        // Getters and setters
         public int getVehicleId() { return vehicleId; }
         public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
 
@@ -355,22 +311,19 @@ public class MaintenanceReportGenerator {
         public void setYear(int year) { this.year = year; }
 
         public int getMaintenanceCount() { return maintenanceCount; }
-        public void setMaintenanceCount(int maintenanceCount) { 
-            this.maintenanceCount = maintenanceCount; 
+        public void setMaintenanceCount(int maintenanceCount) {
+            this.maintenanceCount = maintenanceCount;
         }
 
         public double getTotalCost() { return totalCost; }
         public void setTotalCost(double totalCost) { this.totalCost = totalCost; }
 
         public List<MaintenanceDetail> getMaintenanceDetails() { return maintenanceDetails; }
-        public void setMaintenanceDetails(List<MaintenanceDetail> maintenanceDetails) { 
-            this.maintenanceDetails = maintenanceDetails; 
+        public void setMaintenanceDetails(List<MaintenanceDetail> maintenanceDetails) {
+            this.maintenanceDetails = maintenanceDetails;
         }
     }
 
-    /**
-     * Details of a single maintenance event
-     */
     public static class MaintenanceDetail {
         private int maintenanceId;
         private String dateTimeStart;
@@ -383,35 +336,31 @@ public class MaintenanceReportGenerator {
             this.partsUsed = new ArrayList<>();
         }
 
-        // Getters and setters
         public int getMaintenanceId() { return maintenanceId; }
         public void setMaintenanceId(int maintenanceId) { this.maintenanceId = maintenanceId; }
 
         public String getDateTimeStart() { return dateTimeStart; }
-        public void setDateTimeStart(String dateTimeStart) { 
-            this.dateTimeStart = dateTimeStart; 
+        public void setDateTimeStart(String dateTimeStart) {
+            this.dateTimeStart = dateTimeStart;
         }
 
         public String getDateTimeCompleted() { return dateTimeCompleted; }
-        public void setDateTimeCompleted(String dateTimeCompleted) { 
-            this.dateTimeCompleted = dateTimeCompleted; 
+        public void setDateTimeCompleted(String dateTimeCompleted) {
+            this.dateTimeCompleted = dateTimeCompleted;
         }
 
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
 
         public List<PartUsageDetail> getPartsUsed() { return partsUsed; }
-        public void setPartsUsed(List<PartUsageDetail> partsUsed) { 
-            this.partsUsed = partsUsed; 
+        public void setPartsUsed(List<PartUsageDetail> partsUsed) {
+            this.partsUsed = partsUsed;
         }
 
         public double getTotalCost() { return totalCost; }
         public void setTotalCost(double totalCost) { this.totalCost = totalCost; }
     }
 
-    /**
-     * Details of part usage in a maintenance
-     */
     public static class PartUsageDetail {
         private int partId;
         private String partName;
@@ -419,7 +368,6 @@ public class MaintenanceReportGenerator {
         private double costPerPart;
         private double totalCost;
 
-        // Getters and setters
         public int getPartId() { return partId; }
         public void setPartId(int partId) { this.partId = partId; }
 
