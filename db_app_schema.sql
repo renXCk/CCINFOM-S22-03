@@ -232,29 +232,23 @@ INSERT INTO Vehicle (plate_number, vehicle_type, model, status, fuel_type, milea
 ('DEF 123', 'motorcycle', 'Honda PCX', 'available', 'gasoline', 0);
 
 INSERT INTO Client (client_type, name, contact_person, phone, email, address, priority_flag, status, completed_orders) VALUES
-('Regular', 'Acme Corp', 'John Doe', '09171234567', 'john@acme.com', '123 Main St', 1, 'active', 15),
-('VIP', 'Beta Ltd', 'Jane Smith', '09179876543', 'jane@beta.com', '456 Oak St', 1, 'active', 30),
-('Regular', 'Gamma Inc', 'Tom Lee', '09170001122', 'tom@gamma.com', '789 Pine St', 0, 'inactive', 5),
-('Corporate', 'Delta Co', 'Anna Cruz', '09175553344', 'anna@delta.com', '321 Elm St', 0, 'suspended', 0),
-('Regular', 'Epsilon LLC', 'Mark Tan', '09176667788', 'mark@epsilon.com', '654 Cedar St', 0, 'active', 12),
-('VIP', 'Zeta Enterprises', 'Lucy Lim', '09179998877', 'lucy@zeta.com', '987 Spruce St', 1, 'active', 20);
-
+('Corporate', 'Acme Corp', 'John Doe', '0917-111-2222', 'contact@acme.com', '123 Business Rd, Makati', 1, 'active', 120),
+('Individual', 'Jane Smith', 'Jane Smith', '0918-333-4444', 'jane.smith@gmail.com', '456 Residential St, QC', 0, 'active', 5),
+('Retail', 'SuperMart', 'Manager Mike', '0919-555-6666', 'supply@supermart.com', '789 Market Ave, Taguig', 1, 'active', 50),
+('Corporate', 'Tech Solutions', 'Sarah Lee', '0920-777-8888', 'admin@techsol.com', '101 Tech Park, Pasig', 0, 'inactive', 10);
 
 INSERT INTO Parts (part_name, description, stock_qty, cost, supplier, pending_delivery) VALUES
-('Brake Pad', 'Front brake pad', 50, 1200.00, 'AutoParts Co', FALSE),
-('Oil Filter', 'Engine oil filter', 100, 300.00, 'FilterMart', TRUE),
-('Spark Plug', 'NGK Spark Plug', 200, 150.00, 'NGK Supplier', FALSE),
-('Headlight', 'LED headlight', 30, 2500.00, 'LightTech', TRUE),
-('Battery', 'Car battery 12V', 25, 5000.00, 'PowerCells', FALSE),
-('Tire', 'All-season tire', 60, 4500.00, 'TireWorld', TRUE);
+('Oil Filter', 'Standard Oil Filter', 50, 350.00, 'AutoSupply Co.', 0),
+('Brake Pad', 'Ceramic Brake Pads', 20, 1500.00, 'Brake Masters', 1),
+('Tire', 'R15 All Season', 10, 4500.00, 'Rubber World', 0),
+('Headlight Bulb', 'LED H4', 30, 800.00, 'LightOne', 0);
 
 INSERT INTO Driver (first_name, last_name, license_num, contact_num, email, status, completed_trips) VALUES
-('John', 'Reyes', 'L1234567', '09171234567', 'john.reyes@gmail.com', 'active', 120),
-('Maria', 'Santos', 'L2345678', '09172345678', 'maria.santos@gmail.com', 'active', 95),
-('Carlos', 'Lopez', 'L3456789', '09173456789', 'carlos.lopez@gmail.com', 'suspended', 45),
-('Ana', 'Velasco', 'L4567890', '09174567890', 'ana.velasco@gmail.com', 'inactive', 10),
-('Peter', 'Tan', 'L5678901', '09175678901', 'peter.tan@gmail.com', 'active', 80),
-('Lucy', 'Cruz', 'L6789012', '09176789012', 'lucy.cruz@gmail.com', 'active', 150);
+('Juan', 'Dela Cruz', 'N01-99-123456', '0917-123-4567', 'juan.dc@email.com', 'active', 45),
+('Pedro', 'Penduko', 'N02-88-654321', '0918-234-5678', 'pedro.p@email.com', 'active', 32),
+('Maria', 'Clara', 'N03-77-987654', '0919-345-6789', 'maria.c@email.com', 'active', 15),
+('Jose', 'Rizal', 'N04-66-112233', '0920-456-7890', 'jose.r@email.com', 'suspended', 10),
+('Andres', 'Bonifacio', 'N05-55-445566', '0921-567-8901', 'andres.b@email.com', 'inactive', 60);
 
 INSERT INTO FuelLog (vehicle_id, driver_id, fuel_date, fuel_type, liters_filled, price_per_liter, reimbursed) VALUES
 (1, 1, '2025-11-15 08:00:00', 'gasoline', 10.5, 75.00, FALSE),
@@ -295,10 +289,3 @@ INSERT INTO IncidentLog (driver_id, vehicle_id, incident_type, incident_date_tim
 (4, 4, 'Rear-end Collision', '2025-11-18 07:50:00', '321 Elm St', 'Moderate'),
 (5, 5, 'Broken Headlight', '2025-11-19 08:45:00', '654 Cedar St', 'Minor'),
 (6, 6, 'Oil Spill', '2025-11-19 11:00:00', '987 Spruce St', 'Major');
-
-
-
-
-
-	
-	

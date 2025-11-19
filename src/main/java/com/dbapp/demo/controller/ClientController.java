@@ -1,6 +1,7 @@
 package com.dbapp.demo.controller;
 
 import com.dbapp.demo.model.Client;
+import com.dbapp.demo.model.ClientView;
 import com.dbapp.demo.services.ClientService;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,10 @@ public class ClientController {
     public Client getClientById(@PathVariable int id){
         return clientService.getClientById(id);
     }
+
+    // get all client views
+    @GetMapping("/view")
+    public List<ClientView> getClientViews(){ return  clientService.getClientView(); }
 
     // create new client regis
     @PostMapping("/add")

@@ -28,7 +28,7 @@ import {
 } from "@coreui/react";
 
 import CIcon from "@coreui/icons-react";
-import { cilPlus, cilPencil, cilTrash, cilSortAlphaDown, } from "@coreui/icons";
+import { cilPlus, cilPencil, cilTrash, cilSortAlphaDown, cilListRich } from "@coreui/icons";
 
 import axios from "axios";
 
@@ -36,11 +36,151 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
     <CFormInput {...props} ref={inputRef} />
 ));
 
+// --- Helper Functions ---
+    const getTripStatusBadge = (status) => {
+        switch (status?.toLowerCase()) {
+            case "completed":
+                return "success";
+            case "ongoing":
+                return "primary";
+            case "pending":
+                return "warning";
+            case "cancelled":
+                return "danger";
+            case "archive":
+                return "secondary";
+            default:
+                return "dark";
+        }
+    };
+
+const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    // Simple date formatting for display
+    return new Date(dateString).toLocaleString();
+};
+
+/* =======================================================
+   VIEW WITH OTHER RECORDS MODAL 
+========================================================== */
+function ViewWithOtherRecordsModal({ visible, onClose }) {
+    // Focus is no longer used for filtering, just displays the title if set
+    const [relatedRecords, setRelatedRecords] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (visible) {
+            setLoading(true);
+
+            // Fetch all client view records (which includes trip data)
+            axios.get("http://localhost:8080/api/clients/view")
+                .then(res => {
+                    // We now show ALL records, no client-specific filtering here
+                    setRelatedRecords(res.data);
+                })
+                .catch(err => console.error(err))
+                .finally(() => setLoading(false));
+        }
+    }, [visible]);
+
+    const columns = [
+        { key: 'clientName', label: 'Client Name', cell: (r) => <div className="fw-semibold">{r.clientName}</div> },
+        { 
+            key: 'clientType', 
+            label: 'Client Type', 
+            cell: (r) => r.clientType 
+        },
+        { 
+            key: 'tripStatus', 
+            label: 'Trip Status', 
+            cell: (r) => <CBadge color={getTripStatusBadge(r.tripStatus)}>{r.tripStatus}</CBadge> 
+        },
+        { 
+            key: 'dateTimeStart', 
+            label: 'Start Time', 
+            cell: (r) => formatDate(r.dateTimeStart) 
+        },
+        { 
+            key: 'dateTimeCompleted', 
+            label: 'Completed Time', 
+            cell: (r) => formatDate(r.dateTimeCompleted) || "-" 
+        },
+        { 
+            key: 'vehicle', 
+            label: 'Vehicle', 
+            // This structure correctly renders two lines of text within one cell
+            cell: (r) => (
+                <>
+                    <div className="fw-semibold small">{r.plateNumber}</div>
+                    <div className="text-muted small">{r.vehicleModel}</div>
+                </>
+            ) 
+        },
+        // *** SYNTAX FIX: Comma was missing before this object ***
+        { 
+            key: 'driver', 
+            label: 'Driver', 
+            // Rendering Driver Name on top, License ID on bottom
+            cell: (r) => (
+                <>
+                    <div className="fw-semibold small">{r.driverName}</div>
+                    <div className="text-muted small">Lic: {r.driverLicense}</div>
+                </>
+            ) 
+        },
+    ];
+
+    
+
+    return (
+        <CModal visible={visible} onClose={onClose} size="xl">
+            <CModalHeader>
+                <CModalTitle>Clients View with Other Related Records</CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+                {loading ? (
+                    <div className="text-center p-5">
+                        <CSpinner />
+                        <p>Loading records...</p>
+                    </div>
+                ) : relatedRecords.length === 0 ? (
+                    <div className="text-center p-4">No records found.</div>
+                ) : (
+                    <CTable striped hover responsive bordered className="align-middle small">
+                        <CTableHead color="dark">
+                            <CTableRow>
+                                {/* Use the ordered columns for headers */}
+                                {columns.map(col => (
+                                    <CTableHeaderCell key={col.key}>{col.label}</CTableHeaderCell>
+                                ))}
+                            </CTableRow>
+                        </CTableHead>
+                        <CTableBody>
+                            {relatedRecords.map((r) => (
+                                <CTableRow key={r.tripId}>
+                                    {/* Use the ordered columns for cells */}
+                                    {columns.map(col => (
+                                        <CTableDataCell key={`${r.tripId}-${col.key}`}>
+                                            {col.cell(r)}
+                                        </CTableDataCell>
+                                    ))}
+                                </CTableRow>
+                            ))}
+                        </CTableBody>
+                    </CTable>
+                )}
+            </CModalBody>
+            <CModalFooter>
+                <CButton color="secondary" onClick={onClose}>Close</CButton>
+            </CModalFooter>
+        </CModal>
+    );
+}
+
 /* ===========================
-ADD CLIENT FORM 
+ADD CLIENT FORM MODAL 
 =========================== */
 function AddClientModal({ newClient, setNewClient }) {
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setNewClient({ ...newClient, [name]: value });
@@ -145,12 +285,19 @@ function AddClientModal({ newClient, setNewClient }) {
 }
 
 /* ===========================
-        MAIN PAGE
+          MAIN PAGE!!
 =========================== */
 const Clients = () => {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visible, setVisible] = useState(false);
+    const [viewRecordsModalVisible, setViewRecordsModalVisible] = useState(false);
+    // focusedClient is kept for the Add/Edit form, but not used by the general View modal
+    const [focusedClient, setFocusedClient] = useState(null); 
+
+    /* ===========================
+    STATES 
+    =========================== */
 
     // --- FILTER & SORT STATE ---
     const [filters, setFilters] = useState({
@@ -173,7 +320,7 @@ const Clients = () => {
         status: "",
         priority_flag: "0",
         completed_orders: 0,
-        address: "", // Added address for reset
+        address: "",
     };
 
     /* Form State */
@@ -191,6 +338,15 @@ const Clients = () => {
                 return "dark";
         }
     };
+
+    // Updated to only toggle visibility, as the modal will fetch all data itself.
+    const openViewRecordsModal = () => {
+        setViewRecordsModalVisible(true);
+    };
+
+    /* ===========================
+    FETCHES
+    =========================== */
 
     /* Load Clients */
     const loadClients = async () => {
@@ -220,7 +376,7 @@ const Clients = () => {
         }
         if (filters.type) {
             result = result.filter(
-                (c) => c.client_type && c.client_type.toLowerCase() === filters.type.toLowerCase() 
+                (c) => c.client_type && c.client_type.toLowerCase() === filters.type.toLowerCase()
             );
         }
 
@@ -234,7 +390,6 @@ const Clients = () => {
                 sortConfig.key === "client_id" ||
                 sortConfig.key === "completed_orders"
             ) {
-                // Ensure values are numbers for comparison, defaulting to 0
                 const numA = Number(aVal) || 0;
                 const numB = Number(bVal) || 0;
                 return sortConfig.direction === "asc" ? numA - numB : numB - numA;
@@ -251,6 +406,10 @@ const Clients = () => {
 
         return result;
     }, [clients, filters, sortConfig]);
+
+    /* ===========================
+    HANDLE CRUD BUTTONS
+    =========================== */
 
     /* Handle Edit API call */
     const handleEdit = async () => {
@@ -270,14 +429,14 @@ const Clients = () => {
     };
 
     /* SAVE CLIENT (Handles both Add and Edit) */
-    const handleSave = async () => { 
+    const handleSave = async () => {
         try {
             if (newClient.client_id) {
                 // If client_id exists, it's an edit operation
-                await handleEdit(); 
+                await handleEdit();
                 return;
             }
-            
+
             // Otherwise, it's an add operation
             await axios.post("http://localhost:8080/api/clients/add", newClient);
             loadClients();
@@ -288,10 +447,9 @@ const Clients = () => {
         }
     };
 
-
     const handleEditClick = (client) => {
         setNewClient(client); // populate modal form with current client data
-        setVisible(true);     // open modal
+        setVisible(true); // open modal
     }
 
     const handleDelete = async (clientId) => {
@@ -317,23 +475,44 @@ const Clients = () => {
             direction: prev.direction === 'asc' ? 'desc' : 'asc'
         }));
     };
-    
+
     // Function to handle opening the modal for *adding* a new client
-    const openAddModal = () => { 
+    const openAddModal = () => {
         setNewClient(initialClientState);
         setVisible(true);
     };
 
+    /* ===========================
+    PAGE DESIGN
+    =========================== */
+
     return (
         <CCard className="mb-4">
             <CCardHeader>
+                {/* HEADER & ACTION BUTTONS */}
                 <strong>Client List</strong>
+                {/* Add Client*/}
                 <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
                     <CIcon icon={cilPlus} className="me-2" />
                     Add Client
                 </CButton>
+
+                {/* View with other records - **NOW CORRECTLY OPENS MODAL***/}
+                <CButton
+                    color="secondary"
+                    variant="outline"
+                    className="float-end btn-sm me-2"
+                    onClick={openViewRecordsModal} 
+                >
+                    <CIcon icon={cilListRich} className="me-2" />
+                    View With Other Records
+                </CButton>
+
+
             </CCardHeader>
             <CCardBody>
+
+
                 {/* ===========================
                 FILTER & SORT TOOLBAR
                 =========================== */}
@@ -437,7 +616,7 @@ const Clients = () => {
                                         <CTableDataCell>
                                             <div><small>{c.phone}</small></div>
                                             <div className="text-muted"><small>{c.email}</small></div>
-                                        </CTableDataCell>                                        
+                                        </CTableDataCell>
                                         <CTableDataCell>
                                             <CBadge color={getStatusColor(c.status)}>
                                                 {c.status}
@@ -473,10 +652,12 @@ const Clients = () => {
             </CCardBody>
 
 
-            {/* MODAL */}
-            <CModal 
-                visible={visible} 
-                onClose={() => setVisible(false)} 
+            {/* ===========================
+                MODALS: ADD/EDIT CLIENT
+                =========================== */}
+            <CModal
+                visible={visible}
+                onClose={() => setVisible(false)}
                 onHide={() => setNewClient(initialClientState)}
             >
                 <CModalHeader>
@@ -488,9 +669,9 @@ const Clients = () => {
                 </CModalBody>
 
                 <CModalFooter>
-                    <CButton 
-                        color="secondary" 
-                        onClick={() => { setVisible(false); setNewClient(initialClientState); }}  
+                    <CButton
+                        color="secondary"
+                        onClick={() => { setVisible(false); setNewClient(initialClientState); }}
                     >
                         Close
                     </CButton>
@@ -502,6 +683,19 @@ const Clients = () => {
                     </CButton>
                 </CModalFooter>
             </CModal>
+
+            {/* ===================================================
+                MODAL: VIEW WITH OTHER RECORDS (NOW RENDERED)
+                =================================================== */}
+            <ViewWithOtherRecordsModal
+                // We pass focus/focusedClient but it is currently ignored inside the modal
+                // as requested to show all records instead of one client's records.
+                focus={focusedClient} 
+                visible={viewRecordsModalVisible}
+                onClose={() => setViewRecordsModalVisible(false)}
+            />
+
+
         </CCard>
 
     );

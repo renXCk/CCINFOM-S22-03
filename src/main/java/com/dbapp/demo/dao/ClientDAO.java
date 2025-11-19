@@ -1,6 +1,7 @@
 package com.dbapp.demo.dao;
 
 import com.dbapp.demo.model.Client;
+import com.dbapp.demo.model.ClientView;
 import com.dbapp.demo.util.DBConnection;
 import org.springframework.stereotype.Repository;
 
@@ -148,6 +149,48 @@ public class ClientDAO {
             System.err.println("Error suspending client: " + e.getMessage());
             return false;
         }
+    }
+
+    public List<ClientView> getAllClientView() {
+        List<ClientView> clientViews = new ArrayList<>();
+
+        String query = "SELECT * FROM ClientView ORDER BY client_id, date_time_start DESC";
+
+        try (Connection connection = DBConnection.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(query)) {
+
+            while (rs.next()) {
+                ClientView clientView = new ClientView();
+
+                // Client
+                clientView.setClientId(rs.getInt("client_id"));
+                clientView.setClientName(rs.getString("client_name"));
+                clientView.setClientType(rs.getString("client_type"));
+
+                // Trip
+                clientView.setTripId(rs.getInt("trip_id"));
+                clientView.setDateTimeStart(rs.getString("date_time_start"));
+                clientView.setDateTimeCompleted(rs.getString("date_time_completed"));
+                clientView.setTripStatus(rs.getString("trip_status"));
+
+                // Vehicle
+                clientView.setVehicleId(rs.getInt("vehicle_id"));
+                clientView.setPlateNumber(rs.getString("plate_number"));
+                clientView.setVehicleModel(rs.getString("vehicle_model"));
+
+                // Driver
+                clientView.setDriverId(rs.getInt("driver_id"));
+                clientView.setDriverName(rs.getString("driver_name"));
+                clientView.setDriverLicense(rs.getString("driver_license"));
+
+                clientViews.add(clientView);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error reading ClientView: " + e.getMessage());
+        }
+        return clientViews;
     }
 
 }
