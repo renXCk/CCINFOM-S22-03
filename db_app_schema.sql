@@ -193,6 +193,19 @@ JOIN Vehicle v ON t.vehicle_id = v.vehicle_id
 JOIN Driver d ON t.driver_id = d.driver_id
 JOIN Client c ON t.client_id = c.client_id;
 
+CREATE OR REPLACE VIEW DriverView AS
+SELECT DISTINCT
+    d.driver_id,
+    CONCAT(d.first_name, ' ', d.last_name) AS driver_name,
+    d.license_num,
+    v.vehicle_id,
+    v.plate_number,
+    v.model,
+    v.vehicle_type
+FROM TripLog t
+JOIN Driver d ON t.driver_id = d.driver_id
+JOIN Vehicle v ON t.vehicle_id = v.vehicle_id;
+
 
 -- SAMPLE/GENERATED RECORDS 
 

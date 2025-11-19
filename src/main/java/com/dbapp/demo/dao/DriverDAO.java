@@ -62,8 +62,8 @@ public class DriverDAO {
         return driverList;
     }
 
-    public Driver getDriverById(int driverId){
-        String query = "SELECT * FROM Driver WHERE driver_id="+driverId;
+    public Driver getDriverById(int driverId) {
+        String query = "SELECT * FROM Driver WHERE driver_id=" + driverId;
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -151,17 +151,16 @@ public class DriverDAO {
     }
 
     public boolean deleteDriver(int driverId) {
-        String query = "DELETE FROM Driver WHERE driver_id=?";
+        String query = "UPDATE Driver SET status='suspended' WHERE driver_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setInt(1, driverId);
-            int rowsDeleted = statement.executeUpdate();
-            return rowsDeleted > 0;
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error deleting driver: " + e.getMessage());
             return false;
         }
     }
