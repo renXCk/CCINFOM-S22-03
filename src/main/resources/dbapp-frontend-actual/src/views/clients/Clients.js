@@ -277,7 +277,7 @@ function AddClientModal({ newClient, setNewClient }) {
                 <option value="">Select status</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
-                <option value="Blacklisted">Suspended</option>
+                <option value="Suspended">Suspended</option>
             </CFormSelect>
         </>
     );
@@ -331,7 +331,7 @@ const Clients = () => {
                 return "success";
             case "inactive":
                 return "secondary";
-            case "blacklisted":
+            case "suspended":
                 return "danger";
             default:
                 return "dark";
@@ -556,7 +556,7 @@ const Clients = () => {
                             <option value="">All Statuses</option>
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
-                            <option value="Blacklisted">Blacklisted</option>
+                            <option value="Suspended">Suspended</option>
                         </CFormSelect>
                     </CCol>
 
