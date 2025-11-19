@@ -28,7 +28,7 @@ import {
 } from "@coreui/react";
 
 import CIcon from "@coreui/icons-react";
-import { cilPlus, cilPencil, cilTrash, cilSortAlphaDown, } from "@coreui/icons";
+import { cilPlus, cilPencil, cilTrash, cilSortAlphaDown, cilListRich } from "@coreui/icons";
 
 import axios from "axios";
 
@@ -37,7 +37,16 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
 ));
 
 /* ===========================
-ADD CLIENT FORM 
+VIEW WITH OTHER RECORDS MODAL
+=========================== */
+function ViewWithOtherRecordsModal({ clientId, onClose }) {
+    const [relatedRecords, setRelatedRecords] = useState([]);
+
+}
+
+
+/* ===========================
+ADD CLIENT FORM MODAL
 =========================== */
 function AddClientModal({ newClient, setNewClient }) {
 
@@ -145,12 +154,17 @@ function AddClientModal({ newClient, setNewClient }) {
 }
 
 /* ===========================
-        MAIN PAGE
+        MAIN PAGE!!
 =========================== */
 const Clients = () => {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visible, setVisible] = useState(false);
+
+/* ===========================
+STATES 
+=========================== */
+
 
     // --- FILTER & SORT STATE ---
     const [filters, setFilters] = useState({
@@ -191,6 +205,10 @@ const Clients = () => {
                 return "dark";
         }
     };
+
+/* ===========================
+FETCHES
+=========================== */
 
     /* Load Clients */
     const loadClients = async () => {
@@ -252,6 +270,10 @@ const Clients = () => {
         return result;
     }, [clients, filters, sortConfig]);
 
+/* ===========================
+HANDLE CRUD BUTTONS
+=========================== */
+
     /* Handle Edit API call */
     const handleEdit = async () => {
         try {
@@ -288,7 +310,6 @@ const Clients = () => {
         }
     };
 
-
     const handleEditClick = (client) => {
         setNewClient(client); // populate modal form with current client data
         setVisible(true);     // open modal
@@ -324,16 +345,33 @@ const Clients = () => {
         setVisible(true);
     };
 
+/* ===========================
+PAGE DESIGN
+=========================== */
+
     return (
         <CCard className="mb-4">
             <CCardHeader>
+                {/* HEADER & ACTION BUTTONS */}                
                 <strong>Client List</strong>
+                {/* Add Client*/}
                 <CButton color="primary" className="float-end" size="sm" onClick={openAddModal}>
                     <CIcon icon={cilPlus} className="me-2" />
                     Add Client
                 </CButton>
+
+                {/* View with other records*/}
+                <CButton color="secondary"
+                        variant="outline"
+                        className="float-end btn-sm me-2">
+                    <CIcon icon={cilListRich} className="me-2" />
+                    View With Other Records
+                </CButton>
+              
             </CCardHeader>
             <CCardBody>
+
+                
                 {/* ===========================
                 FILTER & SORT TOOLBAR
                 =========================== */}
@@ -473,7 +511,9 @@ const Clients = () => {
             </CCardBody>
 
 
-            {/* MODAL */}
+            {/* ===========================
+                MODALS: ADD/EDIT CLIENT
+                =========================== */}
             <CModal 
                 visible={visible} 
                 onClose={() => setVisible(false)} 
@@ -502,6 +542,13 @@ const Clients = () => {
                     </CButton>
                 </CModalFooter>
             </CModal>
+
+            {/* ===========================
+                MODAL: VIEW WITH OTHER RECORDS
+                =========================== */}
+
+            
+
         </CCard>
 
     );

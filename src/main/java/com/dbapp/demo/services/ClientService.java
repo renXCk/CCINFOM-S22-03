@@ -2,6 +2,7 @@ package com.dbapp.demo.services;
 
 import com.dbapp.demo.dao.ClientDAO;
 import com.dbapp.demo.model.Client;
+import com.dbapp.demo.model.ClientView;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -68,6 +69,10 @@ public class ClientService {
 
     public List<Client> getAllClients() {
         return dao.readClients();
+    }
+
+    public List<ClientView> getClientView() {
+        return dao.getAllClientView();
     }
 
     public Client getClientById(int id) { return dao.readClientById(id); }
