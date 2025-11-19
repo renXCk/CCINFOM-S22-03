@@ -145,7 +145,7 @@ public class IncidentLogDAO {
     }
 
     public boolean updateIncidentLog(IncidentLog incidentLog) {
-        String query = "UPDATE IncidentLog SET driver_id=?, vehicle_id=?, incident_type=?, incident_date_time=?, incident_location=?, incident_severity=? WHERE incident_id=?";
+        String query = "UPDATE IncidentLog SET driver_id=?, vehicle_id=?, incident_type=?, incident_location=?, incident_severity=? WHERE incident_id=?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -153,10 +153,9 @@ public class IncidentLogDAO {
             statement.setInt(1, incidentLog.getDriverId());
             statement.setInt(2, incidentLog.getVehicleId());
             statement.setString(3, incidentLog.getIncidentType());
-            statement.setTimestamp(3, incidentLog.getIncidentDateTime());
-            statement.setString(5, incidentLog.getIncidentLocation());
-            statement.setString(6, incidentLog.getIncidentSeverity());
-            statement.setInt(7, incidentLog.getIncidentId());
+            statement.setString(4, incidentLog.getIncidentLocation());
+            statement.setString(5, incidentLog.getIncidentSeverity());
+            statement.setInt(6, incidentLog.getIncidentId());
 
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0;
