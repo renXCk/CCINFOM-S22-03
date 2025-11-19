@@ -58,7 +58,7 @@ const _nav = [
       component: CNavItem,
       name: 'Parts',
       to: '/parts',
-      icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
     },
 
   // =========================================
@@ -90,7 +90,7 @@ const _nav = [
       component: CNavItem,
       name: 'Maintenance Logs',
       to: '/maintenancelogs',
-      icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+      icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
   },
 
 
