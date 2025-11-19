@@ -36,6 +36,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- -- Drop View first
 DROP VIEW IF EXISTS VehicleView;
 
+
 -- -- Drop all tables
 DROP TABLE IF EXISTS MaintenancePart;
 DROP TABLE IF EXISTS TripLog;
@@ -206,6 +207,29 @@ SELECT DISTINCT
 FROM TripLog t
 JOIN Driver d ON t.driver_id = d.driver_id
 JOIN Vehicle v ON t.vehicle_id = v.vehicle_id;
+
+CREATE OR REPLACE VIEW ClientView AS
+SELECT 
+    c.client_id,
+    c.name AS client_name,
+    c.client_type,
+    
+    t.trip_id,
+    t.date_time_start,
+    t.date_time_completed,
+    t.status AS trip_status,
+    
+    v.vehicle_id,
+    v.plate_number,
+    v.model AS vehicle_model,
+    
+    d.driver_id,
+    CONCAT(d.first_name, ' ', d.last_name) AS driver_name,
+    d.license_num AS driver_license
+FROM TripLog t
+JOIN Client c ON t.client_id = c.client_id
+JOIN Vehicle v ON t.vehicle_id = v.vehicle_id
+JOIN Driver d ON t.driver_id = d.driver_id;
 
 
 -- SAMPLE/GENERATED RECORDS 

@@ -15,7 +15,7 @@ public class ClientService {
     private String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$";
 
     private final List<String> allowedTypes = List.of("Individual", "Company", "Government");
-    private final List<String> allowedStatus = List.of("Active", "Inactive", "Blacklisted");
+    private final List<String> allowedStatus = List.of("Active", "Inactive", "Suspended");
 
     public ClientService(ClientDAO clientDAO) {
         this.dao = clientDAO;

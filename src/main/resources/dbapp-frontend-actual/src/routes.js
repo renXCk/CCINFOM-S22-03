@@ -11,6 +11,7 @@ const MaintenanceLogs = React.lazy(() => import('./views/maintenancelogs/Mainten
 const IncidentLogs = React.lazy(() => import('./views/incidentlogs/IncidentLogs'))
 const MileageReport = React.lazy(() => import('./views/reports/MileageReport'))
 const ClientReport = React.lazy(() => import('./views/reports/ClientReport'))
+const DriverReport = React.lazy(() => import('./views/reports/DriverReport'))
 const MaintenanceReport = React.lazy(() => import('./views/reports/MaintenanceReport'))
 
 
@@ -120,8 +121,8 @@ const routes = [
   { path: '/triplogs', name: 'TripLogs', element: TripLogs },
   { path: '/reports/mileage', name: 'Mileage Report', element: MileageReport },
   { path: '/reports/clients', name: 'Client Report', element: ClientReport },
+  { path: '/reports/drivers', name: 'Driver Report', element: DriverReport },
   { path: '/reports/maintenance', name: 'Maintenance Report', element: MaintenanceReport },
-
 
 ]
 

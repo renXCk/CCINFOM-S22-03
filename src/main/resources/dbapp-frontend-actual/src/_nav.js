@@ -17,7 +17,7 @@ import {
   cilTruck,
   cilMoodGood,
   cilWarning,
-  cilFile
+  cilFile, cilBarChart
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -115,6 +115,12 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Driver Report',
+    to: '/reports/drivers',
+    icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+  },
+  
+{   component: CNavItem,
     name: 'Maintenance Report',
     to: '/reports/maintenance',
     icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,

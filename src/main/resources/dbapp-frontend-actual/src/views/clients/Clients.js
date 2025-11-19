@@ -56,7 +56,6 @@ const PhoneInput = IMaskMixin(({ inputRef, ...props }) => (
 
 const formatDate = (dateString) => {
     if (!dateString) return "-";
-    // Simple date formatting for display
     return new Date(dateString).toLocaleString();
 };
 
@@ -64,7 +63,7 @@ const formatDate = (dateString) => {
    VIEW WITH OTHER RECORDS MODAL 
 ========================================================== */
 function ViewWithOtherRecordsModal({ visible, onClose }) {
-    // Focus is no longer used for filtering, just displays the title if set
+
     const [relatedRecords, setRelatedRecords] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -75,7 +74,7 @@ function ViewWithOtherRecordsModal({ visible, onClose }) {
             // Fetch all client view records (which includes trip data)
             axios.get("http://localhost:8080/api/clients/view")
                 .then(res => {
-                    // We now show ALL records, no client-specific filtering here
+                   
                     setRelatedRecords(res.data);
                 })
                 .catch(err => console.error(err))
@@ -116,7 +115,7 @@ function ViewWithOtherRecordsModal({ visible, onClose }) {
                 </>
             ) 
         },
-        // *** SYNTAX FIX: Comma was missing before this object ***
+        
         { 
             key: 'driver', 
             label: 'Driver', 
@@ -278,7 +277,7 @@ function AddClientModal({ newClient, setNewClient }) {
                 <option value="">Select status</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
-                <option value="Blacklisted">Blacklisted</option>
+                <option value="Blacklisted">Suspended</option>
             </CFormSelect>
         </>
     );
