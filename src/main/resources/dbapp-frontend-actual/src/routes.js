@@ -7,6 +7,8 @@ const Vehicles = React.lazy(() => import('./views/vehicles/Vehicles'))
 const Drivers = React.lazy(() => import('./views/drivers/Drivers'))
 const FuelLogs = React.lazy(() => import ('./views/fuelLogs/FuelLogs'))
 const IncidentLogs = React.lazy(() => import('./views/incidentlogs/IncidentLogs'))
+const MileageReport = React.lazy(() => import('./views/reports/MileageReport'))
+
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -110,6 +112,7 @@ const routes = [
   { path: '/fuelLogs', name: 'FuelLogs', element: FuelLogs },
   { path: '/incidentlogs', name: 'IncidentLogs', element: IncidentLogs },
   { path: '/triplogs', name: 'TripLogs', element: TripLogs },
+  { path: '/reports/mileage', name: 'Mileage Report', element: MileageReport },
 
 ]
 
