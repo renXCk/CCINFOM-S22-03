@@ -16,7 +16,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE Vehicle;
 TRUNCATE TABLE Client;
-TRUNCATE TABLE Parts;
+TRUNCATE TABLE Part;
 TRUNCATE TABLE Driver;
 TRUNCATE TABLE FuelLog;
 TRUNCATE TABLE TripLog;
@@ -45,7 +45,7 @@ DROP TABLE IF EXISTS MaintenanceLog;
 DROP TABLE IF EXISTS Vehicle;
 DROP TABLE IF EXISTS Driver;
 DROP TABLE IF EXISTS Client;
-DROP TABLE IF EXISTS Parts;
+DROP TABLE IF EXISTS Part;
 
 -- Vehicle (Ren)
 CREATE TABLE IF NOT EXISTS Vehicle (
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS Client (
     CONSTRAINT Client_PK PRIMARY KEY (client_id)
 );
 
--- Parts (Duncan)
+-- Part (Duncan)
 CREATE TABLE IF NOT EXISTS Part (
     part_id         INT AUTO_INCREMENT NOT NULL,
     part_name       VARCHAR(30) NOT NULL,
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS MaintenanceLog (
     CONSTRAINT FK_Maintenance_Vehicle FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
 );
 
--- Junction Table for Maintenance Log & Parts
+-- Junction Table for Maintenance Log & Part
 CREATE TABLE MaintenancePart (
     maintenance_id INT NOT NULL,
     part_id       INT, -- removed not null
@@ -157,7 +157,7 @@ CREATE TABLE MaintenancePart (
     cost_per_part DECIMAL(10,2),
     CONSTRAINT PK_MaintenancePart PRIMARY KEY (maintenance_id, part_id),
     CONSTRAINT FK_MaintenancePart_Maintenance FOREIGN KEY (maintenance_id) REFERENCES MaintenanceLog(maintenance_id),
-    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Parts(part_id)
+    CONSTRAINT FK_MaintenancePart_Part FOREIGN KEY (part_id) REFERENCES Part(part_id)
 );
 
 -- Incident Log (Leelancze)
